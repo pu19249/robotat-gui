@@ -15,6 +15,7 @@ class Pololu:
         self.img = img
         self.controller = controller
     '''
+    List of state receives x, y, bearing
     List of physical parameters receives: l, r, vel_left max, vel_right max
     '''
     # Methods definition

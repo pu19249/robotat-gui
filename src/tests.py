@@ -51,8 +51,8 @@ EO = 0
 eO_1 = 0
 
 # Exponential approach
-v0 = 2
-alpha = 0.5
+v0 = 10
+alpha = 1
 
 for n in range(N):
     if seltraj:
