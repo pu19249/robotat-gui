@@ -95,21 +95,19 @@ for n in range(N):
     U[:, n + 1] = u
 
 # Figure 1 - Plotting the state variables over time
-figure1 = plt.figure()
+fig1, ax1 = plt.subplots()
 t = np.arange(t0, tf + dt, dt)
-plt.plot(t, XI.T, linewidth=1)
-plt.xlabel('$t$', fontsize=16)
-plt.ylabel('$\\mathbf{x}(t)$', fontsize=16)
-l = plt.legend(['$x(t)$', '$y(t)$', '$\\theta(t)$'], loc='best', prop={'size': 12})
-plt.grid(True, which='minor')
-plt.grid(True, which='major')
+ax1.plot(t, XI.T, linewidth=1)
+ax1.set_xlabel('$t$', fontsize=16)
+ax1.set_ylabel('$\\mathbf{x}(t)$', fontsize=16)
+l = ax1.legend(['$x(t)$', '$y(t)$', '$\\theta(t)$'], loc='best', prop={'size': 12})
+ax1.grid(True, which='minor')
+ax1.grid(True, which='major')
 plt.show()
 
 # Figure 2 - Robot animation
 figure2 = plt.figure()
-s = np.max(np.abs(XI[0:2, :]))
-plt.xlim(s * np.array([-1, 1]) + np.array([-0.5, 0.5]))
-plt.ylim(s * np.array([-1, 1]) + np.array([-0.5, 0.5]))
+ax = plt.axes(xlim=(-10, 10), ylim=(-10, 10))  # Set appropriate limits for x and y axes
 plt.grid(True, which='minor')
 plt.grid(True, which='major')
 
@@ -133,11 +131,12 @@ def update_plot(n):
 
     BV = np.array([[-0.1, 0, 0.1], [0, 0.3, 0]])
     IV = np.dot([[np.cos(theta - np.pi / 2), -np.sin(theta - np.pi / 2)], [np.sin(theta - np.pi / 2), np.cos(theta - np.pi / 2)]], BV)
-    bodyplot.set_xy(IV.T + np.array([x, y]))
 
-    return trajplot, bodyplot
+    # Update the vertices of the polygon
+    bodyplot[0].xy = IV.T + np.array([x, y])
 
-ani = animation.FuncAnimation(figure2, update_plot, frames=N+1, interval=dt*1000, blit=True)
-ani.save('robot_animation.mp4', writer='ffmpeg')
+    return trajplot, *bodyplot
 
+# Update the FuncAnimation call
+animation_variable = animation.FuncAnimation(figure2, update_plot, frames=N+1, interval=dt*1000)
 plt.show()
