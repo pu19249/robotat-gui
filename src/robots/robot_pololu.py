@@ -6,8 +6,8 @@ import numpy as np
 
 class Pololu:
     # Function to initialize attrs
-    def __init__(self, state: List[float, float, float], physical_params: \
-                 List[float, float, int, int], ID: float, IP: float, img, controller, u):
+    def __init__(self, state: List[float], physical_params: \
+                 List[float], ID: float, IP: float, img, controller, u):
         self.state = state
         self.physical_params = physical_params
         self.ID = ID
