@@ -100,14 +100,16 @@ t = np.arange(t0, tf + dt, dt)
 ax1.plot(t, XI.T, linewidth=1)
 ax1.set_xlabel('$t$', fontsize=16)
 ax1.set_ylabel('$\\mathbf{x}(t)$', fontsize=16)
-l = ax1.legend(['$x(t)$', '$y(t)$', '$\\theta(t)$'], loc='best', prop={'size': 12})
+l = ax1.legend(['$x(t)$', '$y(t)$', '$\\theta(t)$'],
+               loc='best', prop={'size': 12})
 ax1.grid(True, which='minor')
 ax1.grid(True, which='major')
 plt.show()
 
 # Figure 2 - Robot animation
 figure2 = plt.figure()
-ax = plt.axes(xlim=(-10, 10), ylim=(-10, 10))  # Set appropriate limits for x and y axes
+# Set appropriate limits for x and y axes
+ax = plt.axes(xlim=(-10, 10), ylim=(-10, 10))
 plt.grid(True, which='minor')
 plt.grid(True, which='major')
 
@@ -121,22 +123,27 @@ bodyplot = plt.fill([], [], [0.5, 0.5, 0.5])
 plt.xlabel('$x$', fontsize=16)
 plt.ylabel('$y$', fontsize=16)
 
+
 def update_plot(n):
     q = XI[:, n]
     x = q[0]
     y = q[1]
     theta = q[2]
 
-    trajplot.set_data(np.append(trajplot.get_xdata(), x), np.append(trajplot.get_ydata(), y))
+    trajplot.set_data(np.append(trajplot.get_xdata(), x),
+                      np.append(trajplot.get_ydata(), y))
 
     BV = np.array([[-0.1, 0, 0.1], [0, 0.3, 0]])
-    IV = np.dot([[np.cos(theta - np.pi / 2), -np.sin(theta - np.pi / 2)], [np.sin(theta - np.pi / 2), np.cos(theta - np.pi / 2)]], BV)
+    IV = np.dot([[np.cos(theta - np.pi / 2), -np.sin(theta - np.pi / 2)],
+                [np.sin(theta - np.pi / 2), np.cos(theta - np.pi / 2)]], BV)
 
     # Update the vertices of the polygon
     bodyplot[0].xy = IV.T + np.array([x, y])
 
     return trajplot, *bodyplot
 
+
 # Update the FuncAnimation call
-animation_variable = animation.FuncAnimation(figure2, update_plot, frames=N+1, interval=dt*1000)
+animation_variable = animation.FuncAnimation(
+    figure2, update_plot, frames=N+1, interval=dt*1000)
 plt.show()
