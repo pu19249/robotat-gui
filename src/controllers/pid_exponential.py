@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def pid_exponential():
+def pid_exponential(init_cond, init_u, goal):
     # PID position
     kpP = 1
     kiP = 0.0001
@@ -20,11 +20,11 @@ def pid_exponential():
     v0 = 10
     alpha = 1
 
-    # controller
-    x = xi[0]
-    y = xi[1]
-    theta = xi[2]
-    e = np.array([xg - x, yg - y])
+    # controller (this must run repeteadly with the numerical method)
+    x = init_cond[0]
+    y = init_cond[1]
+    theta = init_cond[2]
+    e = np.array([goal[0] - x, goal[1] - y])
     thetag = np.arctan2(e[1], e[0])
 
     eP = np.linalg.norm(e)
@@ -40,3 +40,5 @@ def pid_exponential():
     eO_1 = eO
 
     u = np.array([v, w])
+
+    return u
