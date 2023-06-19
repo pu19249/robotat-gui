@@ -118,7 +118,10 @@ if seltraj:
     plt.plot(traj[0, :], traj[1, :], 'k')
 
 trajplot, = plt.plot([], [], '--k', linewidth=1)
-bodyplot = plt.fill([], [], [0.5, 0.5, 0.5])
+# Load the robot image
+robot_image = plt.imread("pololu_img.png")
+robotplot = plt.imshow(robot_image, extent=(-0.15, 0.15, -0.15, 0.15))
+
 
 plt.xlabel('$x$', fontsize=16)
 plt.ylabel('$y$', fontsize=16)
@@ -138,12 +141,13 @@ def update_plot(n):
                 [np.sin(theta - np.pi / 2), np.cos(theta - np.pi / 2)]], BV)
 
     # Update the vertices of the polygon
-    bodyplot[0].xy = IV.T + np.array([x, y])
+    robotplot.set_extent((x - 1, x + 1, y - 1, y + 1))
 
-    return trajplot, *bodyplot
+    return trajplot, robotplot
 
 
 # Update the FuncAnimation call
 animation_variable = animation.FuncAnimation(
-    figure2, update_plot, frames=N+1, interval=dt*1000)
+    figure2, update_plot, frames=N + 1, interval=dt * 10)
+
 plt.show()

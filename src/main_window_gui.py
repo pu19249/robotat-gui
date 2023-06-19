@@ -109,7 +109,7 @@ class Window(QMainWindow):
         transform.translate(-center.x(), -center.y())
 
         transformed_pixmap = pixmap.transformed(
-            transform, QtCore.Qt.FastTransformation)
+            transform, QtCore.Qt.SmoothTransformation)
         item.setPixmap(transformed_pixmap)
 
         # Adjust the position after rotation to keep the image centered
