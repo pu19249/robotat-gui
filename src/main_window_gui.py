@@ -34,7 +34,7 @@ class Window(QMainWindow):
         self.timer = QtCore.QTimer()
         self.timer.setInterval(1000)
         #  self.timer.timeout.connect(self.update_img_pos)
-        # self.timer.timeout.connect(self.rotate_img)
+        self.timer.timeout.connect(self.rotate_img2)
         self.timer.start()
         # define the widgets for the OTA tab
 
@@ -50,6 +50,7 @@ class Window(QMainWindow):
         # self.setCentralWidget(self.graphWidget)
         self.pololu_rep = pololu_robot.img
 
+        self.sim_canvas.setScene(self.scene)
         self.img_item = self.scene.addPixmap(self.pololu_rep)
         self.img_item.setPos(0, 0)
 
@@ -60,6 +61,8 @@ class Window(QMainWindow):
         # simulation_graphics()
         # update_plot_data(img)
         # show the app
+        self.rotation_angle = 0
+        self.initial_pos = self.scene.items()[0].pos()
         self.show()
 
         # methods used in the the OTA tab widgets
@@ -78,33 +81,51 @@ class Window(QMainWindow):
     def rotate_img(self):
         item = self.scene.items()[0]
         rotation = 5
+        self.rotation_angle += rotation
         pixmap = item.pixmap()
-        # Get the center position of the pixmap
         center = pixmap.rect().center()
 
-        # Create a transformation matrix with translation and rotation
+        transform = QTransform()
+        transform.translate(center.x(), center.y())
+        transform.rotate(self.rotation_angle)
+        transform.translate(-center.x(), -center.y())
+
+        transformed_pixmap = pixmap.transformed(
+            transform, QtCore.Qt.SmoothTransformation)
+        item.setPixmap(transformed_pixmap)
+
+        # Set the position relative to the initial position
+        item.setPos(self.initial_pos)
+
+    def rotate_img2(self):
+        item = self.scene.items()[0]
+        rotation = 5
+        pixmap = item.pixmap()
+        center = pixmap.rect().center()
+
         transform = QTransform()
         transform.translate(center.x(), center.y())
         transform.rotate(rotation)
         transform.translate(-center.x(), -center.y())
-        # transformed_pixmap = pixmap.transformed(
-        #     QTransform().rotate(rotation), QtCore.Qt.SmoothTransformation)
-        # item.setPixmap(transformed_pixmap)
-        # Apply the transformation to the pixmap
+
         transformed_pixmap = pixmap.transformed(
-            transform, QtCore.Qt.SmoothTransformation)
+            transform, QtCore.Qt.FastTransformation)
         item.setPixmap(transformed_pixmap)
+
+        # Adjust the position after rotation to keep the image centered
+        new_center = transformed_pixmap.rect().center()
+        delta = center - new_center
+        item.setPos(item.pos() + delta)
+        '''
+        This code calculates the difference between the original center position 
+        and the new center position after rotation (delta). It then adjusts the 
+        image's position by adding delta to the current position to keep the image 
+        centered after rotation.
+        '''
+
         # pixmap = pixmap.transformed(transform, QtCore.Qt.SmoothTransformation)
         # ---- update label ----
 
-
-'''
-class MplCanvas(FigureCanvas):
-    def __init__(self, parent=None, width=5, height=4, dpi=100):
-        fig = Figure(figsize=(width, height), dpi=dpi)
-        self.axes = fig.add_subplot(111)
-        super(MplCanvas, self).__init__(fig)
-'''
 
 # initialize the app
 app = QApplication(sys.argv)
