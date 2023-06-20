@@ -3,7 +3,6 @@ from pyqtgraph import PlotWidget, plot
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib
 from matplotlib.figure import Figure
-
 import pygame
 
 from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QTabWidget, QWidget, QTextBrowser, QLabel, QGridLayout, QRadioButton, QComboBox, QSpinBox, QPushButton, QTableView, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem
@@ -28,35 +27,53 @@ class py_game_animation():
         self.img = None
         self.img_rect = None
         self.degree = 0
+        self.x = 0
+        self.y = 0
+        self.counter = 10
+        self.background_color = (255, 255, 255)
 
     def initialize(self):
         pygame.init()
-        self.screen = pygame.display.set_mode([380, 480])
+        self.screen = pygame.display.set_mode([760, 960])
         pygame.display.set_caption('Live simulation')
         self.clock = pygame.time.Clock()
         self.img = pygame.image.load(self.img_path).convert_alpha()
         self.img_rect = self.img.get_rect(center=self.screen.get_rect().center)
         self.degree = 0
+        self.screen.fill(self.background_color)
+        pygame.time.set_timer(pygame.USEREVENT, 1000)
+        self.run = True
+
+    def rotate(self, degree):
+        self.rot_img = pygame.transform.rotate(self.img, self.degree)
+        self.img_rect = self.rot_img.get_rect(center=self.img_rect.center)
+        self.screen.fill(self.background_color)
+        self.screen.blit(self.rot_img, self.img_rect.topleft)
+        pygame.display.flip()
+
+    def x_y_movement(self, x, y):
+        self.screen.blit(self.img, (self.x, self.y))
+        pygame.display.flip()
 
     def start_animation(self):
-        while self.degree < 360:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    done = True
+        while self.run:
+            for e in pygame.event.get():
+                if e.type == pygame.USEREVENT:
+                    self.counter -= 1
+                    print(self.counter)
+                    if self.counter == 0:
+                        self.run = False
+                if e.type == pygame.QUIT:
+                    self.run = False
 
-            # rotate image
-            self.rot_img = pygame.transform.rotate(self.img, self.degree)
-            self.img_rect = self.rot_img.get_rect(center=self.img_rect.center)
-            # copy image to screen
-            self.screen.fill((255, 255, 255))
-            self.screen.blit(self.rot_img, self.img_rect.topleft)
-            pygame.display.flip()
+            # pygame.display.flip()
             '''
             The convert_alpha() method is used when loading the image to preserve transparency.
             The rotation center is correctly set by obtaining the rect of the rotated image and setting its 
             center to self.img_rect.center.
             The image is blitted onto the screen using the top-left corner of the rect (self.img_rect.topleft).
             '''
+            self.rotate(self.degree)
             self.clock.tick(60)
             self.degree += 1
         pygame.quit()
