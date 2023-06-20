@@ -1,7 +1,9 @@
 import pyqtgraph as pg
 from pyqtgraph import PlotWidget, plot
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+import matplotlib
 from matplotlib.figure import Figure
+
 import pygame
 
 from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QTabWidget, QWidget, QTextBrowser, QLabel, QGridLayout, QRadioButton, QComboBox, QSpinBox, QPushButton, QTableView, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem
@@ -10,12 +12,54 @@ from PyQt5.QtCore import pyqtBoundSignal
 import sys
 from robots.robot_pololu import Pololu
 import os
-import matplotlib
+
 from PyQt5.QtGui import QPixmap, QTransform
 matplotlib.use('Qt5Agg')
 
 # Get the directory path of the current script
 script_dir = os.path.dirname(os.path.abspath(__file__))
+
+
+class py_game_animation():
+    def __init__(self, img_path):
+        self.img_path = img_path
+        self.screen = None
+        self.clock = None
+        self.img = None
+        self.img_rect = None
+        self.degree = 0
+
+    def initialize(self):
+        pygame.init()
+        self.screen = pygame.display.set_mode([380, 480])
+        pygame.display.set_caption('Live simulation')
+        self.clock = pygame.time.Clock()
+        self.img = pygame.image.load(self.img_path).convert_alpha()
+        self.img_rect = self.img.get_rect(center=self.screen.get_rect().center)
+        self.degree = 0
+
+    def start_animation(self):
+        while self.degree < 360:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    done = True
+
+            # rotate image
+            self.rot_img = pygame.transform.rotate(self.img, self.degree)
+            self.img_rect = self.rot_img.get_rect(center=self.img_rect.center)
+            # copy image to screen
+            self.screen.fill((255, 255, 255))
+            self.screen.blit(self.rot_img, self.img_rect.topleft)
+            pygame.display.flip()
+            '''
+            The convert_alpha() method is used when loading the image to preserve transparency.
+            The rotation center is correctly set by obtaining the rect of the rotated image and setting its 
+            center to self.img_rect.center.
+            The image is blitted onto the screen using the top-left corner of the rect (self.img_rect.topleft).
+            '''
+            self.clock.tick(60)
+            self.degree += 1
+        pygame.quit()
 
 
 class Window(QMainWindow):
@@ -28,6 +72,10 @@ class Window(QMainWindow):
         # define the widgets for the simulation tab
         self.sim_canvas = self.findChild(QGraphicsView, "visualization_canvas")
         self.ctrl_dropdown = self.findChild(QComboBox, "config_ctrl_box")
+        self.play_btn = self.findChild(QPushButton, "sim_play_btn")
+
+        # play btn to open the pygame animation
+        self.play_btn.clicked.connect(self.play_animation)
 
         # combo box for ctrl choice
         ctrl_list = ["PID exponencial", "PID punto-punto", "LQR", "LQI"]
@@ -70,6 +118,11 @@ class Window(QMainWindow):
         # methods used in the rtd tab widgets
 
         # methods used in multiple tab widgets
+
+    def play_animation(self):
+        sim_game_animation = py_game_animation("pololu_img.png")
+        sim_game_animation.initialize()
+        sim_game_animation.start_animation()
 
     def update_img_pos(self):
         current_pos = self.scene.items()[0].pos()
