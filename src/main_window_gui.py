@@ -5,14 +5,14 @@ import matplotlib
 from matplotlib.figure import Figure
 import pygame
 
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QTabWidget, QWidget, QTextBrowser, QLabel, QGridLayout, QRadioButton, QComboBox, QSpinBox, QPushButton, QTableView, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QStyledItemDelegate
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QTabWidget, QWidget, QTextBrowser, QLabel, QGridLayout, QRadioButton, QComboBox, QSpinBox, QPushButton, QTableView, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem
 from PyQt5 import uic, QtCore
 from PyQt5.QtCore import pyqtBoundSignal
 import sys
 from robots.robot_pololu import Pololu
 import os
 
-from PyQt5.QtGui import QPixmap, QTransform, QStandardItem
+from PyQt5.QtGui import QPixmap, QTransform
 matplotlib.use('Qt5Agg')
 
 # Get the directory path of the current script
@@ -101,15 +101,10 @@ class Window(QMainWindow):
 
         # combo box for ctrl choice
         ctrl_list = [("PID exponencial", "pid_exponential"),
-                     ("PID punto-punto", "pid_point"),
-                     ("LQR", "lqr"),
-                     ("LQI", "lqi")]
-
-        for item_text, item_data in ctrl_list:
-            item = QStandardItem(item_text)
-            item.setData(item_data)
-            item.setText(item_text)
-            self.ctrl_dropdown.addItem(item_text)
+                     ("PID punto-punto", "pid_point"), ("LQR", "lqr"), ("LQI", "lqi")]
+        for x, i in enumerate(ctrl_list):
+            self.ctrl_dropdown.addItem(i[0])
+            self.ctrl_dropdown.setItemData(x, i[1])
         self.ctrl_dropdown.currentTextChanged.connect(self.selection_change)
 
         # timer
@@ -166,10 +161,9 @@ class Window(QMainWindow):
 
     def selection_change(self, text):
         print("The choice was:", text)
-        # Access the associated data
         index = self.ctrl_dropdown.currentIndex()
         data = self.ctrl_dropdown.itemData(index)
-        print(f"Current data is: {data}")
+        print(f"Data: {data}")
 
 
 # initialize the app
