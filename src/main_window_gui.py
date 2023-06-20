@@ -5,14 +5,14 @@ import matplotlib
 from matplotlib.figure import Figure
 import pygame
 
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QTabWidget, QWidget, QTextBrowser, QLabel, QGridLayout, QRadioButton, QComboBox, QSpinBox, QPushButton, QTableView, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QTabWidget, QWidget, QTextBrowser, QLabel, QGridLayout, QRadioButton, QComboBox, QSpinBox, QPushButton, QTableView, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem, QStyledItemDelegate
 from PyQt5 import uic, QtCore
 from PyQt5.QtCore import pyqtBoundSignal
 import sys
 from robots.robot_pololu import Pololu
 import os
 
-from PyQt5.QtGui import QPixmap, QTransform
+from PyQt5.QtGui import QPixmap, QTransform, QStandardItem
 matplotlib.use('Qt5Agg')
 
 # Get the directory path of the current script
@@ -44,14 +44,16 @@ class py_game_animation():
         pygame.time.set_timer(pygame.USEREVENT, 1000)
         self.run = True
 
-    def rotate(self, degree):
+    def rotate_move(self, degree, x, y):
         self.rot_img = pygame.transform.rotate(self.img, self.degree)
         self.img_rect = self.rot_img.get_rect(center=self.img_rect.center)
         self.screen.fill(self.background_color)
-        self.screen.blit(self.rot_img, self.img_rect.topleft)
+        # self.screen.blit(self.rot_img, self.img_rect.topleft)
+        self.screen.blit(self.rot_img, (self.x, self.y))
         pygame.display.flip()
 
     def x_y_movement(self, x, y):
+        self.screen.fill(self.background_color)
         self.screen.blit(self.img, (self.x, self.y))
         pygame.display.flip()
 
@@ -73,8 +75,11 @@ class py_game_animation():
             center to self.img_rect.center.
             The image is blitted onto the screen using the top-left corner of the rect (self.img_rect.topleft).
             '''
-            self.rotate(self.degree)
+            # self.x_y_movement(self.x, self.y)
+            self.rotate_move(self.degree, self.x, self.y)
             self.clock.tick(60)
+            self.x += 1  # update with values from ctrl
+            self.y += 1  # update with values from ctrl
             self.degree += 1
         pygame.quit()
 
@@ -95,10 +100,17 @@ class Window(QMainWindow):
         self.play_btn.clicked.connect(self.play_animation)
 
         # combo box for ctrl choice
-        ctrl_list = ["PID exponencial", "PID punto-punto", "LQR", "LQI"]
-        for i in ctrl_list:
-            self.ctrl_dropdown.addItem(i)
-        self.ctrl_dropdown.currentIndexChanged.connect(self.selection_change)
+        ctrl_list = [("PID exponencial", "pid_exponential"),
+                     ("PID punto-punto", "pid_point"),
+                     ("LQR", "lqr"),
+                     ("LQI", "lqi")]
+
+        for item_text, item_data in ctrl_list:
+            item = QStandardItem(item_text)
+            item.setData(item_data)
+            item.setText(item_text)
+            self.ctrl_dropdown.addItem(item_text)
+        self.ctrl_dropdown.currentTextChanged.connect(self.selection_change)
 
         # timer
         self.timer = QtCore.QTimer()
@@ -152,8 +164,12 @@ class Window(QMainWindow):
     def rotate_img(self):
         print("")
 
-    def selection_change(self, index):
-        print("The choice was:", index)
+    def selection_change(self, text):
+        print("The choice was:", text)
+        # Access the associated data
+        index = self.ctrl_dropdown.currentIndex()
+        data = self.ctrl_dropdown.itemData(index)
+        print(f"Current data is: {data}")
 
 
 # initialize the app
