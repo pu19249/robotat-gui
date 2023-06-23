@@ -31,10 +31,9 @@ class py_game_animation():
         self.img_rect = None
         self.degree = 0
         # 15 pixels to get the center not in the limit but considering the width of the picture (robot)
-        self.x = 760
-        self.y = 960
-        self.x = change_coordinate_x(self.x, 760)
-        self.y = change_coordinate_y(self.y, 960)
+        self.x = 380
+        self.y = 480
+
         self.counter = 10
         self.background_color = (255, 255, 255)
         self.run = True
@@ -42,6 +41,8 @@ class py_game_animation():
     def initialize(self):
         pygame.init()
         self.screen = pygame.display.set_mode([760, 960])
+        self.x = change_coordinate_x(self.x, 760)
+        self.y = change_coordinate_y(self.y, 960)
         pygame.display.set_caption('Live simulation')
         self.clock = pygame.time.Clock()
         self.img = pygame.image.load(self.img_path).convert_alpha()
