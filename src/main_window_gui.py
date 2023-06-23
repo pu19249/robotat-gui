@@ -4,12 +4,15 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib
 from matplotlib.figure import Figure
 import pygame
+import numpy as np
+from map_coordinates import change_coordinate
 
 from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QTabWidget, QWidget, QTextBrowser, QLabel, QGridLayout, QRadioButton, QComboBox, QSpinBox, QPushButton, QTableView, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem
 from PyQt5 import uic, QtCore
 from PyQt5.QtCore import pyqtBoundSignal
 import sys
 from robots.robot_pololu import Pololu
+import controllers as ctrl
 import os
 
 from PyQt5.QtGui import QPixmap, QTransform
@@ -31,6 +34,49 @@ class py_game_animation():
         self.y = 0
         self.counter = 10
         self.background_color = (255, 255, 255)
+        # Simulation parameters
+        self.dt = 0.1  # sample period
+        self.t0 = 0  # initial time
+        self.tf = 30  # final time
+        # iteration number, convert to integer
+        self.N = int((self.tf - self.t0) / self.dt)
+        self.run = True
+        # Initial conditions
+        self.xi0 = np.array([380, 480, 0])
+        self.u0 = np.array([0, 0])
+        self.xi = self.xi0  # state vector
+        self.u = self.u0  # input vector
+
+        # Arrays to store state, inputs, and outputs
+        self.XI = np.zeros((len(self.xi), self.N + 1))
+        self.U = np.zeros((len(self.u), self.N + 1))
+
+        # Initialize arrays
+        self.XI[:, 0] = self.xi0
+        self.U[:, 0] = self.u0
+
+        # Target coordinates
+        self.xg = 0  # in m
+        self.yg = 0  # in m
+        self.yg = change_coordinate(self.yg, 960)
+        self.thetag = 0  # in rad
+        # PID position
+        self.kpP = 1
+        self.kiP = 0.0001
+        self.kdP = 0.5
+        self.EP = 0
+        self.eP_1 = 0
+
+        # PID orientation
+        self.kpO = 2 * 5
+        self.kiO = 0.0001
+        self.kdO = 0
+        self.EO = 0
+        self.eO_1 = 0
+
+        # Exponential approach
+        self.v0 = 10
+        self.alpha = 1
 
     def initialize(self):
         pygame.init()
@@ -42,7 +88,6 @@ class py_game_animation():
         self.degree = 0
         self.screen.fill(self.background_color)
         pygame.time.set_timer(pygame.USEREVENT, 1000)
-        self.run = True
 
     def rotate_move(self, degree, x, y):
         self.rot_img = pygame.transform.rotate(self.img, self.degree)
@@ -57,31 +102,148 @@ class py_game_animation():
         self.screen.blit(self.img, (self.x, self.y))
         pygame.display.flip()
 
-    def start_animation(self):
-        while self.run:
-            for e in pygame.event.get():
-                if e.type == pygame.USEREVENT:
-                    self.counter -= 1
-                    print(self.counter)
-                    if self.counter == 0:
-                        self.run = False
-                if e.type == pygame.QUIT:
-                    self.run = False
+    def animate(self):
+        self.initialize()  # Initialize pygame
+        self.start_animation()  # Start the animation loop
 
-            # pygame.display.flip()
-            '''
-            The convert_alpha() method is used when loading the image to preserve transparency.
-            The rotation center is correctly set by obtaining the rect of the rotated image and setting its 
-            center to self.img_rect.center.
-            The image is blitted onto the screen using the top-left corner of the rect (self.img_rect.topleft).
-            '''
-            # self.x_y_movement(self.x, self.y)
+    def start_animation(self):
+        self.clock = pygame.time.Clock()
+        for n in range(self.N):
+            self.x = self.xi[0]
+            self.y = self.xi[1]
+            self.theta = self.xi[2]
+            self.e = np.array([self.xg - self.x, self.yg - self.y])
+            self.thetag = np.arctan2(self.e[1], self.e[0])
+
+            self.eP = np.linalg.norm(self.e)
+            self.eO = self.thetag - self.theta
+            self.eO = np.arctan2(np.sin(self.eO), np.cos(self.eO))
+
+            self.kP = self.v0 * \
+                (1 - np.exp(-self.alpha * self.eP ** 2)) / self.eP
+            self.v = self.kP * self.eP
+
+            self.eO_D = self.eO - self.eO_1
+            self.EO = self.EO + self.eO
+            self.w = self.kpO * self.eO + self.kiO * self.EO + self.kdO * self.eO_D
+            self.eO_1 = self.eO
+
+            self.u = np.array([self.v, self.w])
+
+            self.k1 = pololu_robot.dynamics(self.xi, self.u)
+            self.k2 = pololu_robot.dynamics(
+                self.xi + np.multiply(self.dt / 2, self.k1), self.u)
+            self.k3 = pololu_robot.dynamics(
+                self.xi + np.multiply(self.dt / 2, self.k2), self.u)
+            self.k4 = pololu_robot.dynamics(
+                self.xi + np.multiply(self.dt, self.k3), self.u)
+
+            self.k1 = np.reshape(self.k1, self.xi.shape)
+            self.k2 = np.reshape(self.k2, self.xi.shape)
+            self.k3 = np.reshape(self.k3, self.xi.shape)
+            self.k4 = np.reshape(self.k4, self.xi.shape)
+
+            self.xi = self.xi + (self.dt / 6) * \
+                (self.k1 + 2 * self.k2 + 2 * self.k3 + self.k4)
+
+            self.XI[:, n + 1] = self.xi
+            self.U[:, n + 1] = self.u
+
+            # Update the state variables
+            self.q = self.XI[:, n]
+            self.x = self.q[0]
+            self.y = self.q[1]
+            # Update angular velocity based on control inputs or desired behavior
+            # Example: Use the second element of self.u as angular velocity
+            self.angular_velocity = self.u[1]
+
+            # Update the rotation angle
+            self.degree += np.degrees(self.angular_velocity)
+            # self.degree = np.degrees(self.q[2])
+
+            # Rotate and move the image
             self.rotate_move(self.degree, self.x, self.y)
-            self.clock.tick(60)
-            self.x += 1  # update with values from ctrl
-            self.y += 1  # update with values from ctrl
-            self.degree += 1
+
+            # Check for quit event
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    return
+
+            self.clock.tick(60)  # Limit the frame rate
+
         pygame.quit()
+
+    # def start_animation(self):
+    #     for n in range(self.N):
+    #         self.x = self.xi[0]
+    #         self.y = self.xi[1]
+    #         self.theta = self.xi[2]
+    #         self.e = np.array([self.xg - self.x, self.yg - self.y])
+    #         self.thetag = np.arctan2(self.e[1], self.e[0])
+
+    #         self.eP = np.linalg.norm(self.e)
+    #         self.eO = self.thetag - self.theta
+    #         self.eO = np.arctan2(np.sin(self.eO), np.cos(self.eO))
+
+    #         self.kP = self.v0 * \
+    #             (1 - np.exp(-self.alpha * self.eP ** 2)) / self.eP
+    #         self.v = self.kP * self.eP
+
+    #         self.eO_D = self.eO - self.eO_1
+    #         self.EO = self.EO + self.eO
+    #         self.w = self.kpO * self.eO + self.kiO * self.EO + self.kdO * self.eO_D
+    #         self.eO_1 = self.eO
+
+    #         self.u = np.array([self.v, self.w])
+
+    #         self.k1 = pololu_robot.dynamics(self.xi, self.u)
+    #         self.k2 = pololu_robot.dynamics(
+    #             self.xi + np.multiply(self.dt / 2, self.k1), self.u)
+    #         self.k3 = pololu_robot.dynamics(
+    #             self.xi + np.multiply(self.dt / 2, self.k2), self.u)
+    #         self.k4 = pololu_robot.dynamics(
+    #             self.xi + np.multiply(self.dt, self.k3), self.u)
+
+    #         self.k1 = np.reshape(self.k1, self.xi.shape)
+    #         self.k2 = np.reshape(self.k2, self.xi.shape)
+    #         self.k3 = np.reshape(self.k3, self.xi.shape)
+    #         self.k4 = np.reshape(self.k4, self.xi.shape)
+
+    #         self.xi = self.xi + (self.dt / 6) * \
+    #             (self.k1 + 2 * self.k2 + 2 * self.k3 + self.k4)
+
+    #         self.XI[:, n + 1] = self.xi
+    #         self.U[:, n + 1] = self.u
+    #     # while self.run:
+    #     #     for e in pygame.event.get():
+    #     #         if e.type == pygame.USEREVENT:
+    #     #             self.tf -= 1
+    #     #             print(self.counter)
+    #     #             if self.tf == 0:
+    #     #                 self.run = False
+    #     #         if e.type == pygame.QUIT:
+    #     #             self.run = False
+
+    #     #     # pygame.display.flip()
+    #     #     '''
+    #     #     The convert_alpha() method is used when loading the image to preserve transparency.
+    #     #     The rotation center is correctly set by obtaining the rect of the rotated image and setting its
+    #     #     center to self.img_rect.center.
+    #     #     The image is blitted onto the screen using the top-left corner of the rect (self.img_rect.topleft).
+    #     #     '''
+    #     #     # self.x_y_movement(self.x, self.y)
+    #     #     self.rotate_move(self.degree, self.x, self.y)
+    #     #     self.clock.tick(60)
+    #     #     self.x += 1  # update with values from ctrl
+    #     #     self.y += 1  # update with values from ctrl
+    #     #     self.degree += 1
+    #         self.q = self.XI[:, n]
+    #         self.x = self.q[0]
+    #         self.y = self.q[1]
+    #         self.degree = self.q[2]
+    #         self.rotate_move(self.degree, self.x, self.y)
+    #     pygame.quit()
 
 
 class Window(QMainWindow):
@@ -145,8 +307,9 @@ class Window(QMainWindow):
 
     def play_animation(self):
         sim_game_animation = py_game_animation("pololu_img.png")
-        sim_game_animation.initialize()
-        sim_game_animation.start_animation()
+        sim_game_animation.animate()
+        # sim_game_animation.initialize()
+        # sim_game_animation.start_animation()
 
     def update_img_pos(self):
         current_pos = self.scene.items()[0].pos()
@@ -161,9 +324,15 @@ class Window(QMainWindow):
 
     def selection_change(self, text):
         print("The choice was:", text)
-        index = self.ctrl_dropdown.currentIndex()
-        data = self.ctrl_dropdown.itemData(index)
-        print(f"Data: {data}")
+        self.index = self.ctrl_dropdown.currentIndex()
+        self.data = self.ctrl_dropdown.itemData(self.index)
+        print(f"Data: {self.data}")
+
+        # Update the controller of the pololu_robot instance
+        self.ctrl_selected = self.data + ".py"
+        pololu_robot.set_controller(self.ctrl_selected)
+        print("controller:", pololu_robot.controller)
+        print("IP: ", pololu_robot.IP)
 
 
 # initialize the app

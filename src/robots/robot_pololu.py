@@ -24,3 +24,9 @@ class Pololu:
 
     def dynamics(self, state, u):
         return [u[0]*np.cos(state[2]), u[0]*np.sin(state[2]), u[1]]
+
+    def set_controller(self, controller):
+        # Update the controller attribute
+        self.controller = controller
+
+    
