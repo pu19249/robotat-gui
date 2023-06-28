@@ -31,18 +31,22 @@ class py_game_animation():
         self.img_rect = None
         self.degree = 0
         # 15 pixels to get the center not in the limit but considering the width of the picture (robot)
-        self.x = 380
-        self.y = 480
+        self.x = 0
+        self.y = 0
 
-        self.counter = 10
+        self.counter = 30
         self.background_color = (255, 255, 255)
+        self.screen_x = 760
+        self.screen_y = 960
         self.run = True
 
     def initialize(self):
         pygame.init()
-        self.screen = pygame.display.set_mode([760, 960])
-        self.x = change_coordinate_x(self.x, 760)
-        self.y = change_coordinate_y(self.y, 960)
+        self.screen = pygame.display.set_mode([self.screen_x, self.screen_y])
+        self.x = change_coordinate_x(self.x, self.screen_x)
+        self.y = change_coordinate_y(self.y, self.screen_y)
+        print(self.x)
+        print(self.y)
         pygame.display.set_caption('Live simulation')
         self.clock = pygame.time.Clock()
         self.img = pygame.image.load(self.img_path).convert_alpha()
@@ -50,6 +54,8 @@ class py_game_animation():
         self.degree = 0
         self.screen.fill(self.background_color)
         pygame.time.set_timer(pygame.USEREVENT, 1000)
+        self.x_0 = 0
+        self.y_0 = 0
 
     def rotate_move(self, degree, x, y):
         self.rot_img = pygame.transform.rotate(self.img, degree)
@@ -85,7 +91,6 @@ class py_game_animation():
                 if e.type == pygame.QUIT:
                     self.run = False
 
-            # pygame.display.flip()
             '''
             The convert_alpha() method is used when loading the image to preserve transparency.
             The rotation center is correctly set by obtaining the rect of the rotated image and setting its
@@ -93,11 +98,40 @@ class py_game_animation():
             The image is blitted onto the screen using the top-left corner of the rect (self.img_rect.topleft).
             '''
             # self.x_y_movement(self.x, self.y)
-            self.rotate_move(self.degree, self.x, self.y)
+            # Example usage
+            dt = 0.1
+            t0 = 0
+            tf = 30
+
+            xi0, u0, xi, XI, U, kpO, kiO, kdO, EO, eO_1, v0, alpha = initial_parameters(
+                dt, t0, tf)
+            xg = 380
+            yg = 480
+            # xg = change_coordinate_x(xg, self.screen_x)
+            # yg = change_coordinate_y(yg, self.screen_y)
+            thetag = 0
+            seltraj = 0
+            traj = 0
+            XI, U, x, y, theta, X, Y, Theta = simulate_robot(
+                dt, t0, tf, xi0, u0, xg, yg, thetag, seltraj, traj, kpO, kiO, kdO, EO, eO_1, v0, alpha, pololu_robot)
+
+            # for i, (x, y, theta) in enumerate(zip(X, Y, Theta)):
+            #     x_coord = change_coordinate_x(x, self.screen_x)
+            #     y_coord = change_coordinate_y(y, self.screen_y)
+            #     # x_coord = 0
+            #     # y_coord = 0
+            #     # theta_val = np.degrees(theta)
+            #     # print(theta_val)
+            #     theta_val = 0
+            # self.rotate_move(theta_val, x_coord, y_coord)
+
             self.clock.tick(60)
-            self.x += 0  # update with values from ctrl
-            self.y += 0  # update with values from ctrl
-            self.degree += 1
+
+            self.x_0 += 1  # update with values from ctrl
+            self.y_0 += 1  # update with values from ctrl
+            self.degree += 5
+            self.rotate_move(self.degree, self.x_0, self.y_0)
+            pygame.display.flip()
         pygame.quit()
 
 
@@ -187,6 +221,123 @@ class Window(QMainWindow):
         pololu_robot.set_controller(self.ctrl_selected)
         print("controller:", pololu_robot.controller)
         print("IP: ", pololu_robot.IP)
+
+
+def initial_parameters(dt, t0, tf):
+    N = int((tf - t0) / dt)
+    # initial conditions
+    xi0 = np.array([0, 0, 0])
+    u0 = np.array([0, 0])
+    xi = xi0  # state vector
+    u = u0  # input vector
+
+    # Arrays to store state, inputs, and outputs
+    XI = np.zeros((len(xi), N + 1))
+    U = np.zeros((len(u), N + 1))
+
+    # initialize arrays
+    XI[:, 0] = xi0
+    U[:, 0] = u0
+
+    # PID position
+    kpP = 1
+    kiP = 0.0001
+    kdP = 0.5
+    EP = 0
+    eP_1 = 0
+
+    # PID orientation
+    kpO = 10
+    kiO = 0.0001
+    kdO = 0
+    EO = 0
+    eO_1 = 0
+
+    # exponential approach
+    v0 = 10
+    alpha = 1
+
+    return xi0, u0, xi, XI, U, kpO, kiO, kdO, EO, eO_1, v0, alpha
+
+
+def runge_kutta(dt, XI, U, n, xi, u, robot):
+    k1 = robot.dynamics(xi, u)
+    k2 = robot.dynamics(xi + np.multiply(dt / 2, k1), u)
+    k3 = robot.dynamics(xi + np.multiply(dt / 2, k2), u)
+    k4 = robot.dynamics(xi + np.multiply(dt, k3), u)
+
+    k1 = np.reshape(k1, xi.shape)
+    k2 = np.reshape(k2, xi.shape)
+    k3 = np.reshape(k3, xi.shape)
+    k4 = np.reshape(k4, xi.shape)
+
+    xi = xi + (dt / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
+
+    XI[:, n + 1] = xi
+    U[:, n + 1] = u
+    q = XI[:, n]
+    x = q[0]
+    y = q[1]
+    theta = q[2]
+    return x, y, theta, xi
+
+
+def pid_exponential(init_cond, goal, kpO, kdO, kiO, EO, eO_1, v0, alpha):
+
+    # controller (this must run repeteadly with the numerical method)
+    x = init_cond[0]
+    y = init_cond[1]
+    theta = init_cond[2]
+    e = np.array([goal[0] - x, goal[1] - y])
+    thetag = np.arctan2(e[1], e[0])
+
+    eP = np.linalg.norm(e)
+    eO = thetag - theta
+    eO = np.arctan2(np.sin(eO), np.cos(eO))
+
+    kP = v0 * (1 - np.exp(-alpha * eP ** 2)) / eP
+    v = kP * eP
+
+    eO_D = eO - eO_1
+    EO = EO + eO
+    w = kpO * eO + kiO * EO + kdO * eO_D
+    eO_1 = eO
+
+    u = np.array([v, w])
+
+    return u
+
+
+def simulate_robot(dt, t0, tf, xi0, u0, xg, yg, thetag, seltraj, traj, kpO, kiO, kdO, EO, eO_1, v0, alpha, robot):
+    N = int((tf - t0) / dt)
+
+    xi = xi0  # state vector
+    u = u0  # input vector
+
+    XI = np.zeros((len(xi), N + 1))
+    U = np.zeros((len(u), N + 1))
+
+    XI[:, 0] = xi0
+    U[:, 0] = u0
+    X = np.zeros(N + 1)
+    Y = np.zeros(N + 1)
+    Theta = np.zeros(N + 1)
+
+    for n in range(N):
+        if seltraj:
+            xg = traj[0, n + 1]
+            yg = traj[1, n + 1]
+
+        u = pid_exponential(xi, [xg, yg], kpO, kdO, kiO, EO, eO_1, v0, alpha)
+
+        x, y, theta, xi = runge_kutta(dt, XI, U, n, xi, u, robot)
+        XI[:, n + 1] = xi
+        U[:, n + 1] = u
+        X[n + 1] = x
+        Y[n + 1] = y
+        Theta[n + 1] = theta
+
+    return XI, U, x, y, theta, X, Y, Theta
 
 
 # initialize the app

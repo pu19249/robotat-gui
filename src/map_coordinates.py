@@ -1,6 +1,4 @@
 # 15 pixels to get the center not in the limit but considering the width of the picture (robot)
-import math
-
 
 def change_coordinate_y(coord, height):
     if coord == height:
