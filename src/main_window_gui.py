@@ -82,8 +82,9 @@ class py_game_animation():
             xg = 100
             yg = 200
             goal = [380, 480]
-            # xg = change_coordinate_x(xg, self.screen_x)
-            # yg = change_coordinate_y(yg, self.screen_y)
+            xg = change_coordinate_x(xg, self.screen_x)
+            yg = change_coordinate_y(yg, self.screen_y)
+            print(xg, yg)
             thetag = 0
             seltraj = 0
             traj = 0
@@ -95,6 +96,7 @@ class py_game_animation():
             for i, (x, y, theta) in enumerate(zip(X, Y, Theta)):
                 x_coord = change_coordinate_x(x, self.screen_x)
                 y_coord = change_coordinate_y(y, self.screen_y)
+                print(x_coord, y_coord)
                 # x_coord = change_coordinate_x(0, self.screen_x)
                 # y_coord = change_coordinate_y(0, self.screen_y)
                 theta_val = np.degrees(theta)
