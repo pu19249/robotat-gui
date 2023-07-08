@@ -31,8 +31,8 @@ class py_game_animation():
         self.img_rect = None
         self.degree = 0
         # 15 pixels to get the center not in the limit but considering the width of the picture (robot)
-        self.x = 0
-        self.y = 0
+        self.x = 380
+        self.y = 480
 
         self.counter = 30
         self.background_color = (255, 255, 255)
@@ -81,16 +81,28 @@ class py_game_animation():
         self.start_animation()  # Start the animation loop
 
     def start_animation(self):
+        # while self.run:
+        #     elapsed_time = pygame.time.get_ticks() / 1000  # Convert milliseconds to seconds
+        #     self.counter = max(30 - int(elapsed_time), 0)
+        #     print(self.counter)
+
+        #     if self.counter == 0:
+        #         self.run = False
+
+        #     for event in pygame.event.get():
+        #         if event.type == pygame.QUIT:
+        #             self.run = False
         while self.run:
             for e in pygame.event.get():
                 if e.type == pygame.USEREVENT:
                     self.counter -= 1
-                    print(self.counter)
-                    if self.counter == 0:
-                        self.run = False
+
                 if e.type == pygame.QUIT:
                     self.run = False
 
+            print(self.counter)
+            if self.counter == 0:
+                self.run = False
             '''
             The convert_alpha() method is used when loading the image to preserve transparency.
             The rotation center is correctly set by obtaining the rect of the rotated image and setting its
@@ -99,14 +111,14 @@ class py_game_animation():
             '''
             # self.x_y_movement(self.x, self.y)
             # Example usage
-            dt = 0.1
+            dt = 0.01
             t0 = 0
             tf = 30
 
             xi0, u0, xi, XI, U, kpO, kiO, kdO, EO, eO_1, v0, alpha = initial_parameters(
                 dt, t0, tf)
-            xg = 380
-            yg = 480
+            xg = 760
+            yg = 960
             # xg = change_coordinate_x(xg, self.screen_x)
             # yg = change_coordinate_y(yg, self.screen_y)
             thetag = 0
@@ -115,22 +127,23 @@ class py_game_animation():
             XI, U, x, y, theta, X, Y, Theta = simulate_robot(
                 dt, t0, tf, xi0, u0, xg, yg, thetag, seltraj, traj, kpO, kiO, kdO, EO, eO_1, v0, alpha, pololu_robot)
 
-            # for i, (x, y, theta) in enumerate(zip(X, Y, Theta)):
-            #     x_coord = change_coordinate_x(x, self.screen_x)
-            #     y_coord = change_coordinate_y(y, self.screen_y)
-            #     # x_coord = 0
-            #     # y_coord = 0
-            #     # theta_val = np.degrees(theta)
-            #     # print(theta_val)
-            #     theta_val = 0
-            # self.rotate_move(theta_val, x_coord, y_coord)
+
 
             self.clock.tick(60)
 
-            self.x_0 += 1  # update with values from ctrl
-            self.y_0 += 1  # update with values from ctrl
-            self.degree += 5
-            self.rotate_move(self.degree, self.x_0, self.y_0)
+            # self.x += 0  # update with values from ctrl
+            # self.y += 0  # update with values from ctrl
+            # self.degree += 5
+            # self.rotate_move(self.degree, self.x, self.y)
+            for i, (x, y, theta) in enumerate(zip(X, Y, Theta)):
+                # x_coord = change_coordinate_x(x, self.screen_x)
+                # y_coord = change_coordinate_y(y, self.screen_y)
+                x_coord = 0
+                y_coord = 0
+                theta_val = np.degrees(theta)
+                print(theta_val)
+                # theta_val = 0
+                self.rotate_move(theta_val, x_coord, y_coord)
             pygame.display.flip()
         pygame.quit()
 
@@ -272,7 +285,9 @@ def runge_kutta(dt, XI, U, n, xi, u, robot):
     k4 = np.reshape(k4, xi.shape)
 
     xi = xi + (dt / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
-
+    x = xi[0]
+    y = xi[1]
+    theta = xi[2]
     XI[:, n + 1] = xi
     U[:, n + 1] = u
     q = XI[:, n]
@@ -331,6 +346,7 @@ def simulate_robot(dt, t0, tf, xi0, u0, xg, yg, thetag, seltraj, traj, kpO, kiO,
         u = pid_exponential(xi, [xg, yg], kpO, kdO, kiO, EO, eO_1, v0, alpha)
 
         x, y, theta, xi = runge_kutta(dt, XI, U, n, xi, u, robot)
+        thetag = theta
         XI[:, n + 1] = xi
         U[:, n + 1] = u
         X[n + 1] = x

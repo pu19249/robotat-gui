@@ -1,7 +1,24 @@
 import numpy as np
 
+def pid_exponential(init_cond, init_u, goal, N):
+    
+    # initial conditions
+    xi0 = np.array([0, 0, 0])
+    u0 = np.array([0, 0])
+    xi = xi0  # state vector
+    u = u0  # input vector
 
-def pid_exponential(init_cond, init_u, goal):
+    # Arrays to store state, inputs, and outputs
+    XI = np.zeros((len(xi), N + 1))
+    U = np.zeros((len(u), N + 1))
+
+    # initialize arrays
+    XI[:, 0] = xi0
+    U[:, 0] = u0
+    X = np.zeros(N + 1)
+    Y = np.zeros(N + 1)
+    Theta = np.zeros(N + 1)
+
     # PID position
     kpP = 1
     kiP = 0.0001
@@ -21,9 +38,9 @@ def pid_exponential(init_cond, init_u, goal):
     alpha = 1
 
     # controller (this must run repeteadly with the numerical method)
-    x = init_cond[0]
-    y = init_cond[1]
-    theta = init_cond[2]
+    x = xi[0]
+    y = xi[1]
+    theta = xi[2]
     e = np.array([goal[0] - x, goal[1] - y])
     thetag = np.arctan2(e[1], e[0])
 
