@@ -13,6 +13,7 @@ from PyQt5.QtCore import pyqtBoundSignal
 import sys
 from robots.robot_pololu import Pololu
 import controllers as ctrl
+from controllers.pid_exponential import pid_exponential
 import os
 
 from PyQt5.QtGui import QPixmap, QTransform
@@ -25,35 +26,26 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 class py_game_animation():
     def __init__(self, img_path):
         self.img_path = img_path
-        self.screen = None
+        self.screen_x = 760
+        self.screen_y = 960
+        self.screen = pygame.display.set_mode([self.screen_x, self.screen_y])
         self.clock = None
         self.img = None
         self.img_rect = None
         self.degree = 0
-        # 15 pixels to get the center not in the limit but considering the width of the picture (robot)
-        self.x = 380
-        self.y = 480
-
         self.counter = 30
         self.background_color = (255, 255, 255)
-        self.screen_x = 760
-        self.screen_y = 960
         self.run = True
 
     def initialize(self):
         pygame.init()
-        self.screen = pygame.display.set_mode([self.screen_x, self.screen_y])
-        self.x = change_coordinate_x(self.x, self.screen_x)
-        self.y = change_coordinate_y(self.y, self.screen_y)
-        print(self.x)
-        print(self.y)
         pygame.display.set_caption('Live simulation')
         self.clock = pygame.time.Clock()
         self.img = pygame.image.load(self.img_path).convert_alpha()
         self.img_rect = self.img.get_rect(center=self.screen.get_rect().center)
         self.degree = 0
         self.screen.fill(self.background_color)
-        pygame.time.set_timer(pygame.USEREVENT, 1000)
+
         self.x_0 = 0
         self.y_0 = 0
 
@@ -71,54 +63,25 @@ class py_game_animation():
         Blit the rotated image onto the screen using self.rot_img and self.rot_rect.
         '''
 
-    def x_y_movement(self, x, y):
-        self.screen.fill(self.background_color)
-        self.screen.blit(self.img, (self.x, self.y))
-        pygame.display.flip()
-
     def animate(self):
         self.initialize()  # Initialize pygame
         self.start_animation()  # Start the animation loop
 
     def start_animation(self):
-        # while self.run:
-        #     elapsed_time = pygame.time.get_ticks() / 1000  # Convert milliseconds to seconds
-        #     self.counter = max(30 - int(elapsed_time), 0)
-        #     print(self.counter)
-
-        #     if self.counter == 0:
-        #         self.run = False
-
-        #     for event in pygame.event.get():
-        #         if event.type == pygame.QUIT:
-        #             self.run = False
         while self.run:
             for e in pygame.event.get():
-                if e.type == pygame.USEREVENT:
-                    self.counter -= 1
-
                 if e.type == pygame.QUIT:
                     self.run = False
 
-            print(self.counter)
-            if self.counter == 0:
-                self.run = False
-            '''
-            The convert_alpha() method is used when loading the image to preserve transparency.
-            The rotation center is correctly set by obtaining the rect of the rotated image and setting its
-            center to self.img_rect.center.
-            The image is blitted onto the screen using the top-left corner of the rect (self.img_rect.topleft).
-            '''
-            # self.x_y_movement(self.x, self.y)
-            # Example usage
             dt = 0.01
             t0 = 0
             tf = 30
 
             xi0, u0, xi, XI, U, kpO, kiO, kdO, EO, eO_1, v0, alpha = initial_parameters(
                 dt, t0, tf)
-            xg = 760
-            yg = 960
+            xg = 100
+            yg = 200
+            goal = [380, 480]
             # xg = change_coordinate_x(xg, self.screen_x)
             # yg = change_coordinate_y(yg, self.screen_y)
             thetag = 0
@@ -127,21 +90,15 @@ class py_game_animation():
             XI, U, x, y, theta, X, Y, Theta = simulate_robot(
                 dt, t0, tf, xi0, u0, xg, yg, thetag, seltraj, traj, kpO, kiO, kdO, EO, eO_1, v0, alpha, pololu_robot)
 
-
-
             self.clock.tick(60)
 
-            # self.x += 0  # update with values from ctrl
-            # self.y += 0  # update with values from ctrl
-            # self.degree += 5
-            # self.rotate_move(self.degree, self.x, self.y)
             for i, (x, y, theta) in enumerate(zip(X, Y, Theta)):
-                # x_coord = change_coordinate_x(x, self.screen_x)
-                # y_coord = change_coordinate_y(y, self.screen_y)
-                x_coord = 0
-                y_coord = 0
+                x_coord = change_coordinate_x(x, self.screen_x)
+                y_coord = change_coordinate_y(y, self.screen_y)
+                # x_coord = change_coordinate_x(0, self.screen_x)
+                # y_coord = change_coordinate_y(0, self.screen_y)
                 theta_val = np.degrees(theta)
-                print(theta_val)
+                # print(theta_val)
                 # theta_val = 0
                 self.rotate_move(theta_val, x_coord, y_coord)
             pygame.display.flip()

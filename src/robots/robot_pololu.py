@@ -28,5 +28,3 @@ class Pololu:
     def set_controller(self, controller):
         # Update the controller attribute
         self.controller = controller
-
-    
