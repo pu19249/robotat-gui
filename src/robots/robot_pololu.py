@@ -8,13 +8,14 @@ from PyQt5.QtGui import QPixmap
 class Pololu:
     # Function to initialize attrs
     def __init__(self, state: List[float], physical_params:
-                 List[float], ID: float, IP: float, img: str, controller: str, u):
+                 List[float], ID: float, IP: float, img: str, controller, u):
         self.state = state
         self.physical_params = physical_params
         self.ID = ID
         self.IP = IP
         self.img = QPixmap(img) if img else None
         self.controller = controller
+        self.f = None
 
     '''
     List of state receives x, y, bearing
@@ -23,16 +24,17 @@ class Pololu:
     # Methods definition
 
     def dynamics(self, state, u):
-        f = [u[0]*np.cos(state[2]), u[0]*np.sin(state[2]), u[1]]
-        return f
+        self.f = [u[0]*np.cos(state[2]), u[0]*np.sin(state[2]), u[1]]
+        return self.f
 
     def control(self):
-        u = self(params)
+        u = self.controller(self.state)
         return u
 
     def update_state(self, dt, f, u, ini_cond, n):
         XI = ini_cond[0]
         U = ini_cond[1]
+        xi = self.state
         k1 = f(xi, u)
         k2 = f(xi + np.multiply(dt / 2, k1), u)
         k3 = f(xi + np.multiply(dt / 2, k2), u)
@@ -54,7 +56,12 @@ class Pololu:
         y = q[1]
         theta = q[2]
 
-        return x, y, theta, xi
+        # return x, y, theta, xi
 
-    def simulate_robot(self):
-        
+    def simulate_robot(self, dt, ini_cond, n):
+        num_steps = 3000
+        for n in range(num_steps):
+            u = self.control()
+            self.update_state(dt, self.f, u, ini_cond, n)
+            # Example: Print the state in each step
+            print(f"Step {n}: State = {self.state}")
