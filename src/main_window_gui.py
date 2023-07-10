@@ -84,7 +84,7 @@ class py_game_animation():
             yg = change_coordinate_y(yg, self.screen_y)
             print(xg, yg)
 
-            pololu_robot.simulate_robot(dt, ini_cond=0, n=3000)
+            pololu_robot.simulate_robot(dt, t0, tf, ini_cond=([0], [0]))
             self.clock.tick(60)
 
             for i, (x, y, theta) in enumerate(zip(X, Y, Theta)):
@@ -205,7 +205,7 @@ IP = "192.168.1.1"  # Example IP
 
 goal = (100, 100)
 N = 3000
-init_u = 0
+init_u = [0, 0]
 def controller(state): return pid_exponential(state, init_u, goal, N)
 
 
@@ -215,3 +215,123 @@ pololu_robot = Pololu(state, physical_params, ID, IP, img_path, controller, u)
 
 main_window = Window()
 app.exec_()
+
+
+# def initial_parameters(dt, t0, tf):
+#     N = int((tf - t0) / dt)
+#     # initial conditions
+#     xi0 = np.array([0, 0, 0])
+#     u0 = np.array([0, 0])
+#     xi = xi0  # state vector
+#     u = u0  # input vector
+
+#     # Arrays to store state, inputs, and outputs
+#     XI = np.zeros((len(xi), N + 1))
+#     U = np.zeros((len(u), N + 1))
+
+#     # initialize arrays
+#     XI[:, 0] = xi0
+#     U[:, 0] = u0
+
+#     # PID position
+#     kpP = 1
+#     kiP = 0.0001
+#     kdP = 0.5
+#     EP = 0
+#     eP_1 = 0
+
+#     # PID orientation
+#     kpO = 10
+#     kiO = 0.0001
+#     kdO = 0
+#     EO = 0
+#     eO_1 = 0
+
+#     # exponential approach
+#     v0 = 10
+#     alpha = 1
+
+#     return xi0, u0, xi, XI, U, kpO, kiO, kdO, EO, eO_1, v0, alpha
+
+
+# def runge_kutta(dt, XI, U, n, xi, u, robot):
+#     k1 = robot.dynamics(xi, u)
+#     k2 = robot.dynamics(xi + np.multiply(dt / 2, k1), u)
+#     k3 = robot.dynamics(xi + np.multiply(dt / 2, k2), u)
+#     k4 = robot.dynamics(xi + np.multiply(dt, k3), u)
+
+#     k1 = np.reshape(k1, xi.shape)
+#     k2 = np.reshape(k2, xi.shape)
+#     k3 = np.reshape(k3, xi.shape)
+#     k4 = np.reshape(k4, xi.shape)
+
+#     xi = xi + (dt / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
+#     x = xi[0]
+#     y = xi[1]
+#     theta = xi[2]
+#     XI[:, n + 1] = xi
+#     U[:, n + 1] = u
+#     q = XI[:, n]
+#     x = q[0]
+#     y = q[1]
+#     theta = q[2]
+#     return x, y, theta, xi
+
+
+# def pid_exponential(init_cond, goal, kpO, kdO, kiO, EO, eO_1, v0, alpha):
+
+#     # controller (this must run repeteadly with the numerical method)
+#     x = init_cond[0]
+#     y = init_cond[1]
+#     theta = init_cond[2]
+#     e = np.array([goal[0] - x, goal[1] - y])
+#     thetag = np.arctan2(e[1], e[0])
+
+#     eP = np.linalg.norm(e)
+#     eO = thetag - theta
+#     eO = np.arctan2(np.sin(eO), np.cos(eO))
+
+#     kP = v0 * (1 - np.exp(-alpha * eP ** 2)) / eP
+#     v = kP * eP
+
+#     eO_D = eO - eO_1
+#     EO = EO + eO
+#     w = kpO * eO + kiO * EO + kdO * eO_D
+#     eO_1 = eO
+
+#     u = np.array([v, w])
+
+#     return u
+
+
+# def simulate_robot(dt, t0, tf, xi0, u0, xg, yg, thetag, seltraj, traj, kpO, kiO, kdO, EO, eO_1, v0, alpha, robot):
+#     N = int((tf - t0) / dt)
+
+#     xi = xi0  # state vector
+#     u = u0  # input vector
+
+#     XI = np.zeros((len(xi), N + 1))
+#     U = np.zeros((len(u), N + 1))
+
+#     XI[:, 0] = xi0
+#     U[:, 0] = u0
+#     X = np.zeros(N + 1)
+#     Y = np.zeros(N + 1)
+#     Theta = np.zeros(N + 1)
+
+#     for n in range(N):
+#         if seltraj:
+#             xg = traj[0, n + 1]
+#             yg = traj[1, n + 1]
+
+#         u = pid_exponential(xi, [xg, yg], kpO, kdO, kiO, EO, eO_1, v0, alpha)
+
+#         x, y, theta, xi = runge_kutta(dt, XI, U, n, xi, u, robot)
+#         thetag = theta
+#         XI[:, n + 1] = xi
+#         U[:, n + 1] = u
+#         X[n + 1] = x
+#         Y[n + 1] = y
+#         Theta[n + 1] = theta
+
+#     return XI, U, x, y, theta, X, Y, Theta

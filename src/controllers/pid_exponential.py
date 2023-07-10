@@ -1,30 +1,15 @@
 import numpy as np
 
-def pid_exponential(init_cond, init_u, goal, N):
-    
-    # initial conditions
-    xi0 = np.array([0, 0, 0])
-    u0 = np.array([0, 0])
-    xi = xi0  # state vector
-    u = u0  # input vector
 
-    # Arrays to store state, inputs, and outputs
-    XI = np.zeros((len(xi), N + 1))
-    U = np.zeros((len(u), N + 1))
-
-    # initialize arrays
-    XI[:, 0] = xi0
-    U[:, 0] = u0
-    X = np.zeros(N + 1)
-    Y = np.zeros(N + 1)
-    Theta = np.zeros(N + 1)
-
+def pid_exponential_cte():
     # PID position
     kpP = 1
     kiP = 0.0001
     kdP = 0.5
     EP = 0
     eP_1 = 0
+
+    position_cte = [kpP, kiP, kdP, EP, eP_1]
 
     # PID orientation
     kpO = 10
@@ -33,9 +18,16 @@ def pid_exponential(init_cond, init_u, goal, N):
     EO = 0
     eO_1 = 0
 
+    orientation_cte = [kpO, kiO, kdO, EO, eO_1]
+
     # exponential approach
     v0 = 10
     alpha = 1
+
+    return position_cte, orientation_cte, v0, alpha
+
+
+def pid_exponential(init_cond, init_u, goal, N):
 
     # controller (this must run repeteadly with the numerical method)
     x = xi[0]
