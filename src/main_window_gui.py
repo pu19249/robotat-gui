@@ -26,7 +26,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 class py_game_animation():
     def __init__(self, img_path):
         # Define the image file name
-        grid_file = "grid_back.png"
+        grid_file = "grid_back_coord.png"
 
         # Create the complete file path
         grid_path = os.path.join(script_dir, grid_file)
