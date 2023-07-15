@@ -13,8 +13,8 @@ class Pololu:
         self.physical_params = physical_params
         self.ID = ID
         self.IP = IP
-        # self.img = QPixmap(img) if img else None
-        self.img = None
+        self.img = QPixmap(img) if img else None
+        # self.img = None # to make tests in a individual script
         self.controller = controller
 
         # Initialize arrays
@@ -65,11 +65,6 @@ class Pololu:
         # simulation params
         N = int((tf - t0) / dt)
 
-        # initial conditions and arrays initialization
-        # xi0 = [0, 0, 0]  # state vector
-        # xi = xi0
-        # u0 = [0, 0]  # input vector
-        # u = u0
         # arrays to store state variables trajectories, inputs, and system outputs
         self.XI = np.zeros((len(self.state), N + 1))
         self.U = np.zeros((2, N + 1))
@@ -80,7 +75,6 @@ class Pololu:
         self.Theta = np.zeros(N + 1)
         # arrays initialization
         self.XI[:, 0] = self.state
-        # U[:, 0] = u0
 
         for n in range(N):
             u = self.control(goal, self.state)
@@ -92,9 +86,6 @@ class Pololu:
             self.XI[:, n+1] = self.state
             self.U[:, n+1] = u
             # Store the values of position and orientation
-            # self.X[n + 1] = self.XI[0, n + 1]
-            # self.Y[n + 1] = self.XI[1, n + 1]
-            # self.Theta[n + 1] = self.XI[2, n + 1]
             self.X[n + 1] = self.state[0]
             self.Y[n + 1] = self.state[1]
             self.Theta[n + 1] = self.state[2]
