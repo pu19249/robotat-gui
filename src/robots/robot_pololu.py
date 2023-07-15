@@ -80,6 +80,7 @@ class Pololu:
             u = self.control(goal, self.state)
             self.update_state(dt, self.dynamics, u)
             # Example: Print the state in each step
+            # used to check in individual test
             print(f"Step {n}: State = {self.state}")
 
             # store the state variables trajectories and inputs

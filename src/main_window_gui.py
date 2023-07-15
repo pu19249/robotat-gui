@@ -23,6 +23,35 @@ matplotlib.use('Qt5Agg')
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
 
+class button_pygame():
+    def __init__(self, x, y, image, screen):
+        self.screen = screen
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x, y)
+        self.clicked = False
+        self.action = None
+        self.pos = None
+
+    def draw(self):
+        self.action = False
+        # get mouse position
+        self.pos = pygame.mouse.get_pos()
+        # check mouseover and clicked conditions
+        if self.rect.collidepoint(self.pos):
+            if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
+                self.clicked = True
+                self.action = True
+
+        if pygame.mouse.get_pressed()[0] == 0:
+            self.clicked = False
+
+            # draw button on screen
+        self.screen.blit(self.image, (self.rect.x, self.rect.y))
+
+        return self.action
+
+
 class py_game_animation():
     def __init__(self, img_path):
         # Define the image file name
@@ -31,7 +60,7 @@ class py_game_animation():
         # Create the complete file path
         grid_path = os.path.join(script_dir, grid_file)
         self.img_path = img_path
-        self.screen_x = 760
+        self.screen_x = 850
         self.screen_y = 960
         self.screen = pygame.display.set_mode([self.screen_x, self.screen_y])
         self.clock = None
@@ -42,12 +71,17 @@ class py_game_animation():
         self.background_color = (255, 255, 255)
         self.run = True
         self.grid = pygame.image.load(grid_path).convert_alpha()
+        self.play = None
 
     def initialize(self):
         pygame.init()
         pygame.display.set_caption('Live simulation')
         self.clock = pygame.time.Clock()
         self.img = pygame.image.load(self.img_path).convert_alpha()
+        play_icon = pygame.image.load('pictures/play_icon.png').convert_alpha()
+        play_icon = pygame.transform.scale(play_icon, (50, 50))
+        self.play = button_pygame(780, 480, play_icon, self.screen)
+        self.play.draw()
         self.img_rect = self.img.get_rect(center=self.screen.get_rect().center)
         self.degree = 0
         self.screen.fill(self.background_color)
@@ -60,9 +94,11 @@ class py_game_animation():
         self.rot_img = pygame.transform.rotate(self.img, degree)
         self.rot_rect = self.rot_img.get_rect(center=(x, y))
         self.screen.fill(self.background_color)
+        # self.screen.blit(self.grid, (0, 0))
         # self.screen.blit(self.rot_img, self.img_rect.topleft)
         self.screen.blit(self.rot_img, self.rot_rect)
         pygame.display.flip()
+
         '''
         Pass the degree argument directly to pygame.transform.rotate() without using self.degree, as degree is already the parameter for rotation angle.
         Create a new rot_rect variable to store the rect (position and size) of the rotated image.
@@ -76,35 +112,35 @@ class py_game_animation():
 
     def start_animation(self):
         while self.run:
-            for e in pygame.event.get():
-                if e.type == pygame.QUIT:
-                    self.run = False
-
             dt = 0.01
             t0 = 0
             tf = 30
 
             xg = 100
             yg = 200
-            goal = [380, 480]
             xg = change_coordinate_x(xg, self.screen_x)
             yg = change_coordinate_y(yg, self.screen_y)
-            print(xg, yg)
+            goal = [xg, yg]
+            # print(xg, yg)
 
-            # pololu_robot.simulate_robot(dt, t0, tf, ini_cond=([0], [0]))
+            pololu_robot.simulate_robot(dt, t0, tf, goal)
             self.clock.tick(60)
-
-            # for i, (x, y, theta) in enumerate(zip(X, Y, Theta)):
-            #     x_coord = change_coordinate_x(x, self.screen_x)
-            #     y_coord = change_coordinate_y(y, self.screen_y)
-            #     print(x_coord, y_coord)
-            #     # x_coord = change_coordinate_x(0, self.screen_x)
-            #     # y_coord = change_coordinate_y(0, self.screen_y)
-            #     theta_val = np.degrees(theta)
-            #     # print(theta_val)
-            #     # theta_val = 0
-            #     self.rotate_move(theta_val, x_coord, y_coord)
-            pygame.display.flip()
+            # if self.play.draw():
+            #     print('START')
+            for i, (x, y, theta) in enumerate(zip(pololu_robot.X, pololu_robot.Y, pololu_robot.Theta)):
+                x_new = change_coordinate_x(x, self.screen_x)
+                y_new = change_coordinate_y(y, self.screen_y)
+                print(x_new, y_new)
+                # x_coord = change_coordinate_x(0, self.screen_x)
+                # y_coord = change_coordinate_y(0, self.screen_y)
+                theta_val = np.degrees(theta)
+                # print(theta_val)
+                # theta_val = 0
+                self.rotate_move(theta_val, x_new, y_new)
+                pygame.display.flip()
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                self.run = False
         pygame.quit()
 
 
@@ -204,13 +240,13 @@ img_file = "pololu_img.png"
 
 # Create the complete file path
 img_path = os.path.join(script_dir, img_file)
-state = [0, 0, 0]  # Example state values
+state_0 = [0, 0, 0]  # Example state values
 physical_params = [1, 1, 10, 10]  # Example physical parameters
 ID = 1  # Example ID
 IP = "192.168.1.1"  # Example IP
-# img_path = "pololu_img.png"  # Replace with the actual path to your PNG image file
+img_path = "pololu_img.png"  # Replace with the actual path to your PNG image file
 
-goal = (100, 100)
+goal = [100, 100]
 N = 3000
 init_u = [0, 0]
 def controller(state): return pid_exponential(goal, state)
@@ -218,7 +254,8 @@ def controller(state): return pid_exponential(goal, state)
 
 u = 0
 
-pololu_robot = Pololu(state, physical_params, ID, IP, img_path, controller, u)
+pololu_robot = Pololu(state_0, physical_params, ID, IP,
+                      img_path, lambda state, goal=goal: pid_exponential(state, goal), u)
 
 main_window = Window()
 app.exec_()
