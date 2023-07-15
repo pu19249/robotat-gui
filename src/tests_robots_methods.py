@@ -36,4 +36,4 @@ print(pololu_robot.img)
 print(pololu_robot.controller)
 print(pololu_robot.Theta)
 
-pololu_robot.simulate_robot(0.01, 0, 10, goal)
+pololu_robot.simulate_robot(0.01, 0, 30, goal)
