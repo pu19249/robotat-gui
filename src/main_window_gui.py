@@ -206,7 +206,7 @@ IP = "192.168.1.1"  # Example IP
 goal = (100, 100)
 N = 3000
 init_u = [0, 0]
-def controller(state): return pid_exponential(state, init_u, goal, N)
+def controller(state): return pid_exponential(goal, state)
 
 
 u = 0

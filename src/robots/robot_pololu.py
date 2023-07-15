@@ -13,7 +13,8 @@ class Pololu:
         self.physical_params = physical_params
         self.ID = ID
         self.IP = IP
-        self.img = QPixmap(img) if img else None
+        # self.img = QPixmap(img) if img else None
+        self.img = None
         self.controller = controller
 
         # Initialize arrays
@@ -34,8 +35,8 @@ class Pololu:
         f = [u[0]*np.cos(state[2]), u[0]*np.sin(state[2]), u[1]]
         return f
 
-    def control(self):
-        u = self.controller(self.state)
+    def control(self, goal, state):
+        u = self.controller(state, goal)
         return u
 
     def goal_def(self, xg, yg):
@@ -45,7 +46,7 @@ class Pololu:
 
     def update_state(self, dt, f, u):
         # the state of the system is updated by means of a discretization bythe Runge-Kutta method (RK4)
-        xi = self.state
+        xi = np.array(self.state)
         k1 = f(xi, u)
         k2 = f(xi + np.multiply(dt / 2, k1), u)
         k3 = f(xi + np.multiply(dt / 2, k2), u)
@@ -57,34 +58,46 @@ class Pololu:
         k4 = np.reshape(k4, xi.shape)
 
         xi = xi + (dt / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
+        self.state = xi.tolist()
 
-        # return x, y, theta, xi
-
-    def simulate_robot(self, dt, t0, tf, ini_cond):
+    # goal should be defined as [xg, yg]
+    def simulate_robot(self, dt, t0, tf, goal):
         # simulation params
         N = int((tf - t0) / dt)
 
         # initial conditions and arrays initialization
-        xi0 = [0, 0, 0]  # state vector
-        xi = xi0
-        u0 = [0, 0]  # input vector
-        u = u0
+        # xi0 = [0, 0, 0]  # state vector
+        # xi = xi0
+        # u0 = [0, 0]  # input vector
+        # u = u0
         # arrays to store state variables trajectories, inputs, and system outputs
-        XI = np.zeros((len(xi), N + 1))
-        U = np.zeros((len(u), N + 1))
+        self.XI = np.zeros((len(self.state), N + 1))
+        self.U = np.zeros((2, N + 1))
+
+        # initialize trajectory arrays
+        self.X = np.zeros(N + 1)
+        self.Y = np.zeros(N + 1)
+        self.Theta = np.zeros(N + 1)
         # arrays initialization
-        XI[:, 0] = xi0
-        U[:, 0] = u0
+        self.XI[:, 0] = self.state
+        # U[:, 0] = u0
 
         for n in range(N):
-            u = self.control()
-            self.update_state(dt, self.dynamics, u, ini_cond, n)
+            u = self.control(goal, self.state)
+            self.update_state(dt, self.dynamics, u)
             # Example: Print the state in each step
             print(f"Step {n}: State = {self.state}")
+
+            # store the state variables trajectories and inputs
+            self.XI[:, n+1] = self.state
+            self.U[:, n+1] = u
             # Store the values of position and orientation
-            self.X[n + 1] = self.XI[0, n + 1]
-            self.Y[n + 1] = self.XI[1, n + 1]
-            self.Theta[n + 1] = self.XI[2, n + 1]
+            # self.X[n + 1] = self.XI[0, n + 1]
+            # self.Y[n + 1] = self.XI[1, n + 1]
+            # self.Theta[n + 1] = self.XI[2, n + 1]
+            self.X[n + 1] = self.state[0]
+            self.Y[n + 1] = self.state[1]
+            self.Theta[n + 1] = self.state[2]
 
         # Return the state and input arrays
         return self.X, self.Y, self.Theta
