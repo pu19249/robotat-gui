@@ -128,17 +128,15 @@ class py_game_animation():
             # maps it back to the original system
             # for e.g. the user gives (-120, 140) the pygame coordinate system would expect a (500, 620) so the -120, 140 are the parameters for the inverse_change_coordinates func.
 
-            x_or3, y_or3 = inverse_change_coordinates(0, -480, 960, 760)
-            self.rotate_move(45, x_or3, y_or3)
-            # if self.play.action:
-            #     print('START')
-            #     for x, y, theta in zip(X_sim, Y_sim, Theta_sim):
-            #         # x, y, theta = pololu_robot.X[-1], pololu_robot.Y[-1], pololu_robot.Theta[-1]
-            #         x_new = change_coordinate_x(x, self.screen_x)
-            #         y_new = change_coordinate_y(y, self.screen_y)
-            #         theta_val = np.degrees(theta)
-            #         self.rotate_move(theta_val, x_new, y_new)
-            #         print(x_new, y_new, theta_val)
+            if self.play.action:
+                print('START')
+                for x, y, theta in zip(X_sim, Y_sim, Theta_sim):
+                    # x, y, theta = pololu_robot.X[-1], pololu_robot.Y[-1], pololu_robot.Theta[-1]
+                    x_new, y_new = inverse_change_coordinates(
+                        x, y, self.screen_y, self.screen_x)
+                    theta_val = np.degrees(theta)
+                    self.rotate_move(0, x_new, y_new)
+                    print(x_new, y_new)
             pygame.display.flip()
             time.sleep(0.1)  # Add a small delay to reduce computation load
 
@@ -247,7 +245,7 @@ ID = 1  # Example ID
 IP = "192.168.1.1"  # Example IP
 img_path = "pololu_img.png"  # Replace with the actual path to your PNG image file
 
-goal = [100, 100]
+goal = [380, 480]
 N = 3000
 init_u = [0, 0]
 def controller(state): return pid_exponential(goal, state)
@@ -258,12 +256,12 @@ u = 0
 pololu_robot = Pololu(state_0, physical_params, ID, IP,
                       img_path, lambda state, goal=goal: pid_exponential(state, goal), u)
 
-dt = 0.01
+dt = 0.1
 t0 = 0
-tf = 30
+tf = 100
 
-xg = 100
-yg = 100
+xg = 200
+yg = 200
 
 goal = [xg, yg]
 
