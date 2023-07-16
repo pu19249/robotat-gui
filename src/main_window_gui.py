@@ -5,7 +5,7 @@ import matplotlib
 from matplotlib.figure import Figure
 import pygame
 import numpy as np
-from map_coordinates import change_coordinate_y, change_coordinate_x, change_coordinates, inverse_change_coordinates
+from map_coordinates import change_coordinates, inverse_change_coordinates
 import time
 from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QTabWidget, QWidget, QTextBrowser, QLabel, QGridLayout, QRadioButton, QComboBox, QSpinBox, QPushButton, QTableView, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem
 from PyQt5 import uic, QtCore
@@ -15,6 +15,7 @@ from robots.robot_pololu import Pololu
 import controllers as ctrl
 from controllers.pid_exponential import pid_exponential
 import os
+import array as arr
 
 from PyQt5.QtGui import QPixmap, QTransform
 matplotlib.use('Qt5Agg')
@@ -126,9 +127,9 @@ class py_game_animation():
             # the user gives the goal in quadrants, so the code
             # maps it back to the original system
             # for e.g. the user gives (-120, 140) the pygame coordinate system would expect a (500, 620) so the -120, 140 are the parameters for the inverse_change_coordinates func.
-            x_or, y_or = inverse_change_coordinates(380, 480, 960, 760)
-            print(x_or, y_or)
-            self.rotate_move(45, x_or, y_or)
+
+            x_or3, y_or3 = inverse_change_coordinates(0, -480, 960, 760)
+            self.rotate_move(45, x_or3, y_or3)
             # if self.play.action:
             #     print('START')
             #     for x, y, theta in zip(X_sim, Y_sim, Theta_sim):
@@ -261,8 +262,8 @@ dt = 0.01
 t0 = 0
 tf = 30
 
-xg = change_coordinate_x(100, 760)
-yg = change_coordinate_y(200, 960)
+xg = 100
+yg = 100
 
 goal = [xg, yg]
 
