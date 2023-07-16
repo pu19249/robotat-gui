@@ -6,7 +6,7 @@ from matplotlib.figure import Figure
 import pygame
 import numpy as np
 from map_coordinates import change_coordinate_y, change_coordinate_x
-
+import time
 from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QTabWidget, QWidget, QTextBrowser, QLabel, QGridLayout, QRadioButton, QComboBox, QSpinBox, QPushButton, QTableView, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem
 from PyQt5 import uic, QtCore
 from PyQt5.QtCore import pyqtBoundSignal
@@ -94,11 +94,9 @@ class py_game_animation():
         self.rot_img = pygame.transform.rotate(self.img, degree)
         self.rot_rect = self.rot_img.get_rect(center=(x, y))
         self.screen.fill(self.background_color)
-        # self.screen.blit(self.grid, (0, 0))
-        # self.screen.blit(self.rot_img, self.img_rect.topleft)
+        self.screen.blit(self.grid, (0, 0))
         self.screen.blit(self.rot_img, self.rot_rect)
         pygame.display.flip()
-
         '''
         Pass the degree argument directly to pygame.transform.rotate() without using self.degree, as degree is already the parameter for rotation angle.
         Create a new rot_rect variable to store the rect (position and size) of the rotated image.
@@ -112,35 +110,29 @@ class py_game_animation():
 
     def start_animation(self):
         while self.run:
-            dt = 0.01
-            t0 = 0
-            tf = 30
 
-            xg = 100
-            yg = 200
-            xg = change_coordinate_x(xg, self.screen_x)
-            yg = change_coordinate_y(yg, self.screen_y)
-            goal = [xg, yg]
-            # print(xg, yg)
-
-            pololu_robot.simulate_robot(dt, t0, tf, goal)
             self.clock.tick(60)
-            # if self.play.draw():
-            #     print('START')
-            for i, (x, y, theta) in enumerate(zip(pololu_robot.X, pololu_robot.Y, pololu_robot.Theta)):
-                x_new = change_coordinate_x(x, self.screen_x)
-                y_new = change_coordinate_y(y, self.screen_y)
-                print(x_new, y_new)
-                # x_coord = change_coordinate_x(0, self.screen_x)
-                # y_coord = change_coordinate_y(0, self.screen_y)
-                theta_val = np.degrees(theta)
-                # print(theta_val)
-                # theta_val = 0
-                self.rotate_move(theta_val, x_new, y_new)
-                pygame.display.flip()
-        for e in pygame.event.get():
-            if e.type == pygame.QUIT:
-                self.run = False
+            # print(traj[0], traj[1], traj[2])
+            # for n in pololu_robot.X:
+            #     print(n)
+            self.play.draw()  # Update the play button
+
+            for e in pygame.event.get():
+                if e.type == pygame.QUIT:
+                    self.run = False
+
+            if self.play.action:
+                print('START')
+                for x, y, theta in zip(X_sim, Y_sim, Theta_sim):
+                    # x, y, theta = pololu_robot.X[-1], pololu_robot.Y[-1], pololu_robot.Theta[-1]
+                    x_new = change_coordinate_x(x, self.screen_x)
+                    y_new = change_coordinate_y(y, self.screen_y)
+                    theta_val = np.degrees(theta)
+                    self.rotate_move(theta_val, x_new, y_new)
+                    print(x_new, y_new, theta_val)
+            pygame.display.flip()
+            time.sleep(0.1)  # Add a small delay to reduce computation load
+
         pygame.quit()
 
 
@@ -256,6 +248,23 @@ u = 0
 
 pololu_robot = Pololu(state_0, physical_params, ID, IP,
                       img_path, lambda state, goal=goal: pid_exponential(state, goal), u)
+
+dt = 0.01
+t0 = 0
+tf = 30
+
+xg = change_coordinate_x(100, 760)
+yg = change_coordinate_y(200, 960)
+
+goal = [xg, yg]
+
+traj = pololu_robot.simulate_robot(dt, t0, tf, goal)
+# Access the simulation results
+X_sim, Y_sim, Theta_sim = pololu_robot.get_simulation_results()
+
+
+# Access the number of steps taken during the simulation
+num_steps = pololu_robot.get_number_of_steps()
 
 main_window = Window()
 app.exec_()

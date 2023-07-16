@@ -14,7 +14,7 @@ class Pololu:
         self.ID = ID
         self.IP = IP
         self.img = QPixmap(img) if img else None
-        # self.img = None # to make tests in a individual script
+        # self.img = None  # to make tests in a individual script
         self.controller = controller
 
         # Initialize arrays
@@ -24,6 +24,11 @@ class Pololu:
         self.X = None
         self.Y = None
         self.Theta = None
+
+        self.steps = None  # To store the number of steps taken during the simulation
+        self.simulated = False  # To indicate if the simulation has been performed or not
+        # To store the simulation results (X, Y, Theta)
+        self.simulation_results = None
 
     '''
     List of state receives x, y, bearing
@@ -81,7 +86,7 @@ class Pololu:
             self.update_state(dt, self.dynamics, u)
             # Example: Print the state in each step
             # used to check in individual test
-            print(f"Step {n}: State = {self.state}")
+            # print(f"Step {n}: State = {self.state}")
 
             # store the state variables trajectories and inputs
             self.XI[:, n+1] = self.state
@@ -91,5 +96,19 @@ class Pololu:
             self.Y[n + 1] = self.state[1]
             self.Theta[n + 1] = self.state[2]
 
+        self.steps = N + 1  # Store the number of steps taken during the simulation
+        self.simulated = True  # Mark the simulation as completed
+        # Store the simulation results
+        self.simulation_results = (self.X, self.Y, self.Theta)
         # Return the state and input arrays
         return self.X, self.Y, self.Theta
+
+    def get_simulation_results(self):
+        if not self.simulated:
+            raise ValueError("Simulation not performed yet.")
+        return self.simulation_results
+
+    def get_number_of_steps(self):
+        if not self.simulated:
+            raise ValueError("Simulation not performed yet.")
+        return self.steps

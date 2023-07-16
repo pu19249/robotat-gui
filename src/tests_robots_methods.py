@@ -1,6 +1,8 @@
 from robots.robot_pololu import Pololu
 from controllers.pid_exponential import pid_exponential
 import os
+import matplotlib.pyplot as plt
+import numpy as np
 
 # Get the directory path of the current script
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -28,12 +30,35 @@ u = 0
 pololu_robot = Pololu(state_0, physical_params, ID, IP,
                       img_path, lambda state, goal=goal: pid_exponential(state, goal), u)
 
-print(pololu_robot.state)
-print(pololu_robot.physical_params)
-print(pololu_robot.ID)
-print(pololu_robot.IP)
-print(pololu_robot.img)
-print(pololu_robot.controller)
-print(pololu_robot.Theta)
+# print(pololu_robot.state)
+# print(pololu_robot.physical_params)
+# print(pololu_robot.ID)
+# print(pololu_robot.IP)
+# print(pololu_robot.img)
+# print(pololu_robot.controller)
+# print(pololu_robot.Theta)
 
 pololu_robot.simulate_robot(0.01, 0, 30, goal)
+
+# Access the simulation results
+X_sim, Y_sim, Theta_sim = pololu_robot.get_simulation_results()
+
+# Access the number of steps taken during the simulation
+num_steps = pololu_robot.get_number_of_steps()
+
+print(X_sim)
+
+# Create an array of time steps
+time_steps = np.linspace(0, 30, num_steps)
+for n in X_sim:
+    print(n)
+# Plotting the trajectory of the robot
+plt.style.use('_mpl-gallery')
+plt.plot(time_steps, X_sim, linewidth=2.0)
+plt.plot(time_steps, Y_sim, linewidth=1.5)
+plt.plot(time_steps, Theta_sim, linewidth=3)
+plt.xlabel("Time (seconds)")
+plt.ylabel("X position")
+plt.title("Robot Trajectory")
+plt.grid(True)
+plt.show()
