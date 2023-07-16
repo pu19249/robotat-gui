@@ -5,7 +5,7 @@ import matplotlib
 from matplotlib.figure import Figure
 import pygame
 import numpy as np
-from map_coordinates import change_coordinate_y, change_coordinate_x
+from map_coordinates import change_coordinate_y, change_coordinate_x, change_coordinates, inverse_change_coordinates
 import time
 from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QTabWidget, QWidget, QTextBrowser, QLabel, QGridLayout, QRadioButton, QComboBox, QSpinBox, QPushButton, QTableView, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem
 from PyQt5 import uic, QtCore
@@ -121,15 +121,23 @@ class py_game_animation():
                 if e.type == pygame.QUIT:
                     self.run = False
 
-            if self.play.action:
-                print('START')
-                for x, y, theta in zip(X_sim, Y_sim, Theta_sim):
-                    # x, y, theta = pololu_robot.X[-1], pololu_robot.Y[-1], pololu_robot.Theta[-1]
-                    x_new = change_coordinate_x(x, self.screen_x)
-                    y_new = change_coordinate_y(y, self.screen_y)
-                    theta_val = np.degrees(theta)
-                    self.rotate_move(theta_val, x_new, y_new)
-                    print(x_new, y_new, theta_val)
+            # x = change_coordinate_x(760, self.screen_x)
+            # y = change_coordinate_y(960, self.screen_y)
+            # the user gives the goal in quadrants, so the code
+            # maps it back to the original system
+            # for e.g. the user gives (-120, 140) the pygame coordinate system would expect a (500, 620) so the -120, 140 are the parameters for the inverse_change_coordinates func.
+            x_or, y_or = inverse_change_coordinates(380, 480, 960, 760)
+            print(x_or, y_or)
+            self.rotate_move(45, x_or, y_or)
+            # if self.play.action:
+            #     print('START')
+            #     for x, y, theta in zip(X_sim, Y_sim, Theta_sim):
+            #         # x, y, theta = pololu_robot.X[-1], pololu_robot.Y[-1], pololu_robot.Theta[-1]
+            #         x_new = change_coordinate_x(x, self.screen_x)
+            #         y_new = change_coordinate_y(y, self.screen_y)
+            #         theta_val = np.degrees(theta)
+            #         self.rotate_move(theta_val, x_new, y_new)
+            #         print(x_new, y_new, theta_val)
             pygame.display.flip()
             time.sleep(0.1)  # Add a small delay to reduce computation load
 
