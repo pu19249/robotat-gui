@@ -245,7 +245,7 @@ ID = 1  # Example ID
 IP = "192.168.1.1"  # Example IP
 img_path = "pololu_img.png"  # Replace with the actual path to your PNG image file
 
-goal = [380, 480]
+goal = [-190, -240]
 N = 3000
 init_u = [0, 0]
 def controller(state): return pid_exponential(goal, state)
@@ -260,8 +260,8 @@ dt = 0.1
 t0 = 0
 tf = 100
 
-xg = 190
-yg = 240
+xg = 100
+yg = 100
 
 goal = [xg, yg]
 

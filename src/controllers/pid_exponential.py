@@ -58,5 +58,5 @@ def pid_exponential(xi, goal):
     eO_1 = eO
 
     u = np.array([v, w])
-
+    print(u, xi)
     return u
