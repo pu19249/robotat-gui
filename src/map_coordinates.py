@@ -18,6 +18,8 @@ def change_coordinates(x, y, height, length):
 
 
 def inverse_change_coordinates(x_new, y_new, height, length):
+    x_new = x_new*2  # the scale needed because the canva is doubled of the real size
+    y_new = y_new*2
     if x_new < 0 and y_new < 0:
         x = 380 + abs(x_new)
         y = y_new + height / 2

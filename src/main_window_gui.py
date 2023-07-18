@@ -14,8 +14,8 @@ import sys
 from robots.robot_pololu import Pololu
 import controllers as ctrl
 from controllers.pid_exponential import pid_exponential
+from controllers.lqr_pp import lqr_pp
 import os
-import array as arr
 
 from PyQt5.QtGui import QPixmap, QTransform
 matplotlib.use('Qt5Agg')
@@ -254,14 +254,14 @@ def controller(state): return pid_exponential(goal, state)
 u = 0
 
 pololu_robot = Pololu(state_0, physical_params, ID, IP,
-                      img_path, lambda state, goal=goal: pid_exponential(state, goal), u)
+                      img_path, lambda state, goal=goal: lqr_pp(state, goal), u)
 
 dt = 0.1
 t0 = 0
 tf = 100
 
-xg = 200
-yg = 200
+xg = 190
+yg = 240
 
 goal = [xg, yg]
 
