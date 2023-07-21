@@ -52,8 +52,8 @@ def lqr_init():
                   [Cr, np.zeros((Cr.shape[0], Cr.shape[0]))]])
     BB = np.block([[B], [Dr]])  # np.block([[A], [B]]) # vstack([A, B])
     QQ = np.eye(A.shape[0]+Cr.shape[0])
-    QQ[2, 2] = 10
-    QQ[3, 3] = 10
+    QQ[2, 2] = 100
+    QQ[3, 3] = 100
     Klqi, d1, d2 = ct.lqr(AA, BB, QQ, R)
     sigma = 0
 
