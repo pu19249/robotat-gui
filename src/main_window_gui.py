@@ -1,23 +1,17 @@
-import pyqtgraph as pg
-from pyqtgraph import PlotWidget, plot
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib
-from matplotlib.figure import Figure
 import pygame
 import numpy as np
-from map_coordinates import change_coordinates, inverse_change_coordinates
+from map_coordinates import inverse_change_coordinates
 import time
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QTabWidget, QWidget, QTextBrowser, QLabel, QGridLayout, QRadioButton, QComboBox, QSpinBox, QPushButton, QTableView, QGraphicsView, QGraphicsScene, QGraphicsPixmapItem
+from PyQt5.QtWidgets import QMainWindow, QApplication, QComboBox
+from PyQt5.QtWidgets import QPushButton, QGraphicsView, QGraphicsScene
 from PyQt5 import uic, QtCore
-from PyQt5.QtCore import pyqtBoundSignal
 import sys
 from robots.robot_pololu import Pololu
-import controllers as ctrl
-from controllers.pid_exponential import pid_exponential
+from controllers.exponential_pid import pid_exponential
 from controllers.lqr_pp import lqr_pp
 import os
 
-from PyQt5.QtGui import QPixmap, QTransform
 matplotlib.use('Qt5Agg')
 
 # Get the directory path of the current script
