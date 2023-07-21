@@ -1,0 +1,20 @@
+{
+  "t0": 0,
+  "tf": 30,
+  "dt": 0.01,
+  "no_robots": 1,
+  "x_dimension_arena": 760,
+  "y_dimension_arena": 960,
+  "pololu_robot": {
+    "img": "pictures/pololu_img.png",
+    "physycal_params": {
+      "ell": 10,
+      "radius": 5,
+      "vel_left_max": 500,
+      "vel_right_max": 500
+    },
+    "ID_robot": 1,
+    "IP": "192.192.1.0",
+    "state": [0, 0, 0]
+  }
+}
