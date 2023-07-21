@@ -15,9 +15,18 @@
     },
     "ID_robot": 1,
     "IP": "192.192.1.0",
-    "state": [0, 0, 0]
+    "state": [0, 0, 0],
+    "controller": "exponential_pid"
+  },
+  "obstacle": {
+    "id": 1,
+    "pos": [100, 100],
+    "orientation": [1, 2, 3],
+    "type": "rect",
+    "dimensions": [10, 10]
+  },
+  "landmarks": {
+    "id": 1,
+    "pos": [50, 50]
   }
 }
-
-asdfadsf
-asdfasdf
