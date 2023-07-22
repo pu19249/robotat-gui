@@ -14,7 +14,7 @@ class Pololu:
         self.ID = ID
         self.IP = IP
         # self.img = QPixmap(img) if img else None
-        self.img = None  # to make tests in a individual script
+        self.img = img  # to make tests in a individual script
         self.controller = controller
 
         # Initialize arrays

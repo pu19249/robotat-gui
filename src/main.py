@@ -42,7 +42,7 @@ traj = pololu[0].simulate_robot(dt, t0, tf, goal)
 X_sim, Y_sim, Theta_sim = pololu[0].get_simulation_results()
 
 # initialize pygame animation
-
+print(X_sim)
 animation_window = py_game_animation(
     world.get('x_dimension_arena'),
     world.get('y_dimension_arena'), pololu[0].img,
