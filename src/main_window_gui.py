@@ -50,7 +50,7 @@ class button_pygame():
 class py_game_animation():
     def __init__(self, img_path):
         # Define the image file name
-        grid_file = "grid_back_coord.png"
+        grid_file = "pictures/grid_back_coord.png"
 
         # Create the complete file path
         grid_path = os.path.join(script_dir, grid_file)
@@ -197,7 +197,7 @@ class Window(QMainWindow):
         # methods used in multiple tab widgets
 
     def play_animation(self):
-        sim_game_animation = py_game_animation("pololu_img.png")
+        sim_game_animation = py_game_animation("pictures/pololu_img.png")
         sim_game_animation.initialize()
         sim_game_animation.start_animation()
 
@@ -229,7 +229,7 @@ class Window(QMainWindow):
 app = QApplication(sys.argv)
 
 # Define the image file name
-img_file = "pololu_img.png"
+img_file = "pictures/pololu_img.png"
 
 # Create the complete file path
 img_path = os.path.join(script_dir, img_file)
@@ -237,7 +237,8 @@ state_0 = [0, 0, 0]  # Example state values
 physical_params = [1, 1, 10, 10]  # Example physical parameters
 ID = 1  # Example ID
 IP = "192.168.1.1"  # Example IP
-img_path = "pololu_img.png"  # Replace with the actual path to your PNG image file
+# Replace with the actual path to your PNG image file
+img_path = "pictures/pololu_img.png"
 
 goal = [-190, -240]
 N = 3000

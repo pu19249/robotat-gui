@@ -1,12 +1,16 @@
 import pygame
 import os
 import time
+import ctypes
 
 # Get the directory path of the current script
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
+# this solves scaling issues for the independent pygame window
+ctypes.windll.user32.SetProcessDPIAware()
 
-class button_pygame:
+
+class button_pygame():
     def __init__(self, x, y, image, screen):
         self.screen = screen
         self.image = image
@@ -16,7 +20,7 @@ class button_pygame:
         self.action = None
         self.pos = None
 
-    def draw_button(self):
+    def draw(self):
         self.action = False
         # get mouse position
         self.pos = pygame.mouse.get_pos()
@@ -35,21 +39,22 @@ class button_pygame:
         return self.action
 
 
-class py_game_animation:
+class py_game_animation():
     def __init__(self, img_path, x_size, y_size):
         # Define the image file name
-        grid_file = "grid_back_coord.png"
+        grid_file = "pictures/grid_back_coord.png"
 
         # Create the complete file path
         grid_path = os.path.join(script_dir, grid_file)
         self.img_path = img_path
-        self.screen_x = 2*x_size
-        self.screen_y = 2*y_size
+        self.screen_x = x_size
+        self.screen_y = y_size
         self.screen = pygame.display.set_mode([self.screen_x, self.screen_y])
         self.clock = None
         self.img = None
         self.img_rect = None
         self.degree = 0
+        self.counter = 30
         self.background_color = (255, 255, 255)
         self.run = True
         self.grid = pygame.image.load(grid_path).convert_alpha()
@@ -63,7 +68,7 @@ class py_game_animation:
         play_icon = pygame.image.load('pictures/play_icon.png').convert_alpha()
         play_icon = pygame.transform.scale(play_icon, (50, 50))
         self.play = button_pygame(780, 480, play_icon, self.screen)
-        self.play.draw_button()
+        self.play.draw()
         self.img_rect = self.img.get_rect(center=self.screen.get_rect().center)
         self.degree = 0
         self.screen.fill(self.background_color)
@@ -97,7 +102,7 @@ class py_game_animation:
             # print(traj[0], traj[1], traj[2])
             # for n in pololu_robot.X:
             #     print(n)
-            self.play.draw_button()  # Update the play button
+            self.play.draw()  # Update the play button
 
             for e in pygame.event.get():
                 if e.type == pygame.QUIT:
