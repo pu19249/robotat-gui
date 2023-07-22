@@ -27,7 +27,7 @@ def pid_exponential_cte():
     return position_cte, orientation_cte, v0, alpha
 
 
-def pid_exponential(xi, goal):
+def exponential_pid(xi, goal):
     position_cte, orientation_cte, v0, alpha = pid_exponential_cte()
     kpO = orientation_cte[0]
     kiO = orientation_cte[1]

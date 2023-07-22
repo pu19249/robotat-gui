@@ -8,13 +8,13 @@ from PyQt5.QtGui import QPixmap
 class Pololu:
     # Function to initialize attrs
     def __init__(self, state: List[float], physical_params:
-                 List[float], ID: float, IP: float, img: str, controller, u):
+                 List[float], ID: float, IP: float, img: str, controller):
         self.state = state
         self.physical_params = physical_params
         self.ID = ID
         self.IP = IP
-        self.img = QPixmap(img) if img else None
-        # self.img = None  # to make tests in a individual script
+        # self.img = QPixmap(img) if img else None
+        self.img = None  # to make tests in a individual script
         self.controller = controller
 
         # Initialize arrays
@@ -50,7 +50,7 @@ class Pololu:
         return xg, yg
 
     def update_state(self, dt, f, u):
-        # the state of the system is updated by means of a discretization bythe Runge-Kutta method (RK4)
+        # the state of the system is updated by means of a discretization by the Runge-Kutta method (RK4)
         xi = np.array(self.state)
         k1 = f(xi, u)
         k2 = f(xi + np.multiply(dt / 2, k1), u)

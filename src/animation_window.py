@@ -40,7 +40,7 @@ class button_pygame():
 
 
 class py_game_animation():
-    def __init__(self, img_path, x_size, y_size):
+    def __init__(self, x_size, y_size, img_path, no_robots):
         # Define the image file name
         grid_file = "pictures/grid_back_coord.png"
 
