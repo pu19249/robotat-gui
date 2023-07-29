@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QPushButton, QGraphicsView, QGraphicsScene
 from PyQt5 import uic, QtCore
 import sys
 from robots.robot_pololu import Pololu
-from controllers.exponential_pid import pid_exponential
+from controllers.exponential_pid import exponential_pid
 from controllers.lqr_pp import lqr_pp
 import os
 
@@ -243,13 +243,13 @@ img_path = "pictures/pololu_img.png"
 goal = [-190, -240]
 N = 3000
 init_u = [0, 0]
-def controller(state): return pid_exponential(goal, state)
+# def controller(state): return pid_exponential(goal, state)
 
 
 u = 0
 
 pololu_robot = Pololu(state_0, physical_params, ID, IP,
-                      img_path, lambda state, goal=goal: lqr_pp(state, goal), u)
+                      img_path, lambda state, goal=goal: exponential_pid(state, goal))
 
 dt = 0.1
 t0 = 0

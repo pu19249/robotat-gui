@@ -5,7 +5,7 @@
   "no_robots": 2,
   "x_dimension_arena": 850,
   "y_dimension_arena": 960,
-  "robot": [
+  "robots": [
     {
       "img": "pictures/pololu_img.png",
       "physical_params": {

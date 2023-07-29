@@ -2,19 +2,21 @@ from typing import *
 import math
 import numpy as np
 from PyQt5.QtGui import QPixmap
+import pygame
 # Define Pololyu 3Pi + robot class
 
 
 class Pololu:
     # Function to initialize attrs
     def __init__(self, state: List[float], physical_params:
-                 List[float], ID: float, IP: float, img: str, controller):
+                 List[float], ID: float, IP: float, img_path: str, controller):
         self.state = state
         self.physical_params = physical_params
         self.ID = ID
         self.IP = IP
-        # self.img = QPixmap(img) if img else None
-        self.img = img  # to make tests in a individual script
+        self.img_path = img_path  # to make tests in a individual script
+        self.img = None
+        self.img_rect = None
         self.controller = controller
 
         # Initialize arrays

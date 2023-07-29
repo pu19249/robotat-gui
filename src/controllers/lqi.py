@@ -60,7 +60,7 @@ def lqr_init():
     return Klqr, sigma, Klqi, Cr
 
 
-def lqr_pp(xi, goal):
+def lqi(xi, goal):
     Klqr, sigma, Klqi, Cr = lqr_init()
     dt = 0.1
     x = (xi[0:2])
