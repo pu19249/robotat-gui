@@ -49,6 +49,7 @@ for i in range(len(robots)):
                          ctrl_func(state, goal),
                          animation_window.screen))
 
+
 dt = world['dt']
 t0 = world['t0']
 tf = world['tf']
@@ -56,7 +57,7 @@ tf = world['tf']
 characters = [
     ('pictures/pololu_img.png', 100, 100, 45),
     ('pictures/pololu_img.png', 300, 200, 90),
-
+    ('pictures/pololu_img.png', 300, 50, 90),
 ]
 
 # Add robot characters to the animation
@@ -76,7 +77,7 @@ for character in characters:
 Beyond this point, the animation should occur when the play button is pressed (is a while loop needed? cause the simulation method already occurs in the indicated interval, but at the same time the animation should have a duration of the time specified...)
 '''
 for i in range(len(robots)):
-    pololu[i].initialize_image()
+    # pololu[i].initialize_image()
 
     traj.append(pololu[i].simulate_robot(dt, t0, tf, goal1))
     x_results, y_results, theta_results = pololu[i].get_simulation_results()

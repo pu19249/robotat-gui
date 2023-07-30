@@ -50,7 +50,7 @@ class robot_character():
 
         self.img = pygame.image.load(self.img_path).convert_alpha()
         self.img = pygame.transform.scale(
-            self.img, (50, 50))  # Resize the image if needed
+            self.img, (40, 40))  # Resize the image if needed
         self.rot_img = self.img
         self.rot_rect = self.img.get_rect(center=(x, y))
 
@@ -115,7 +115,7 @@ class py_game_animation():
 
             self.clock.tick(60)
             self.play.draw()  # Update the play button
-
+            deg = 0
             for e in pygame.event.get():
                 if e.type == pygame.QUIT:
                     self.run = False
@@ -125,10 +125,15 @@ class py_game_animation():
             if self.play.action:
                 print('START')
 
-                # # Move and rotate each robot character
-                # for robot in self.robot_characters:
-                #     robot.rotate_move(robot.degree, robot.x, robot.y)
-                #     robot.update()  # Update character attributes and animations if needed
+                # Move and rotate each robot character
+                for robot in self.robot_characters:
+                    robot.rotate_move(robot.degree, robot.x, robot.y)
+                    # Increment and keep it within 0 to 359
+                    robot.degree = (robot.degree + 1) % 360
+                    self.screen.fill(self.background_color)
+                    self.screen.blit(self.grid, (0, 0))
+                    # self.screen.fill(self.background_color)
+                    # robot.update()  # Update character attributes and animations if needed
 
             # self.screen.fill(self.background_color)
             # self.screen.blit(self.grid, (0, 0))
