@@ -48,17 +48,29 @@ class robot_character():
         self.degree = degree
         self.size = size
 
-        self.screen = pygame.display.set_mode([self.size[0], self.size[1]])
         self.img = pygame.image.load(self.img_path).convert_alpha()
-        self.img_rect = self.img.get_rect(center=screen.get_rect().center)
+        self.img = pygame.transform.scale(
+            self.img, (50, 50))  # Resize the image if needed
+        self.rot_img = self.img
+        self.rot_rect = self.img.get_rect(center=(x, y))
+
+        self.background_color = (255, 255, 255)
+        self.grid = pygame.image.load(
+            "pictures/grid_back_coord.png").convert_alpha()
 
     def rotate_move(self, degree, x, y):
-        self.rot_img = pygame.transform.rotate(self.img, degree)
-        self.rot_rect = self.rot_img.get_rect(center=(x, y))
-        self.screen.fill(self.background_color)  # background color
-        self.screen.blit(self.grid, (0, 0))
-        self.screen.blit(self.rot_img, self.rot_rect)
-        pygame.display.flip()
+        self.degree = degree
+        self.x = x
+        self.y = y
+
+    def draw_robot(self):
+        rotated_img = pygame.transform.rotate(self.img, self.degree)
+        rotated_rect = rotated_img.get_rect(center=(self.x, self.y))
+        # self.screen.fill(self.background_color)  # Fill the background color
+        # Blit the grid on top of the background
+        # self.screen.blit(self.grid, (0, 0))
+        # Blit the rotated robot image
+        self.screen.blit(rotated_img, rotated_rect)
 
 
 class py_game_animation():
@@ -94,12 +106,9 @@ class py_game_animation():
         self.screen.fill(self.background_color)
         self.screen.blit(self.grid, (0, 0))
 
-        for robot in self.robot_characters:
-            robot.initialize()
-
     def animate(self):
         self.initialize()  # Initialize pygame
-        self.start_animation()  # Start the animation loop
+        self.start_animation()
 
     def start_animation(self):
         while self.run:
@@ -110,17 +119,24 @@ class py_game_animation():
             for e in pygame.event.get():
                 if e.type == pygame.QUIT:
                     self.run = False
-                    pygame.quit()
+                    # pygame.quit()
                     break
 
             if self.play.action:
                 print('START')
 
-                # Move and rotate each robot character
-                for robot in self.robot_characters:
-                    robot.rotate_move(robot.degree, robot.x,
-                                      robot.y)
+                # # Move and rotate each robot character
+                # for robot in self.robot_characters:
+                #     robot.rotate_move(robot.degree, robot.x, robot.y)
+                #     robot.update()  # Update character attributes and animations if needed
+
+            # self.screen.fill(self.background_color)
+            # self.screen.blit(self.grid, (0, 0))
+
+            for robot in self.robot_characters:
+                robot.draw_robot()  # Draw the characters on the screen
 
             pygame.display.flip()
-            time.sleep(0.1)  # Add a small delay to reduce computation load
+            # Add a small delay to achieve ~60 FPS
+            pygame.time.delay(1000 // 60)
         pygame.quit()

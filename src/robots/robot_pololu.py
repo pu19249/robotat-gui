@@ -9,7 +9,7 @@ import pygame
 class Pololu:
     # Function to initialize attrs
     def __init__(self, state: List[float], physical_params:
-                 List[float], ID: float, IP: float, img_path: str, controller):
+                 List[float], ID: float, IP: float, img_path: str, controller, screen):
         self.state = state
         self.physical_params = physical_params
         self.ID = ID
@@ -18,6 +18,7 @@ class Pololu:
         self.img = None
         self.img_rect = None
         self.controller = controller
+        self.screen = screen
 
         # Initialize arrays
         self.N = None
@@ -51,6 +52,12 @@ class Pololu:
         # define the dimension of the given value (m, mm, etc)
         return xg, yg
 
+    def initialize_image(self):
+        self.img = pygame.image.load(self.img_path).convert_alpha()
+        # Resize the image to a suitable size
+        self.img = pygame.transform.scale(self.img, (50, 50))
+        self.img_rect = self.img.get_rect()
+
     def update_state(self, dt, f, u):
         # the state of the system is updated by means of a discretization by the Runge-Kutta method (RK4)
         xi = np.array(self.state)
@@ -83,6 +90,14 @@ class Pololu:
         # arrays initialization
         self.XI[:, 0] = self.state
 
+        self.initialize_image()  # Load the robot's image
+
+        # Clear the screen and draw the grid before the animation loop
+        # self.screen.fill((255, 255, 255))
+        # self.screen.blit(pygame.image.load(
+        #    "pictures/grid_back_coord.png").convert_alpha(), (0, 0))
+        # self.screen.blit()
+
         for n in range(N):
             u = self.control(goal, self.state)
             self.update_state(dt, self.dynamics, u)
@@ -114,3 +129,7 @@ class Pololu:
         if not self.simulated:
             raise ValueError("Simulation not performed yet.")
         return self.steps
+
+    # Add a method to update the robot's position in the animation loop
+    def update_position(self, x, y, theta):
+        self.state = [x, y, theta]

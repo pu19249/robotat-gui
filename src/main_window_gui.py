@@ -48,15 +48,15 @@ class button_pygame():
 
 
 class py_game_animation():
-    def __init__(self, img_path):
+    def __init__(self, img_path, x_size, y_size):
         # Define the image file name
         grid_file = "pictures/grid_back_coord.png"
 
         # Create the complete file path
         grid_path = os.path.join(script_dir, grid_file)
         self.img_path = img_path
-        self.screen_x = 850
-        self.screen_y = 960
+        self.screen_x = x_size
+        self.screen_y = y_size
         self.screen = pygame.display.set_mode([self.screen_x, self.screen_y])
         self.clock = None
         self.img = None
@@ -67,6 +67,7 @@ class py_game_animation():
         self.run = True
         self.grid = pygame.image.load(grid_path).convert_alpha()
         self.play = None
+        self.robot_characters = []
 
     def initialize(self):
         pygame.init()
@@ -101,9 +102,9 @@ class py_game_animation():
 
     def animate(self):
         self.initialize()  # Initialize pygame
-        self.start_animation()  # Start the animation loop
+    #     self.start_animation()  # Start the animation loop
 
-    def start_animation(self):
+    # def start_animation(self):
         while self.run:
 
             self.clock.tick(60)
