@@ -67,8 +67,6 @@ characters = [
 for character in characters:
     animation_window.add_robot_character(*character)
 
-# for character in animation_window.robot_characters:
-#     character.rotate_move()
 
 # animation_window.animate()
 
@@ -109,4 +107,5 @@ Beyond this point, the animation should occur when the play button is pressed (i
 
 
 animation_window.animate()
+
 # while loop
