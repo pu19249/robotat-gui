@@ -59,6 +59,10 @@ class robot_character():
         self.grid = pygame.image.load(
             "pictures/grid_back_coord.png").convert_alpha()
 
+    # degree, x, and y are state attributes of the robot class
+    # when this method is called the attributes are updated and so
+    # in the rotate move method they are already updated without the need of
+    # passing them the value
     def update(self, degree, x, y):
         self.degree = degree
         self.x = x
@@ -70,14 +74,6 @@ class robot_character():
 
         # Blit the rotated robot image
         self.screen.blit(rotated_img, rotated_rect)
-
-    # def rotate_move(self, degree, x, y):
-    #     self.rot_img = pygame.transform.rotate(self.img, degree)
-    #     self.rot_rect = self.rot_img.get_rect(center=(x, y))
-    #     self.screen.fill(self.background_color)
-    #     self.screen.blit(self.grid, (0, 0))
-    #     self.screen.blit(self.rot_img, self.rot_rect)
-    #     pygame.display.flip()
 
 
 class py_game_animation():
@@ -97,6 +93,8 @@ class py_game_animation():
         # the list size will be defined by the number of robots indicated
         self.robot_characters = []
 
+    # this method will create as many robots need to be created inside
+    # this animation window
     def add_robot_character(self, img_path, x, y, degree):
         robot = robot_character(img_path, x, y, degree,
                                 self.screen, [self.screen_x, self.screen_y])
