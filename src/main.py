@@ -3,6 +3,7 @@ from animation_window import py_game_animation, robot_character
 from robots.robot_pololu import Pololu
 from controllers.exponential_pid import exponential_pid
 from controllers.lqi import lqi
+from map_coordinates import inverse_change_coordinates
 
 # load json file
 f = open('world_definition.json')
@@ -76,11 +77,14 @@ for character in characters:
 '''
 Beyond this point, the animation should occur when the play button is pressed (is a while loop needed? cause the simulation method already occurs in the indicated interval, but at the same time the animation should have a duration of the time specified...)
 '''
+x_vals_display = []
+y_vals_display = []
 for i in range(len(robots)):
     # pololu[i].initialize_image()
 
     traj.append(pololu[i].simulate_robot(dt, t0, tf, goal1))
     x_results, y_results, theta_results = pololu[i].get_simulation_results()
+    print(x_results)
 
     # Append the X simulation results for the current robot
     X_sim.append(x_results)
@@ -89,6 +93,13 @@ for i in range(len(robots)):
     # Append the Theta simulation results for the current robot
     Theta_sim.append(theta_results)
 
+for x, y in zip(x_results, y_results):
+    x_new_val, y_new_val = inverse_change_coordinates(x, y, 480, 380)
+    print(x, y, "->", x_new_val, y_new_val)
+    x_vals_display.append(x_new_val)
+    y_vals_display.append(y_new_val)
+
+print(len(x_results), len(x_vals_display))
 print(animation_window.screen)
 animation_window.animate()
 # while loop

@@ -2,6 +2,7 @@ import pygame
 import os
 import time
 import ctypes
+import numpy as np
 
 # Get the directory path of the current script
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -58,19 +59,25 @@ class robot_character():
         self.grid = pygame.image.load(
             "pictures/grid_back_coord.png").convert_alpha()
 
-    def rotate_move(self, degree, x, y):
+    def update(self, degree, x, y):
         self.degree = degree
         self.x = x
         self.y = y
 
-    def draw_robot(self):
+    def rotate_move(self):
         rotated_img = pygame.transform.rotate(self.img, self.degree)
         rotated_rect = rotated_img.get_rect(center=(self.x, self.y))
-        # self.screen.fill(self.background_color)  # Fill the background color
-        # Blit the grid on top of the background
-        # self.screen.blit(self.grid, (0, 0))
+
         # Blit the rotated robot image
         self.screen.blit(rotated_img, rotated_rect)
+
+    # def rotate_move(self, degree, x, y):
+    #     self.rot_img = pygame.transform.rotate(self.img, degree)
+    #     self.rot_rect = self.rot_img.get_rect(center=(x, y))
+    #     self.screen.fill(self.background_color)
+    #     self.screen.blit(self.grid, (0, 0))
+    #     self.screen.blit(self.rot_img, self.rot_rect)
+    #     pygame.display.flip()
 
 
 class py_game_animation():
@@ -111,11 +118,12 @@ class py_game_animation():
         self.start_animation()
 
     def start_animation(self):
+        deg = 1
         while self.run:
 
             self.clock.tick(60)
             self.play.draw()  # Update the play button
-            deg = 0
+
             for e in pygame.event.get():
                 if e.type == pygame.QUIT:
                     self.run = False
@@ -125,21 +133,26 @@ class py_game_animation():
             if self.play.action:
                 print('START')
 
-                # Move and rotate each robot character
-                for robot in self.robot_characters:
-                    robot.rotate_move(robot.degree, robot.x, robot.y)
-                    # Increment and keep it within 0 to 359
-                    robot.degree = (robot.degree + 1) % 360
-                    self.screen.fill(self.background_color)
-                    self.screen.blit(self.grid, (0, 0))
-                    # self.screen.fill(self.background_color)
-                    # robot.update()  # Update character attributes and animations if needed
+                # # Move and rotate each robot character
+                # while deg <= 180:
 
-            # self.screen.fill(self.background_color)
-            # self.screen.blit(self.grid, (0, 0))
+                #     for robot in self.robot_characters:
+
+                #         robot.rotate_move()
+                #         # Increment and keep it within 0 to 359
+                #         self.degree = deg
+                #         print(deg)
+                #         self.screen.fill(self.background_color)
+                #         self.screen.blit(self.grid, (0, 0))
+                #         # robot.draw_robot()
+
+                #         # Update character attributes and animations if needed
+                #         robot.update(deg, robot.x, robot.y)
+                #         robot.rotate_move()
+                #         deg += 1
 
             for robot in self.robot_characters:
-                robot.draw_robot()  # Draw the characters on the screen
+                robot.rotate_move()  # Draw the characters on the screen
 
             pygame.display.flip()
             # Add a small delay to achieve ~60 FPS
