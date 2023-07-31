@@ -131,25 +131,26 @@ class py_game_animation():
             if self.play.action:
                 print('START')
                 while deg <= 180:
-
+                    self.screen.fill(self.background_color)
+                    self.screen.blit(self.grid, (0, 0))
                     for robot in self.robot_characters:
                         # Increment and keep it within 0 to 359
                         self.degree = deg
                         print(deg)
-                        # self.screen.fill(self.background_color)
-                        self.screen.blit(self.grid, (0, 0))
 
                         # Update character attributes and animations if needed
                         robot.update(deg, robot.x, robot.y)
                         robot.rotate_move()
                     deg += 1
                     pygame.display.flip()
-                # Add a small delay to control frame rate
-                    pygame.time.delay(50)
-                # for robot in self.robot_characters:
-                #     robot.rotate_move()  # Draw the characters on the screen
+                    # Add a small delay to control frame rate
+                    pygame.time.delay(60)
 
+            # this one is necessary here too, so the animation starts not in
+            # black but with everything set up
             pygame.display.flip()
-            # Add a small delay to achieve ~60 FPS
-            pygame.time.delay(1000 // 60)
+            # Add a small delay to achieve ~60 FPS, although this line
+            # may not be necessary cause the delay will be applied in the
+            # loop above
+            # pygame.time.delay(1000 // 60)
         pygame.quit()
