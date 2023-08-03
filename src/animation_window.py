@@ -8,7 +8,7 @@ import numpy as np
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
 # this solves scaling issues for the independent pygame window
-ctypes.windll.user32.SetProcessDPIAware()
+# ctypes.windll.user32.SetProcessDPIAware()
 
 
 class button_pygame():
@@ -85,7 +85,7 @@ class py_game_animation():
         grid_path = os.path.join(script_dir, grid_file)
         self.screen_x = x_size
         self.screen_y = y_size
-        self.screen = pygame.display.set_mode([self.screen_x, self.screen_y])
+        self.screen = pygame.display.set_mode([self.screen_x, self.screen_y], pygame.SCALED)
         self.background_color = (255, 255, 255)
         self.run = True
         self.grid = pygame.image.load(grid_path).convert_alpha()
