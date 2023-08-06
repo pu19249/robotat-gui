@@ -10,7 +10,6 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 # this solves scaling issues for the independent pygame window
 # ctypes.windll.user32.SetProcessDPIAware()
 
-
 class button_pygame():
     def __init__(self, x, y, image, screen):
         self.screen = screen
@@ -85,10 +84,12 @@ class py_game_animation():
         grid_path = os.path.join(script_dir, grid_file)
         self.screen_x = x_size
         self.screen_y = y_size
-        self.screen = pygame.display.set_mode([self.screen_x, self.screen_y], pygame.SCALED)
+        self.original_size = (self.screen_x, self.screen_y)
+        self.screen = pygame.display.set_mode([self.screen_x, self.screen_y], pygame.RESIZABLE)
         self.background_color = (255, 255, 255)
         self.run = True
-        self.grid = pygame.image.load(grid_path).convert_alpha()
+        self.grid_img = pygame.image.load(grid_path).convert_alpha()
+        self.grid = pygame.transform.scale(self.grid_img, (self.screen_x-90, self.screen_y))
         self.play = None
         # the list size will be defined by the number of robots indicated
         self.robot_characters = []
@@ -106,7 +107,7 @@ class py_game_animation():
         self.clock = pygame.time.Clock()
         play_icon = pygame.image.load('pictures/play_icon.png').convert_alpha()
         play_icon = pygame.transform.scale(play_icon, (50, 50))
-        self.play = button_pygame(780, 480, play_icon, self.screen)
+        self.play = button_pygame(570, 480, play_icon, self.screen)
         self.play.draw()
         self.screen.fill(self.background_color)
         self.screen.blit(self.grid, (0, 0))
@@ -127,7 +128,25 @@ class py_game_animation():
                     self.run = False
                     # pygame.quit()
                     break
+                elif e.type == pygame.VIDEORESIZE:
+                    self.screen_x, self.screen_y = e.w, e.h
+                    self.screen = pygame.display.set_mode((self.screen_x, self.screen_y), pygame.RESIZABLE)
 
+                    # Resize the grid image while maintaining aspect ratio
+                    aspect_ratio = self.original_size[0] / self.original_size[1]
+                    new_width = self.screen_x
+                    new_height = int(new_width / aspect_ratio)
+                    if new_height > self.screen_y:
+                        new_height = self.screen_y
+                        new_width = int(new_height * aspect_ratio)
+
+                    self.grid = pygame.transform.scale(self.grid_img, (new_width, new_height))
+            self.screen.fill(self.background_color)  # Clear the screen
+
+            # Redraw the background and other elements
+            self.screen.blit(self.grid, (0, 0))
+            self.play.draw()
+            
             if self.play.action:
                 print('START')
                 while deg <= 180:
