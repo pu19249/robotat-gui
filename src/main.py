@@ -58,9 +58,8 @@ tf = world['tf']
 # this list needs to depend directly of the creation of the robots objects
 # and also map the positions first
 characters = [
-    ('pictures/pololu_img.png', 100, 100, 45),
-    ('pictures/pololu_img.png', 300, 200, 90),
-    ('pictures/pololu_img.png', 300, 50, 90),
+    ('pictures/pololu_img.png', 380, 480, 45),
+    ('pictures/pololu_img.png', 390, 490, 90),
 ]
 
 # Add robot characters to the animation
@@ -83,28 +82,34 @@ Beyond this point, the animation should occur when the play button is pressed (i
 
 # THIS PART ALMOST WORKS BUT FIRST OTHER TESTS WILL BE DONE TO SEE
 # WHAT VALUES AND HOW NEED TO BE PASSED TO ANIMATE THE ROBOTS
-# x_vals_display = []
-# y_vals_display = []
-# for i in range(len(robots)):
-#     # pololu[i].initialize_image()
+x_vals_display = []
+y_vals_display = []
+for i in range(len(robots)):
+    # pololu[i].initialize_image()
 
-#     traj.append(pololu[i].simulate_robot(dt, t0, tf, goal1))
-#     x_results, y_results, theta_results = pololu[i].get_simulation_results()
-#     print(x_results)
+    traj.append(pololu[i].simulate_robot(dt, t0, tf, goal1))
+    x_results, y_results, theta_results = pololu[i].get_simulation_results()
+    # print(x_results)
 
-#     # Append the X simulation results for the current robot
-#     X_sim.append(x_results)
-#     # Append the Y simulation results for the current robot
-#     Y_sim.append(y_results)
-#     # Append the Theta simulation results for the current robot
-#     Theta_sim.append(theta_results)
+    # Append the X simulation results for the current robot
+    X_sim.append(x_results)
+    # Append the Y simulation results for the current robot
+    Y_sim.append(y_results)
+    # Append the Theta simulation results for the current robot
+    Theta_sim.append(theta_results)
 
-# for x, y in zip(x_results, y_results):
-#     x_new_val, y_new_val = inverse_change_coordinates(x, y, 480, 380)
-#     print(x, y, "->", x_new_val, y_new_val)
-#     x_vals_display.append(x_new_val)
-#     y_vals_display.append(y_new_val)
+for x, y in zip(x_results, y_results):
+    x_new_val, y_new_val = inverse_change_coordinates(x, y, 480, 380)
+    # print(x, y, "->", x_new_val, y_new_val)
+    x_vals_display.append(x_new_val)
+    y_vals_display.append(y_new_val)
+    print(x_new_val)
 
+## WILL TEST TO PASS JUST ONE MOVEMENT FOR NOW TO A ROBOT IN THE ANIMATION WINDOW
+
+# Iterate through the robot characters and update their attributes
+# Update robot characters within the animation window
+animation_window.update_robot_characters(x_vals_display, y_vals_display)
 
 animation_window.animate()
 

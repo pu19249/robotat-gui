@@ -66,6 +66,7 @@ class robot_character():
         self.degree = degree
         self.x = x
         self.y = y
+        print(self.x, self.y, self.degree)
 
     def rotate_move(self):
         rotated_img = pygame.transform.rotate(self.img, self.degree)
@@ -77,6 +78,8 @@ class robot_character():
 
 class py_game_animation():
     def __init__(self, x_size, y_size):
+
+        # self.monitor_size = [pygame.display.Info().current_w, pygame.display.Info().current_h]
         # Define the image file name
         grid_file = "pictures/grid_back_coord.png"
 
@@ -101,13 +104,17 @@ class py_game_animation():
                                 self.screen, [self.screen_x, self.screen_y])
         self.robot_characters.append(robot)
 
+    def update_robot_characters(self, x_vals_display, y_vals_display):
+            for robot_character, x, y in zip(self.robot_characters, x_vals_display, y_vals_display):
+                robot_character.update(0, x, y)
+                print(x, y)
     def initialize(self):
         pygame.init()
         pygame.display.set_caption('Live simulation')
         self.clock = pygame.time.Clock()
         play_icon = pygame.image.load('pictures/play_icon.png').convert_alpha()
-        play_icon = pygame.transform.scale(play_icon, (50, 50))
-        self.play = button_pygame(570, 480, play_icon, self.screen)
+        play_icon = pygame.transform.scale(play_icon, (self.screen_x*0.1, self.screen_x*0.1))
+        self.play = button_pygame(self.screen_x - 25, self.screen_y/2, play_icon, self.screen)
         self.play.draw()
         self.screen.fill(self.background_color)
         self.screen.blit(self.grid, (0, 0))
@@ -132,13 +139,17 @@ class py_game_animation():
                     self.screen_x, self.screen_y = e.w, e.h
                     self.screen = pygame.display.set_mode((self.screen_x, self.screen_y), pygame.RESIZABLE)
 
-                    # Resize the grid image while maintaining aspect ratio
-                    aspect_ratio = self.original_size[0] / self.original_size[1]
-                    new_width = self.screen_x
-                    new_height = int(new_width / aspect_ratio)
-                    if new_height > self.screen_y:
-                        new_height = self.screen_y
-                        new_width = int(new_height * aspect_ratio)
+                    # Calculate the aspect ratio of the original image
+                    original_aspect_ratio = self.original_size[0] / self.original_size[1]
+
+                    # Calculate the maximum width based on the height to maintain aspect ratio
+                    max_width = int(self.screen_y * original_aspect_ratio)
+
+                    # Use the smaller of max_width and screen_x to avoid exceeding the screen dimensions
+                    new_width = min(max_width, self.screen_x)
+
+                    # Calculate the corresponding height
+                    new_height = int(new_width / original_aspect_ratio)
 
                     self.grid = pygame.transform.scale(self.grid_img, (new_width, new_height))
             self.screen.fill(self.background_color)  # Clear the screen
@@ -155,10 +166,10 @@ class py_game_animation():
                     for robot in self.robot_characters:
                         # Increment and keep it within 0 to 359
                         self.degree = deg
-                        print(deg)
+                        # print(deg)
 
                         # Update character attributes and animations if needed
-                        robot.update(deg, robot.x, robot.y)
+                        # robot.update(deg, x_mov, y_mov)
                         robot.rotate_move()
                     deg += 1
                     pygame.display.flip()
