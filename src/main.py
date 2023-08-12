@@ -64,7 +64,6 @@ for i in range(len(robots)):
                              robots[i].get('state')[1],
                              robots[i].get('state')[2]))
 
-
 dt = world['dt']
 t0 = world['t0']
 tf = world['tf']
@@ -94,10 +93,17 @@ Beyond this point, the animation should occur when the play button is pressed (i
 # WHAT VALUES AND HOW NEED TO BE PASSED TO ANIMATE THE ROBOTS
 x_vals_display = []
 y_vals_display = []
+theta_vals_display = []
 for i in range(len(robots)):
     # pololu[i].initialize_image()
-
-    traj.append(pololu[i].simulate_robot(dt, t0, tf, goal1))
+    if i == 0:
+        current_goal = goal1
+    elif i == 1:
+        current_goal = goal2
+    else:
+        # You can define additional goals here if needed
+        current_goal = [0, 0]  # Default goal
+    traj.append(pololu[i].simulate_robot(dt, t0, tf, current_goal))
     x_results, y_results, theta_results = pololu[i].get_simulation_results()
     # print(x_results)
 
@@ -108,12 +114,31 @@ for i in range(len(robots)):
     # Append the Theta simulation results for the current robot
     Theta_sim.append(theta_results)
 
-for x, y in zip(x_results, y_results):
-    x_new_val, y_new_val = inverse_change_coordinates(x, y, 960, 760)
-    # print(x, y, "->", x_new_val, y_new_val)
-    x_vals_display.append(x_new_val)
-    y_vals_display.append(y_new_val)
-    # print(x_new_val)
+
+# for x, y in zip(x_results, y_results):
+#     x_new_val, y_new_val = inverse_change_coordinates(x, y, 960, 760)
+#     # print(x, y, "->", x_new_val, y_new_val)
+#     x_vals_display.append(x_new_val)
+#     y_vals_display.append(y_new_val)
+#     # print(x_new_val)
+
+
+for i in range(len(robots)):
+    x_results = X_sim[i]
+    y_results = Y_sim[i]
+    
+    x_vals_display_robot = []
+    y_vals_display_robot = []
+    
+    for x, y in zip(x_results, y_results):
+        x_new_val, y_new_val = inverse_change_coordinates(x, y, 960, 760)
+        x_vals_display_robot.append(x_new_val)
+        y_vals_display_robot.append(y_new_val)
+        # print(x, y, "->", x_new_val, y_new_val)
+    
+    x_vals_display.append(x_vals_display_robot)
+    y_vals_display.append(y_vals_display_robot)
+
 
 ## WILL TEST TO PASS JUST ONE MOVEMENT FOR NOW TO A ROBOT IN THE ANIMATION WINDOW
 
