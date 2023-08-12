@@ -21,7 +21,7 @@ Theta_sim = []
 characters = []
 
 goal1 = [100, 100]
-goal2 = [-100, -100]
+goal2 = [-100, -150]
 robots = world['robots']  # this takes the robot object from the json file
 
 # Define a dictionary to map controller names to controller functions

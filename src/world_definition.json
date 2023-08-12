@@ -7,7 +7,7 @@
   "y_dimension_arena": 960,
   "robots": [
     {
-      "img": "pictures/pololu_img.png",
+      "img": "pictures/pololu_img_x.png",
       "physical_params": {
         "ell": 10,
         "radius": 5,
@@ -20,7 +20,7 @@
       "controller": "exponential_pid"
     },
     {
-      "img": "pictures/pololu_img2.png",
+      "img": "pictures/pololu_img_x.png",
       "physical_params": {
         "ell": 10,
         "radius": 5,
