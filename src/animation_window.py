@@ -8,7 +8,7 @@ import numpy as np
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
 # this solves scaling issues for the independent pygame window
-# ctypes.windll.user32.SetProcessDPIAware()
+ctypes.windll.user32.SetProcessDPIAware()
 
 class button_pygame():
     def __init__(self, x, y, image, screen):
@@ -113,27 +113,91 @@ class py_game_animation():
         pygame.display.set_caption('Live simulation')
         self.clock = pygame.time.Clock()
         play_icon = pygame.image.load('pictures/play_icon.png').convert_alpha()
-        play_icon = pygame.transform.scale(play_icon, (self.screen_x*0.1, self.screen_x*0.1))
-        self.play = button_pygame(self.screen_x - 25, self.screen_y/2, play_icon, self.screen)
+        play_icon = pygame.transform.scale(play_icon, (self.screen_x*0.05, self.screen_x*0.05))
+        self.play = button_pygame(self.screen_x - 50, self.screen_y/2, play_icon, self.screen)
         self.play.draw()
         self.screen.fill(self.background_color)
         self.screen.blit(self.grid, (0, 0))
 
-    def animate(self):
+    def animate(self, x_values, y_values, theta_values):
         self.initialize()  # Initialize pygame
-        self.start_animation()
+        self.start_animation(x_values, y_values, theta_values)
 
-    def start_animation(self):
-        deg = 1
+    # def start_animation(self, x_values, y_values, theta_values):
+    #     while self.run:
+
+    #         self.clock.tick(60)
+    #         self.play.draw()  # Update the play button
+
+    #         for e in pygame.event.get():
+    #             if e.type == pygame.QUIT:
+    #                 self.run = False
+    #                 # pygame.quit()
+    #                 break
+    #             elif e.type == pygame.VIDEORESIZE:
+    #                 self.screen_x, self.screen_y = e.w, e.h
+    #                 self.screen = pygame.display.set_mode((self.screen_x, self.screen_y), pygame.RESIZABLE)
+
+    #                 # Calculate the aspect ratio of the original image
+    #                 original_aspect_ratio = self.original_size[0] / self.original_size[1]
+
+    #                 # Calculate the maximum width based on the height to maintain aspect ratio
+    #                 max_width = int(self.screen_y * original_aspect_ratio)
+
+    #                 # Use the smaller of max_width and screen_x to avoid exceeding the screen dimensions
+    #                 new_width = min(max_width, self.screen_x)
+
+    #                 # Calculate the corresponding height
+    #                 new_height = int(new_width / original_aspect_ratio)
+
+    #                 self.grid = pygame.transform.scale(self.grid_img, (new_width, new_height))
+    #         self.screen.fill(self.background_color)  # Clear the screen
+
+    #         # Redraw the background and other elements
+    #         self.screen.blit(self.grid, (0, 0))
+    #         self.play.draw()
+            
+    #         if self.play.action:
+    #             print('START')
+    #             index = 0
+    #             print(len(x_values))
+    #             while index < len(x_values):
+                    
+    #                 self.screen.fill(self.background_color)
+    #                 self.screen.blit(self.grid, (0, 0))
+    #                 for robot in self.robot_characters:
+    #                     x = x_values[index]
+    #                     y = y_values[index]
+    #                     # theta = theta_values[index]
+    #                     # Update character attributes and animations if needed
+    #                     robot.update(0, x, y)
+    #                     robot.rotate_move()
+                        
+    #                 pygame.display.flip()
+    #                 # Add a small delay to control frame rate
+    #                 pygame.time.delay(10)
+    #                 index += 1
+    #                 print(index)
+    #         # this one is necessary here too, so the animation starts not in
+    #         # black but with everything set up
+    #         pygame.display.flip()
+    #         # Add a small delay to achieve ~60 FPS, although this line
+    #         # may not be necessary cause the delay will be applied in the
+    #         # loop above
+    #         # pygame.time.delay(1000 // 60)
+    #     pygame.quit()
+
+    def start_animation(self, x_values, y_values, theta_values):
+        index = 0  # Initialize the index for accessing x_values and y_values
+        animation_running = False
+
         while self.run:
-
             self.clock.tick(60)
             self.play.draw()  # Update the play button
 
             for e in pygame.event.get():
                 if e.type == pygame.QUIT:
                     self.run = False
-                    # pygame.quit()
                     break
                 elif e.type == pygame.VIDEORESIZE:
                     self.screen_x, self.screen_y = e.w, e.h
@@ -152,35 +216,35 @@ class py_game_animation():
                     new_height = int(new_width / original_aspect_ratio)
 
                     self.grid = pygame.transform.scale(self.grid_img, (new_width, new_height))
-            self.screen.fill(self.background_color)  # Clear the screen
 
-            # Redraw the background and other elements
+            self.screen.fill(self.background_color)
             self.screen.blit(self.grid, (0, 0))
             self.play.draw()
             
-            if self.play.action:
+            if self.play.action and not animation_running:
                 print('START')
-                while deg <= 180:
-                    self.screen.fill(self.background_color)
-                    self.screen.blit(self.grid, (0, 0))
-                    for robot in self.robot_characters:
-                        # Increment and keep it within 0 to 359
-                        self.degree = deg
-                        # print(deg)
+                animation_running = True  # Start the animation
+                index = 0  # Reset the index
 
-                        # Update character attributes and animations if needed
-                        # robot.update(deg, x_mov, y_mov)
-                        robot.rotate_move()
-                    deg += 1
-                    pygame.display.flip()
-                    # Add a small delay to control frame rate
-                    pygame.time.delay(60)
+            if animation_running and index < len(x_values):
+                x = x_values[index]
+                y = y_values[index]
+                
+                for robot in self.robot_characters:
+                    # Update character attributes and animations if needed
+                    robot.update(0, x, y)
+                    robot.rotate_move()
+                
+                pygame.display.flip()
+                pygame.time.delay(10)
+                index += 1
+                print(index)
 
-            # this one is necessary here too, so the animation starts not in
-            # black but with everything set up
             pygame.display.flip()
-            # Add a small delay to achieve ~60 FPS, although this line
-            # may not be necessary cause the delay will be applied in the
-            # loop above
-            # pygame.time.delay(1000 // 60)
-        pygame.quit()
+
+            if animation_running and index >= len(x_values):
+                animation_running = False  # Stop the animation
+
+        pygame.quit()  # Quit Pygame after the loop finishes
+
+# Rest of your code...

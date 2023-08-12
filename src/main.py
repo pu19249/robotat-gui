@@ -58,8 +58,7 @@ tf = world['tf']
 # this list needs to depend directly of the creation of the robots objects
 # and also map the positions first
 characters = [
-    ('pictures/pololu_img.png', 380, 480, 45),
-    ('pictures/pololu_img.png', 390, 490, 90),
+    ('pictures/pololu_img.png', 0, 0, 45)
 ]
 
 # Add robot characters to the animation
@@ -99,18 +98,17 @@ for i in range(len(robots)):
     Theta_sim.append(theta_results)
 
 for x, y in zip(x_results, y_results):
-    x_new_val, y_new_val = inverse_change_coordinates(x, y, 480, 380)
+    x_new_val, y_new_val = inverse_change_coordinates(x, y, 960, 760)
     # print(x, y, "->", x_new_val, y_new_val)
     x_vals_display.append(x_new_val)
     y_vals_display.append(y_new_val)
-    print(x_new_val)
+    # print(x_new_val)
 
 ## WILL TEST TO PASS JUST ONE MOVEMENT FOR NOW TO A ROBOT IN THE ANIMATION WINDOW
 
 # Iterate through the robot characters and update their attributes
 # Update robot characters within the animation window
-animation_window.update_robot_characters(x_vals_display, y_vals_display)
-
-animation_window.animate()
+# animation_window.update_robot_characters(x_vals_display, y_vals_display)
+animation_window.animate(x_vals_display, y_vals_display, Theta_sim)
 
 # while loop
