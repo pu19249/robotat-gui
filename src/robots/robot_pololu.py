@@ -39,6 +39,7 @@ class Pololu:
     '''
     # Methods definition
 
+    
     def dynamics(self, state, u):
         f = [u[0]*np.cos(state[2]), u[0]*np.sin(state[2]), u[1]]
         return f

@@ -20,7 +20,7 @@
       "controller": "exponential_pid"
     },
     {
-      "img": "pictures/pololu_img.png",
+      "img": "pictures/pololu_img2.png",
       "physical_params": {
         "ell": 10,
         "radius": 5,

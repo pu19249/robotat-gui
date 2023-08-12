@@ -66,7 +66,7 @@ class robot_character():
         self.degree = degree
         self.x = x
         self.y = y
-        print(self.x, self.y, self.degree)
+        # print(self.x, self.y, self.degree)
 
     def rotate_move(self):
         rotated_img = pygame.transform.rotate(self.img, self.degree)
@@ -74,7 +74,8 @@ class robot_character():
 
         # Blit the rotated robot image
         self.screen.blit(rotated_img, rotated_rect)
-
+    def __str__(self):
+        return self.img_path
 
 class py_game_animation():
     def __init__(self, x_size, y_size):
@@ -163,18 +164,27 @@ class py_game_animation():
                 index = 0  # Reset the index
 
             if animation_running and index < len(x_values):
-                x = x_values[index]
-                y = y_values[index]
-                
-                for robot in self.robot_characters:
+                x_robot1 = x_values[index][0]  # x-value for the first robot
+                x_robot2 = x_values[index][1]  # x-value for the second robot
+                y_robot1 = y_values[index][0]  # corresponding y-value for the first robot
+                y_robot2 = y_values[index][1]  # corresponding y-value for the second robot
+                theta_robot1 = theta_values[index][0]  # corresponding y-value for the first robot
+                theta_robot2 = theta_values[index][1]  # corresponding y-value for the second robot
+                # self.robot_characters[0].update(theta_robot1, x_robot1, y_robot1)
+                # print(self.robot_characters[0])
+                # self.robot_characters[0].rotate_move()
+                # self.robot_characters[1].update(theta_robot2, x_robot2, y_robot2)
+                # self.robot_characters[1].rotate_move()
+                # print(self.robot_characters[1])
+                for robot, x, y, theta in zip(self.robot_characters, [x_robot1, x_robot2], [y_robot1, y_robot2], [theta_robot1, theta_robot2]):
                     # Update character attributes and animations if needed
-                    robot.update(0, x, y)
+                    robot.update(theta, x, y)
                     robot.rotate_move()
                 
                 pygame.display.flip()
                 pygame.time.delay(10)
                 index += 1
-                print(index)
+                # print(index)
 
             pygame.display.flip()
 
@@ -183,4 +193,3 @@ class py_game_animation():
 
         pygame.quit()  # Quit Pygame after the loop finishes
 
-# Rest of your code...

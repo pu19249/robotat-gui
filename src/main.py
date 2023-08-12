@@ -4,6 +4,7 @@ from robots.robot_pololu import Pololu
 from controllers.exponential_pid import exponential_pid
 from controllers.lqi import lqi
 from map_coordinates import inverse_change_coordinates
+import numpy as np
 
 # load json file
 f = open('world_definition.json')
@@ -20,7 +21,7 @@ Theta_sim = []
 characters = []
 
 goal1 = [100, 100]
-goal2 = [200, 200]
+goal2 = [-100, -100]
 robots = world['robots']  # this takes the robot object from the json file
 
 # Define a dictionary to map controller names to controller functions
@@ -63,6 +64,8 @@ for i in range(len(robots)):
                              robots[i].get('state')[0],
                              robots[i].get('state')[1],
                              robots[i].get('state')[2]))
+    
+print(characters)
 
 dt = world['dt']
 t0 = world['t0']
@@ -126,25 +129,35 @@ for i in range(len(robots)):
 for i in range(len(robots)):
     x_results = X_sim[i]
     y_results = Y_sim[i]
+    theta_results = Theta_sim[i]
     
     x_vals_display_robot = []
     y_vals_display_robot = []
+    theta_vals_display_robot = []
     
-    for x, y in zip(x_results, y_results):
+    for x, y, theta in zip(x_results, y_results, theta_results):
         x_new_val, y_new_val = inverse_change_coordinates(x, y, 960, 760)
+        theta_new_val = np.rad2deg(theta)
         x_vals_display_robot.append(x_new_val)
         y_vals_display_robot.append(y_new_val)
+        theta_vals_display_robot.append(theta_new_val)
         # print(x, y, "->", x_new_val, y_new_val)
     
     x_vals_display.append(x_vals_display_robot)
     y_vals_display.append(y_vals_display_robot)
+    theta_vals_display.append(theta_vals_display_robot)
 
 
+x_vals_display = np.array(list(zip(x_vals_display[0], x_vals_display[1])))
+y_vals_display = np.array(list(zip(y_vals_display[0], y_vals_display[1])))
+theta_vals_display = np.array(list(zip(theta_vals_display[0], theta_vals_display[1])))
+# print(x_vals_display)
+# print(x_vals_display)
 ## WILL TEST TO PASS JUST ONE MOVEMENT FOR NOW TO A ROBOT IN THE ANIMATION WINDOW
 
 # Iterate through the robot characters and update their attributes
 # Update robot characters within the animation window
 # animation_window.update_robot_characters(x_vals_display, y_vals_display)
-animation_window.animate(x_vals_display, y_vals_display, Theta_sim)
+animation_window.animate(x_vals_display, y_vals_display, theta_vals_display)
 
 # while loop
