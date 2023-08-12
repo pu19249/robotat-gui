@@ -17,6 +17,7 @@ traj = []
 X_sim = []
 Y_sim = []
 Theta_sim = []
+characters = []
 
 goal1 = [100, 100]
 goal2 = [200, 200]
@@ -40,15 +41,28 @@ animation_window.initialize()
 for i in range(len(robots)):
     controller_name = robots[i].get('controller')
     controller_function = controller_map.get(controller_name, None)
+     # Define the goal based on robot's index
+    if i == 0:
+        current_goal = goal1
+    elif i == 1:
+        current_goal = goal2
+    else:
+        # You can define additional goals here if needed
+        current_goal = [0, 0]  # Default goal
+
     pololu.append(Pololu(robots[i].get('state'),
                          robots[i].get('physical_params'),
                          robots[i].get('ID_robot'),
                          robots[i].get('IP'),
                          robots[i].get('img'),
-                         lambda state, goal=goal1,
+                         lambda state, goal=current_goal,
                          ctrl_func=controller_function:
                          ctrl_func(state, goal),
                          animation_window.screen))
+    characters.append((robots[i].get('img'),
+                             robots[i].get('state')[0],
+                             robots[i].get('state')[1],
+                             robots[i].get('state')[2]))
 
 
 dt = world['dt']
@@ -57,20 +71,17 @@ tf = world['tf']
 
 # this list needs to depend directly of the creation of the robots objects
 # and also map the positions first
-characters = [
-    ('pictures/pololu_img.png', 0, 0, 45)
-]
+# characters = [
+#     ('pictures/pololu_img.png', 100, 100, 45)
+# ]
 
 # Add robot characters to the animation
 for character in characters:
     animation_window.add_robot_character(*character)
 
-
 # animation_window.animate()
 
-
 # obstacles
-
 
 # landmarks
 
