@@ -2,15 +2,15 @@
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
 
-const char* ssid = "TIGO-F4CD";
-const char* password = "4NJ667300826";
+const char* ssid = "Robotat";
+const char* password = "iemtbmcit116";
 unsigned int localPort = 12345;  // Puerto local para la comunicación UDP
 
 WiFiUDP udp;
 
 
 //variabls for blinking an LED with Millis
-const int led = 2; // ESP32 Pin to which onboard LED is connected
+const int led = 25; // ESP32 Pin to which onboard LED is connected
 unsigned long previousMillis = 0;  // will store last time LED was updated
 const long interval = 1500;  // interval at which to blink (milliseconds)
 int ledState = LOW;  // ledState used to set the LED
