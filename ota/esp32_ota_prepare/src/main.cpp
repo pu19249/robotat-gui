@@ -16,13 +16,8 @@
 #define PASSWORD  "iemtbmcit116"
 
 BasicOTA OTA;
-//variabls for blinking an LED with Millis
-const int led = 2; // ESP32 Pin to which onboard LED is connected
-unsigned long previousMillis = 0;  // will store last time LED was updated
-const long interval = 1500;  // interval at which to blink (milliseconds)
-int ledState = LOW;  // ledState used to set the LED
+
 void setup() {
-  pinMode(led, OUTPUT); 
   Serial.begin(115200);
   Serial.println("Startup");
   WiFi.mode(WIFI_STA);
@@ -42,14 +37,5 @@ void setup() {
 
 void loop() {
   OTA.handle();  
-  //     //loop to blink without delay
-  unsigned long currentMillis = millis();
-  if (currentMillis - previousMillis >= interval) {
-  // save the last time you blinked the LED
-  previousMillis = currentMillis;
-  // if the LED is off turn it on and vice-versa:
-  ledState = not(ledState);
-  // set the LED with the ledState of the variable:
-  digitalWrite(led,  ledState);
-  }
+
 }
