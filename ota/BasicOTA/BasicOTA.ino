@@ -3,8 +3,8 @@
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
 
-const char* ssid = "Robotat";
-const char* password = "iemtbmcit116";
+const char* ssid = "TIGO-F4CD";
+const char* password = "4NJ667300826";
 
 //variabls for blinking an LED with Millis
 const int led = 2; // ESP32 Pin to which onboard LED is connected
