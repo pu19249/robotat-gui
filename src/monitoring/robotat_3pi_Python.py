@@ -122,7 +122,7 @@ def get_pose(tcp_obj, agents_ids, rotrep):
 robotat = robotat_connect()
 print(type(robotat))
 time_sim = 0
-pose1 = get_pose(robotat, [6], 'quat') 
+pose1 = get_pose(robotat, [9], 'quat') 
 print(pose1)
 # while time_sim < 10:
 #     pose1 = get_pose(robotat, [6], 'quat') 
