@@ -1,6 +1,0 @@
-Collecting setuptools
-  Using cached setuptools-68.1.2-py3-none-any.whl (805 kB)
-Collecting wheel
-  Using cached wheel-0.41.2-py3-none-any.whl (64 kB)
-Installing collected packages: wheel, setuptools
-Successfully installed setuptools-68.1.2 wheel-0.41.2

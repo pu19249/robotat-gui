@@ -62,27 +62,3 @@ def displayAvailableNetworks():
     elif platform.system() == "Linux":
         command = "nmcli dev wifi list"
     os.system(command)
-
-
-# # usage example
-# try:
-#     displayAvailableNetworks()
-#     option = input("New connection (y/N)? ")
-#     if option == "N" or option == "":
-#         name = input("Name: ")
-#         if not is_connected_to_network(name):
-#             connect(name, name)
-#             print("If you aren't connected to this network, try connecting with correct credentials")
-#         else:
-#             print("Already connected to the network.")
-#     elif option == "y":
-#         name = input("Name: ")
-#         key = getpass.getpass("Password: ")
-#         if not is_connected_to_network(name):
-#             createNewConnection(name, name, key)
-#             connect(name, name)
-#             print("If you aren't connected to this network, try connecting with correct credentials")
-#         else:
-#             print("Already connected to the network.")
-# except KeyboardInterrupt as e:
-#     print("\nExiting...")
