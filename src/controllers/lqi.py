@@ -41,7 +41,7 @@ def lqr(A, B, Q, R):  # byMark Wilfried Mueller
 def lqr_init():
     A = np.zeros((2, 2))
     B = np.eye(2)
-    Q = np.array([[0.5, 0], [0, 0.5]])
+    Q = np.array([[1000, 0], [0, 1000]])
     R = np.eye(2)
     Klqr, Xlqr, eigValslqr = ct.lqr(A, B, Q, R)
     # LQR + Integrators (LQI)
@@ -55,7 +55,7 @@ def lqr_init():
     QQ[2, 2] = 100
     QQ[3, 3] = 100
     Klqi, d1, d2 = ct.lqr(AA, BB, QQ, R)
-    sigma = 0
+    sigma = 50
 
     return Klqr, sigma, Klqi, Cr
 

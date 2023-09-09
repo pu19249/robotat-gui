@@ -7,7 +7,7 @@ from windows.map_coordinates import inverse_change_coordinates
 import numpy as np
 
 # load json file
-f = open('worlds/world_definition.json')
+f = open('worlds/world3.json')
 # returns a json object as a dictionary
 world = json.load(f)
 
@@ -19,10 +19,12 @@ X_sim = []
 Y_sim = []
 Theta_sim = []
 characters = []
+goals = []
+# goal1 = [100, 100]
+# goal2 = [-100, -150]
 
-goal1 = [100, 100]
-goal2 = [-100, -150]
 robots = world['robots']  # this takes the robot object from the json file
+goals = world['landmarks']
 
 # Define a dictionary to map controller names to controller functions
 controller_map = {
@@ -42,14 +44,21 @@ animation_window.initialize()
 for i in range(len(robots)):
     controller_name = robots[i].get('controller')
     controller_function = controller_map.get(controller_name, None)
-     # Define the goal based on robot's index
-    if i == 0:
-        current_goal = goal1
-    elif i == 1:
-        current_goal = goal2
+    landmark_id = robots[i].get('ID_robot')
+    closest_landmark = next((lm for lm in world['landmarks'] if lm['id'] == landmark_id), None)
+    if closest_landmark is not None:
+        current_goal = closest_landmark['pos']
     else:
-        # You can define additional goals here if needed
-        current_goal = [0, 0]  # Default goal
+        # Handle case where no matching landmark is found
+        current_goal = [0, 0]
+    #  # Define the goal based on robot's index
+    # if i == 0:
+    #     current_goal = goals[i]
+    # elif i == 1:
+    #     current_goal = goals[i]
+    # else:
+    #     # You can define additional goals here if needed
+    #     current_goal = [0, 0]  # Default goal
 
     pololu.append(Pololu(robots[i].get('state'),
                          robots[i].get('physical_params'),
@@ -99,13 +108,13 @@ y_vals_display = []
 theta_vals_display = []
 for i in range(len(robots)):
     # pololu[i].initialize_image()
-    if i == 0:
-        current_goal = goal1
-    elif i == 1:
-        current_goal = goal2
+    landmark_id = robots[i].get('ID_robot')
+    closest_landmark = next((lm for lm in world['landmarks'] if lm['id'] == landmark_id), None)
+    if closest_landmark is not None:
+        current_goal = closest_landmark['pos']
     else:
-        # You can define additional goals here if needed
-        current_goal = [0, 0]  # Default goal
+        # Handle case where no matching landmark is found
+        current_goal = [0, 0]
     traj.append(pololu[i].simulate_robot(dt, t0, tf, current_goal))
     x_results, y_results, theta_results = pololu[i].get_simulation_results()
     # print(x_results)
@@ -116,6 +125,7 @@ for i in range(len(robots)):
     Y_sim.append(y_results)
     # Append the Theta simulation results for the current robot
     Theta_sim.append(theta_results)
+
 
 
 # for x, y in zip(x_results, y_results):
@@ -146,13 +156,14 @@ for i in range(len(robots)):
     x_vals_display.append(x_vals_display_robot)
     y_vals_display.append(y_vals_display_robot)
     theta_vals_display.append(theta_vals_display_robot)
+    
+
+x_vals_display = np.array(list(zip(*x_vals_display)))
+y_vals_display = np.array(list(zip(*y_vals_display)))
+theta_vals_display = np.array(list(zip(*theta_vals_display)))
 
 
-x_vals_display = np.array(list(zip(x_vals_display[0], x_vals_display[1])))
-y_vals_display = np.array(list(zip(y_vals_display[0], y_vals_display[1])))
-theta_vals_display = np.array(list(zip(theta_vals_display[0], theta_vals_display[1])))
-# print(x_vals_display)
-# print(x_vals_display)
+# print(x_vals_display, y_vals_display, theta_vals_display)
 ## WILL TEST TO PASS JUST ONE MOVEMENT FOR NOW TO A ROBOT IN THE ANIMATION WINDOW
 
 # Iterate through the robot characters and update their attributes

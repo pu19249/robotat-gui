@@ -166,22 +166,18 @@ class py_game_animation():
                 index = 0  # Reset the index
 
             if animation_running and index < len(x_values):
-                x_robot1 = x_values[index][0]  # x-value for the first robot
-                x_robot2 = x_values[index][1]  # x-value for the second robot
-                y_robot1 = y_values[index][0]  # corresponding y-value for the first robot
-                y_robot2 = y_values[index][1]  # corresponding y-value for the second robot
-                theta_robot1 = theta_values[index][0]  # corresponding y-value for the first robot
-                theta_robot2 = theta_values[index][1]  # corresponding y-value for the second robot
-                # self.robot_characters[0].update(theta_robot1, x_robot1, y_robot1)
-                # print(self.robot_characters[0])
-                # self.robot_characters[0].rotate_move()
-                # self.robot_characters[1].update(theta_robot2, x_robot2, y_robot2)
-                # self.robot_characters[1].rotate_move()
-                # print(self.robot_characters[1])
-                for robot, x, y, theta in zip(self.robot_characters, [x_robot1, x_robot2], [y_robot1, y_robot2], [theta_robot1, theta_robot2]):
-                    # Update character attributes and animations if needed
-                    robot.update(theta, x, y)
+                for i in range(len(self.robot_characters)):
+                    x_robot = x_values[index][i]  # x-value for the i-th robot
+                    y_robot = y_values[index][i]  # corresponding y-value for the i-th robot
+                    theta_robot = theta_values[index][i]  # corresponding theta-value for the i-th robot
+
+                    robot = self.robot_characters[i]
+
+                    # Update character attributes and animations
+                    robot.update(theta_robot, x_robot, y_robot)
                     robot.rotate_move()
+
+
                 
                 pygame.display.flip()
                 pygame.time.delay(10)
