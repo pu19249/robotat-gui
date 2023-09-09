@@ -2,12 +2,13 @@ import json
 from windows.animation_window import py_game_animation, robot_character
 from robots.robot_pololu import Pololu
 from controllers.exponential_pid import exponential_pid
-from controllers.lqi import lqi
+from controllers.pd_controller import pd_controller
+from controllers.lqi import lqi_controller
 from windows.map_coordinates import inverse_change_coordinates
 import numpy as np
 
 # load json file
-f = open('worlds/world3.json')
+f = open('worlds/world_definition.json')
 # returns a json object as a dictionary
 world = json.load(f)
 
@@ -29,7 +30,8 @@ goals = world['landmarks']
 # Define a dictionary to map controller names to controller functions
 controller_map = {
     'exponential_pid': exponential_pid,
-    'lqi': lqi,
+    'pd_controller': pd_controller,
+    'lqi_controller': lqi_controller
 }
 
 # define the animation dimensions based on the json information
