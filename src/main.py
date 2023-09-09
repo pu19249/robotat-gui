@@ -3,11 +3,11 @@ from windows.animation_window import py_game_animation, robot_character
 from robots.robot_pololu import Pololu
 from controllers.exponential_pid import exponential_pid
 from controllers.lqi import lqi
-from map_coordinates import inverse_change_coordinates
+from windows.map_coordinates import inverse_change_coordinates
 import numpy as np
 
 # load json file
-f = open('world_definition.json')
+f = open('worlds/world_definition.json')
 # returns a json object as a dictionary
 world = json.load(f)
 

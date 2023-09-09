@@ -6,7 +6,7 @@ import numpy as np
 
 # Get the directory path of the current script
 script_dir = os.path.dirname(os.path.abspath(__file__))
-
+pictures_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'pictures')
 # this solves scaling issues for the independent pygame window
 ctypes.windll.user32.SetProcessDPIAware()
 
@@ -53,10 +53,11 @@ class robot_character():
             self.img, (40, 40))  # Resize the image if needed
         self.rot_img = self.img
         self.rot_rect = self.img.get_rect(center=(x, y))
-
+        # Get the path to the 'pictures' directory
+         # Get the path to the 'pictures' directory
+        
         self.background_color = (255, 255, 255)
-        self.grid = pygame.image.load(
-            "pictures/grid_back_coord.png").convert_alpha()
+        self.grid = pygame.image.load(os.path.join(pictures_dir, "grid_back_coord.png")).convert_alpha()
 
     # degree, x, and y are state attributes of the robot class
     # when this method is called the attributes are updated and so
@@ -82,7 +83,8 @@ class py_game_animation():
 
         # self.monitor_size = [pygame.display.Info().current_w, pygame.display.Info().current_h]
         # Define the image file name
-        grid_file = "pictures/grid_back_coord.png"
+        
+        grid_file = os.path.join(pictures_dir, "grid_back_coord.png")
 
         # Create the complete file path
         grid_path = os.path.join(script_dir, grid_file)
@@ -113,7 +115,7 @@ class py_game_animation():
         pygame.init()
         pygame.display.set_caption('Live simulation')
         self.clock = pygame.time.Clock()
-        play_icon = pygame.image.load('pictures/play_icon.png').convert_alpha()
+        play_icon = pygame.image.load(os.path.join(pictures_dir, "play_icon.png")).convert_alpha()
         play_icon = pygame.transform.scale(play_icon, (self.screen_x*0.05, self.screen_x*0.05))
         self.play = button_pygame(self.screen_x - 50, self.screen_y/2, play_icon, self.screen)
         self.play.draw()
