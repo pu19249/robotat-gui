@@ -10,20 +10,20 @@ retries_update = 0
 max_retries_connection = 3
 max_retries_update = 3
 
-# if not is_connected_to_network(Robotat_SSID):
-#     print('Not connected to Robotat')
-#     print('Connecting ...')
-#     createNewConnection(Robotat_SSID, Robotat_SSID, Robotat_Password)
-#     connect(Robotat_SSID, Robotat_SSID)
-#     connected = True
-#     print('Connected to ', Robotat_SSID)
-#     while connected == False and retries_connection != max_retries_connection:
-#         print('Retrying connection')
-#         time.sleep(3)
-#         connect(Robotat_SSID, Robotat_SSID)
-#         retries_connection += 1
-#         connected = True
-#         print('Connected to ', Robotat_SSID)
+if not is_connected_to_network(Robotat_SSID):
+    print('Not connected to Robotat')
+    print('Connecting ...')
+    createNewConnection(Robotat_SSID, Robotat_SSID, Robotat_Password)
+    connect(Robotat_SSID, Robotat_SSID)
+    connected = True
+    print('Connected to ', Robotat_SSID)
+    while connected == False and retries_connection != max_retries_connection:
+        print('Retrying connection')
+        time.sleep(3)
+        connect(Robotat_SSID, Robotat_SSID)
+        retries_connection += 1
+        connected = True
+        print('Connected to ', Robotat_SSID)
 
 
 

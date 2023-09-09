@@ -1,5 +1,5 @@
 import json
-from animation_window import py_game_animation, robot_character
+from windows.animation_window import py_game_animation, robot_character
 from robots.robot_pololu import Pololu
 from controllers.exponential_pid import exponential_pid
 from controllers.lqi import lqi
