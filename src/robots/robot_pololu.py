@@ -1,10 +1,8 @@
 from typing import *
-import math
 import numpy as np
-from PyQt5.QtGui import QPixmap
 import pygame
-# Define Pololyu 3Pi + robot class
 
+# Define Pololu 3Pi+ robot class
 
 class Pololu:
     # Function to initialize attrs
@@ -14,7 +12,7 @@ class Pololu:
         self.physical_params = physical_params
         self.ID = ID
         self.IP = IP
-        self.img_path = img_path  # to make tests in a individual script
+        self.img_path = img_path  
         self.img = None
         self.img_rect = None
         self.controller = controller
@@ -39,7 +37,6 @@ class Pololu:
     '''
     # Methods definition
 
-    
     def dynamics(self, state, u):
         f = [u[0]*np.cos(state[2]), u[0]*np.sin(state[2]), u[1]]
         return f

@@ -107,10 +107,11 @@ class py_game_animation():
                                 self.screen, [self.screen_x, self.screen_y])
         self.robot_characters.append(robot)
 
-    def update_robot_characters(self, x_vals_display, y_vals_display):
-            for robot_character, x, y in zip(self.robot_characters, x_vals_display, y_vals_display):
-                robot_character.update(0, x, y)
+    def update_robot_characters(self, x_vals_display, y_vals_display, theta_vals_display):
+            for robot_character, x, y, theta in zip(self.robot_characters, x_vals_display, y_vals_display, theta_vals_display):
+                robot_character.update(theta, x, y)
                 print(x, y)
+    
     def initialize(self):
         pygame.init()
         pygame.display.set_caption('Live simulation')
@@ -119,18 +120,41 @@ class py_game_animation():
         play_icon = pygame.transform.scale(play_icon, (self.screen_x*0.05, self.screen_x*0.05))
         self.play = button_pygame(self.screen_x - 50, self.screen_y/2, play_icon, self.screen)
         self.play.draw()
+        
         self.screen.fill(self.background_color)
         self.screen.blit(self.grid, (0, 0))
+        
+    def display_initial_positions(self):
+        for robot in self.robot_characters:
+            robot.rotate_move()
+        pygame.display.flip()
+
 
     def animate(self, x_values, y_values, theta_values):
         self.initialize()  # Initialize pygame
         self.start_animation(x_values, y_values, theta_values)
 
+
     def start_animation(self, x_values, y_values, theta_values):
         index = 0  # Initialize the index for accessing x_values and y_values
         animation_running = False
+        index_1 = 0
+        print('x values', x_values)
+        
+        for robot_index in range(len(self.robot_characters)):
+            x_robot = x_values[0][robot_index]  # Initial x position
+            y_robot = y_values[0][robot_index]  # Initial y position
+            theta_robot = theta_values[0][robot_index]  # Initial theta value
+            
+            print(f"Robot {robot_index}: x = {x_robot}, y = {y_robot}, theta = {theta_robot}")
 
+            self.robot_characters[robot_index].update(theta_robot, x_robot, y_robot)
+            self.robot_characters[robot_index].rotate_move()
+
+        pygame.display.flip()
+        pygame.time.delay(10)
         while self.run:
+            
             self.clock.tick(60)
             self.play.draw()  # Update the play button
 
@@ -159,13 +183,16 @@ class py_game_animation():
             self.screen.fill(self.background_color)
             self.screen.blit(self.grid, (0, 0))
             self.play.draw()
+            self.display_initial_positions() # this keeps the robots at their final position even when the time has finished :D
             
             if self.play.action and not animation_running:
                 print('START')
                 animation_running = True  # Start the animation
                 index = 0  # Reset the index
+                
 
             if animation_running and index < len(x_values):
+
                 for i in range(len(self.robot_characters)):
                     x_robot = x_values[index][i]  # x-value for the i-th robot
                     y_robot = y_values[index][i]  # corresponding y-value for the i-th robot
