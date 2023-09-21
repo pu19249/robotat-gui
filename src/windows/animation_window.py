@@ -1,8 +1,6 @@
 import pygame
 import os
-import time
 import ctypes
-import numpy as np
 
 # Get the directory path of the current script
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -47,6 +45,7 @@ class robot_character():
         self.y = y
         self.degree = degree
         self.size = size
+        self.radius = 20
 
         self.img = pygame.image.load(self.img_path).convert_alpha()
         self.img = pygame.transform.scale(
@@ -58,6 +57,13 @@ class robot_character():
         
         self.background_color = (255, 255, 255)
         self.grid = pygame.image.load(os.path.join(pictures_dir, "grid_back_coord.png")).convert_alpha()
+    def draw_hitbox(self):
+        pygame.draw.circle(self.screen, (255, 0, 0), (self.x, self.y), self.radius, 2)
+
+    def check_collision(robot1, robot2):
+        distance = ((robot1.x - robot2.x)**2 + (robot1.y - robot2.y)**2)**0.5
+        return distance < robot1.radius + robot2.radius
+
 
     # degree, x, and y are state attributes of the robot class
     # when this method is called the attributes are updated and so
@@ -83,7 +89,7 @@ class py_game_animation():
 
         # self.monitor_size = [pygame.display.Info().current_w, pygame.display.Info().current_h]
         # Define the image file name
-        
+
         grid_file = os.path.join(pictures_dir, "grid_back_coord.png")
 
         # Create the complete file path
@@ -97,6 +103,8 @@ class py_game_animation():
         self.grid_img = pygame.image.load(grid_path).convert_alpha()
         self.grid = pygame.transform.scale(self.grid_img, (self.screen_x-90, self.screen_y))
         self.play = None
+        self.bounding_box = pygame.Rect(0, 0, 760, 960)  # Create a rectangle around the grid
+
         # the list size will be defined by the number of robots indicated
         self.robot_characters = []
 
@@ -189,9 +197,24 @@ class py_game_animation():
                 print('START')
                 animation_running = True  # Start the animation
                 index = 0  # Reset the index
-                
+            
+            for i in range(len(self.robot_characters)):
+                    for j in range(i + 1, len(self.robot_characters)):
+                        if robot_character.check_collision(self.robot_characters[i], self.robot_characters[j]):
+                            # Handle collision here (e.g., change color, stop movement, etc.)
+                            print('collision')
+                            animation_running = False  # Stop the animation
+                            break
+            for robot in self.robot_characters:
+                if not self.bounding_box.collidepoint(robot.x, robot.y):
+                    # Handle collision with bounding box (e.g., stop movement, change direction, etc.)
+                    print('collision')
+                    animation_running = False  # Stop the animation
+                    break
 
             if animation_running and index < len(x_values):
+                        # Check for collisions
+                
 
                 for i in range(len(self.robot_characters)):
                     x_robot = x_values[index][i]  # x-value for the i-th robot

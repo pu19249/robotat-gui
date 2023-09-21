@@ -30,7 +30,7 @@
       "ID_robot": 2,
       "IP": "192.192.1.1",
       "state": [100, 100, 0],
-      "controller": "pd_controller"
+      "controller": "exponential_pid"
     }
   ],
   "obstacle": {
@@ -43,11 +43,11 @@
   "landmarks": [
     {
     "id": 1,
-    "pos": [100, 50]
+    "pos": [1000, 50]
   },
   {
     "id": 2,
-    "pos": [-50, -50]
+    "pos": [100, 50]
   }
 ]
 }
