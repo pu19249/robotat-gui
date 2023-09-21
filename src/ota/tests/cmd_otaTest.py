@@ -1,6 +1,11 @@
+import sys
 import subprocess
 import os
 import time
+from pathlib import Path
+
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(parent_dir)
 from wifi_connect import is_connected_to_network, connect, createNewConnection
 
 Robotat_SSID = 'Robotat'
@@ -28,10 +33,10 @@ if not is_connected_to_network(Robotat_SSID):
 
 
 # Replace this with the path to your sketch directory
-sketch_directory = os.path.join(os.getcwd(), "ota-secondTest")
-
+sketch_directory = os.path.join(str(Path(__file__).parent), "esp32ota_ota_update")
+print(sketch_directory)
 # Replace "esp32doit-devkit-v1" with the correct environment name
-compile_result = subprocess.run(["platformio", "run", "--target", "upload", "--environment", "esp32dev"], cwd=sketch_directory, capture_output=True, text=True)
+compile_result = subprocess.run(["platformio", "run", "--target", "upload", "--environment", "esp32ota"], cwd=sketch_directory, capture_output=True, text=True)
 
 # Manages the error retrying 3 times before giving it up
 if compile_result.returncode != 0:
