@@ -2,12 +2,13 @@ import pygame
 import os
 import ctypes
 
-# Get the directory path of the current script
+# Get the directory path of the current script, abspath because of the tree structure that everything is on different folders
 script_dir = os.path.dirname(os.path.abspath(__file__))
 pictures_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'pictures')
 # this solves scaling issues for the independent pygame window
 ctypes.windll.user32.SetProcessDPIAware()
 
+# Button class for handling actions as 'Play' for the animation
 class button_pygame():
     def __init__(self, x, y, image, screen):
         self.screen = screen
@@ -31,12 +32,13 @@ class button_pygame():
         if pygame.mouse.get_pressed()[0] == 0:
             self.clicked = False
 
-            # draw button on screen
+        # draw button on screen
         self.screen.blit(self.image, (self.rect.x, self.rect.y))
 
         return self.action
 
-
+# class for handling position and orientation on the animation window
+# also collision because is related with the rect it occupates
 class robot_character():
     def __init__(self, img_path, x, y, degree, screen, size):
         self.img_path = img_path
@@ -45,25 +47,25 @@ class robot_character():
         self.y = y
         self.degree = degree
         self.size = size
-        self.radius = 20
+        self.radius = 10 # radius it occupates in the animation window
 
         self.img = pygame.image.load(self.img_path).convert_alpha()
         self.img = pygame.transform.scale(
             self.img, (40, 40))  # Resize the image if needed
         self.rot_img = self.img
         self.rot_rect = self.img.get_rect(center=(x, y))
-        # Get the path to the 'pictures' directory
-         # Get the path to the 'pictures' directory
         
         self.background_color = (255, 255, 255)
         self.grid = pygame.image.load(os.path.join(pictures_dir, "grid_back_coord.png")).convert_alpha()
+
+    # box based on the radius defined before
     def draw_hitbox(self):
         pygame.draw.circle(self.screen, (255, 0, 0), (self.x, self.y), self.radius, 2)
 
+    #  distance formula to check if the distance between the centers of two robots is less than the sum of their radii
     def check_collision(robot1, robot2):
         distance = ((robot1.x - robot2.x)**2 + (robot1.y - robot2.y)**2)**0.5
         return distance < robot1.radius + robot2.radius
-
 
     # degree, x, and y are state attributes of the robot class
     # when this method is called the attributes are updated and so
@@ -73,7 +75,6 @@ class robot_character():
         self.degree = degree
         self.x = x
         self.y = y
-        # print(self.x, self.y, self.degree)
 
     def rotate_move(self):
         rotated_img = pygame.transform.rotate(self.img, self.degree)
@@ -81,19 +82,18 @@ class robot_character():
 
         # Blit the rotated robot image
         self.screen.blit(rotated_img, rotated_rect)
-    def __str__(self):
-        return self.img_path
+
 
 class py_game_animation():
     def __init__(self, x_size, y_size):
 
         # self.monitor_size = [pygame.display.Info().current_w, pygame.display.Info().current_h]
-        # Define the image file name
 
         grid_file = os.path.join(pictures_dir, "grid_back_coord.png")
 
         # Create the complete file path
         grid_path = os.path.join(script_dir, grid_file)
+
         self.screen_x = x_size
         self.screen_y = y_size
         self.original_size = (self.screen_x, self.screen_y)
@@ -118,7 +118,6 @@ class py_game_animation():
     def update_robot_characters(self, x_vals_display, y_vals_display, theta_vals_display):
             for robot_character, x, y, theta in zip(self.robot_characters, x_vals_display, y_vals_display, theta_vals_display):
                 robot_character.update(theta, x, y)
-                print(x, y)
     
     def initialize(self):
         pygame.init()
@@ -146,21 +145,17 @@ class py_game_animation():
     def start_animation(self, x_values, y_values, theta_values):
         index = 0  # Initialize the index for accessing x_values and y_values
         animation_running = False
-        index_1 = 0
-        print('x values', x_values)
         
         for robot_index in range(len(self.robot_characters)):
             x_robot = x_values[0][robot_index]  # Initial x position
             y_robot = y_values[0][robot_index]  # Initial y position
             theta_robot = theta_values[0][robot_index]  # Initial theta value
-            
-            print(f"Robot {robot_index}: x = {x_robot}, y = {y_robot}, theta = {theta_robot}")
-
             self.robot_characters[robot_index].update(theta_robot, x_robot, y_robot)
             self.robot_characters[robot_index].rotate_move()
 
         pygame.display.flip()
         pygame.time.delay(10)
+
         while self.run:
             
             self.clock.tick(60)
@@ -213,9 +208,7 @@ class py_game_animation():
                     break
 
             if animation_running and index < len(x_values):
-                        # Check for collisions
                 
-
                 for i in range(len(self.robot_characters)):
                     x_robot = x_values[index][i]  # x-value for the i-th robot
                     y_robot = y_values[index][i]  # corresponding y-value for the i-th robot
@@ -227,12 +220,9 @@ class py_game_animation():
                     robot.update(theta_robot, x_robot, y_robot)
                     robot.rotate_move()
 
-
-                
                 pygame.display.flip()
                 pygame.time.delay(10)
                 index += 1
-                # print(index)
 
             pygame.display.flip()
 
@@ -240,4 +230,3 @@ class py_game_animation():
                 animation_running = False  # Stop the animation
 
         pygame.quit()  # Quit Pygame after the loop finishes
-

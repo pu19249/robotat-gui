@@ -8,6 +8,7 @@ from windows.map_coordinates import inverse_change_coordinates
 import numpy as np
 import pygame
 
+
 # Load json file (using with automatically closes the file when exiting the block)
 with open('worlds/world_definition.json') as f:
     world = json.load(f)
@@ -82,7 +83,7 @@ for character in characters:
 x_vals_display = []
 y_vals_display = []
 theta_vals_display = []
-print(characters)
+
 for i in range(len(robots)):
     landmark_id = robots[i].get('ID_robot')
     closest_landmark = next((lm for lm in world['landmarks'] if lm['id'] == landmark_id), None)
@@ -106,8 +107,8 @@ for i in range(len(robots)):
         y_vals_display_robot.append(y_new_val)
         theta_vals_display_robot.append(theta_new_val)
         
-        # Add a print statement for debugging
-        print(f"x: {x}, y: {y} => x_new: {x_new_val}, y_new: {y_new_val}")
+        # Print statement for debugging
+        # print(f"x: {x}, y: {y} => x_new: {x_new_val}, y_new: {y_new_val}")
 
     x_vals_display.append(x_vals_display_robot)
     y_vals_display.append(y_vals_display_robot)
@@ -119,7 +120,6 @@ y_vals_display = np.array(list(zip(*y_vals_display)))
 y_vals_display = y_vals_display[1:]
 theta_vals_display = np.array(list(zip(*theta_vals_display)))
 theta_vals_display = theta_vals_display[1:]
-print('y', y_vals_display)
+
 # run the animation with the results for each robot
-print(characters)
 animation_window.animate(x_vals_display, y_vals_display, theta_vals_display)

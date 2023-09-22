@@ -90,16 +90,10 @@ class Pololu:
 
         self.initialize_image()  # Load the robot's image
 
-        # Clear the screen and draw the grid before the animation loop
-        # self.screen.fill((255, 255, 255))
-        # self.screen.blit(pygame.image.load(
-        #    "pictures/grid_back_coord.png").convert_alpha(), (0, 0))
-        # self.screen.blit()
 
         for n in range(N):
             u = self.control(goal, self.state)
             self.update_state(dt, self.dynamics, u)
-            # Example: Print the state in each step
             # used to check in individual test
             # print(f"Step {n}: State = {self.state}")
 
