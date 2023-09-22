@@ -7,7 +7,7 @@ import pygame
 class Pololu:
     # Function to initialize attrs
     def __init__(self, state: List[float], physical_params:
-                 List[float], ID: float, IP: float, img_path: str, controller, screen):
+                 List[float], ID: float, IP: float, img_path: str, controller):
         self.state = state
         self.physical_params = physical_params
         self.ID = ID
@@ -16,7 +16,7 @@ class Pololu:
         self.img = None
         self.img_rect = None
         self.controller = controller
-        self.screen = screen
+        
 
         # Initialize arrays
         self.N = None

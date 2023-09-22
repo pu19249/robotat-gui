@@ -94,7 +94,7 @@
        <bool>false</bool>
       </property>
      </widget>
-     <widget class="QLabel" name="label">
+     <widget class="QLabel" name="message_sim">
       <property name="geometry">
        <rect>
         <x>20</x>
