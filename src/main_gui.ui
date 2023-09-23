@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>992</width>
-    <height>796</height>
+    <width>1124</width>
+    <height>799</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,9 +19,12 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>981</width>
+      <width>1121</width>
       <height>741</height>
      </rect>
+    </property>
+    <property name="autoFillBackground">
+     <bool>true</bool>
     </property>
     <property name="currentIndex">
      <number>0</number>
@@ -34,7 +37,7 @@
       <property name="geometry">
        <rect>
         <x>80</x>
-        <y>300</y>
+        <y>20</y>
         <width>181</width>
         <height>61</height>
        </rect>
@@ -56,7 +59,7 @@
       <property name="geometry">
        <rect>
         <x>80</x>
-        <y>380</y>
+        <y>100</y>
         <width>181</width>
         <height>61</height>
        </rect>
@@ -78,12 +81,12 @@
        <string>Guardar datos</string>
       </property>
      </widget>
-     <widget class="QWidget" name="widget" native="true">
+     <widget class="MplWidget" name="MplWidget" native="true">
       <property name="geometry">
        <rect>
         <x>360</x>
         <y>0</y>
-        <width>621</width>
+        <width>761</width>
         <height>701</height>
        </rect>
       </property>
@@ -93,6 +96,16 @@
       <property name="acceptDrops">
        <bool>false</bool>
       </property>
+      <widget class="QComboBox" name="robot_graph_selection">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>20</y>
+         <width>73</width>
+         <height>22</height>
+        </rect>
+       </property>
+      </widget>
      </widget>
      <widget class="QLabel" name="label">
       <property name="geometry">
@@ -126,6 +139,32 @@
        <string>Graficar</string>
       </property>
      </widget>
+     <widget class="QRadioButton" name="velocities">
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>400</y>
+        <width>95</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Velocidades</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="state">
+      <property name="geometry">
+       <rect>
+        <x>100</x>
+        <y>340</y>
+        <width>141</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Variables de estado</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="ota_tab">
      <attribute name="title">
@@ -144,13 +183,21 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>992</width>
+     <width>1124</width>
      <height>26</height>
     </rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MplWidget</class>
+   <extends>QWidget</extends>
+   <header>mplwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

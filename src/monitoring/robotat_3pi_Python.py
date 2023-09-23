@@ -9,16 +9,22 @@ def robotat_connect():
     server_address = ('192.168.50.200', 1883)
 
     print("Connecting to %s port %s" % server_address)
-
-    sock.connect(server_address)
+    try:
+        sock.connect(server_address)
+        sock.settimeout(1)
+    except:
+        print('No response from server')
+        quit()
     return sock
 
 def get_pose_continuous(tcp_obj, agents_ids, rotrep, max_attempts=10):
+    # tcp_obj.settimeout(1)
+    #tcp_obj.recv(2048)
     for attempt in range(max_attempts):
         try:
-            tcp_obj.settimeout(1)
-            tcp_obj.recv(2048)
-
+            #print("DEB1")
+            #print(len(tcp_obj.recv(2048)))
+            
             if min(agents_ids) > 0 and max(agents_ids) <= 100:
                 s = {
                     "dst": 1,
@@ -41,23 +47,28 @@ def get_pose_continuous(tcp_obj, agents_ids, rotrep, max_attempts=10):
                     mocap_data = mocap_data[:, :-1]
 
                 yield mocap_data
+                break
 
             else:
                 print('ERROR: Invalid ID(s).')
-                break
+                
 
         except socket.timeout:
             print("Timeout count:", attempt + 1)
             time.sleep(0.1)
+            
 
     print("Reached maximum number of attempts. Exiting.")
     yield None
 
 # Uso
 robotat = robotat_connect()
+robotat.recv(2048)
 
-for pose_data in get_pose_continuous(robotat, [9], 'quat', max_attempts=5):
-    if pose_data is not None:
-        print(pose_data)
-    else:
-        break
+while(1): 
+    for pose_data in get_pose_continuous(robotat, [7], 'quat', max_attempts=5):
+        if pose_data is not None:
+            print(pose_data)
+        else:
+            break
+    time.sleep(0.5)

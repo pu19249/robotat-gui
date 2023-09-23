@@ -20,5 +20,5 @@ def pd_controller(xi, goal):
     w = kp * eO + ki * eO + kd * eO
 
     u = np.array([v, w])
-    print(u)
+    # print(u)
     return u

@@ -199,13 +199,17 @@ class py_game_animation():
                             # Handle collision here (e.g., change color, stop movement, etc.)
                             print('collision')
                             animation_running = False  # Stop the animation
-                            break
+                            pygame.time.delay(1000)
+                            self.run = False
+
             for robot in self.robot_characters:
                 if not self.bounding_box.collidepoint(robot.x, robot.y):
                     # Handle collision with bounding box (e.g., stop movement, change direction, etc.)
                     print('collision')
                     animation_running = False  # Stop the animation
-                    break
+                    pygame.time.delay(1000)
+                    self.run = False
+                    
 
             if animation_running and index < len(x_values):
                 

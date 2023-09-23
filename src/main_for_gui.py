@@ -86,6 +86,9 @@ def calculate_simulation(world, robots, pololu):
     x_vals_display = []
     y_vals_display = []
     theta_vals_display = []
+    x_results_plt = []
+    y_results_plt = []
+    theta_results_plt = []
     
     for i in range(len(robots)):
         landmark_id = robots[i].get('ID_robot')
@@ -101,48 +104,44 @@ def calculate_simulation(world, robots, pololu):
         x_vals_display_robot = []
         y_vals_display_robot = []
         theta_vals_display_robot = []
+        x_results_raw = []
+        y_results_raw = []
 
         # this part makes the mapping to display in the commplete animation window 
         for x, y, theta in zip(x_results, y_results, theta_results):
+            # Get raw data
+            x_raw, y_raw = x, y
             x_new_val, y_new_val = inverse_change_coordinates(x, y, 960, 760) #(in this case we know its doubled, so 760x960)
             theta_new_val = np.rad2deg(theta)
             x_vals_display_robot.append(x_new_val)
             y_vals_display_robot.append(y_new_val)
             theta_vals_display_robot.append(theta_new_val)
-            
+            x_results_raw.append(x_raw)
+            y_results_raw.append(y_raw)
             # Print statement for debugging
             # print(f"x: {x}, y: {y} => x_new: {x_new_val}, y_new: {y_new_val}")
-
+        
         x_vals_display.append(x_vals_display_robot)
         y_vals_display.append(y_vals_display_robot)
         theta_vals_display.append(theta_vals_display_robot)
+        x_results_plt.append(x_results_raw)
+        y_results_plt.append(y_results_raw)
     # Remove the first value from each list
+    
     x_vals_display = np.array(list(zip(*x_vals_display)))
     x_vals_display = x_vals_display[1:]
     y_vals_display = np.array(list(zip(*y_vals_display)))
     y_vals_display = y_vals_display[1:]
     theta_vals_display = np.array(list(zip(*theta_vals_display)))
-    theta_vals_display = theta_vals_display[1:]
+    theta_vals_display = theta_vals_display[:-1]
 
-    return x_vals_display, y_vals_display, theta_vals_display
+    x_results_plt = np.array(list(zip(*x_results_plt)))
+    x_results_plt = x_results_plt[1:]
+    y_results_plt = np.array(list(zip(*y_results_plt)))
+    y_results_plt = y_results_plt[1:]
+    
+    return x_vals_display, y_vals_display, theta_vals_display, x_results_plt, y_results_plt
 
 def run_animation(animation_window, x_vals_display, y_vals_display, theta_vals_display):
     # run the animation with the results for each robot
     animation_window.animate(x_vals_display, y_vals_display, theta_vals_display)
-
-
-# if __name__ == "__main__":
-#     # Load world
-#     world = load_world('worlds/world_definition.json')
-
-#     # Initialize animation window
-#     animation_window = initialize_animation(world)
-
-#     # Create objects
-#     robots, pololu = create_objects(world, animation_window)
-
-#     # Calculate simulation
-#     x_vals_display, y_vals_display, theta_vals_display = calculate_simulation(world, robots, pololu)
-
-#     # Run animation
-#     run_animation(animation_window, x_vals_display, y_vals_display, theta_vals_display)
