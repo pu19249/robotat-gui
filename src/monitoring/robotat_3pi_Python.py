@@ -175,13 +175,13 @@ def robotat_3pi_force_stop(tcp_obj, robot):
 robotat = robotat_connect()
 robotat.recv(2048)
 
-# while(1): 
-#     for pose_data in get_pose_continuous(robotat, [7], 'quat', max_attempts=5):
-#         if pose_data is not None:
-#             print(pose_data)
-#         else:
-#             break
-#     time.sleep(0.5)
+while(1): 
+    for pose_data in get_pose_continuous(robotat, [7], 'quat', max_attempts=5):
+        if pose_data is not None:
+            print(pose_data)
+        else:
+            break
+    time.sleep(0.5)
 
 # Example usage:
-robot = robotat_3pi_connect(robotat, [6])  # Change the agent_id as needed
+# robot = robotat_3pi_connect(robotat, [6])  # Change the agent_id as needed
