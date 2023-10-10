@@ -1,6 +1,6 @@
 import sys
 sys.path.append('C:\\Users\\jpu20\\Documents\\robotat-gui\\src')
-
+import random
 from windows.animation_window import *
 from robotat_3pi_Python import *
 from windows.map_coordinates import inverse_change_coordinates
@@ -8,7 +8,7 @@ from windows.map_coordinates import inverse_change_coordinates
 import threading
 import time
 pictures_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'pictures')
-animation_window = py_game_animation(850, 960)
+animation_window = py_game_monitoring(850, 960)
 # animation_window.start_animation
 animation_window.initialize()
 # robotat = robotat_connect()
@@ -16,6 +16,8 @@ animation_window.initialize()
 x_data = []
 y_data = []
 theta_data = []
+
+
 
 # First we need to create the object that represents and updates the position and rotation of the Pololu img (first one robot only)
 character = (os.path.join(pictures_dir, "pololu_img_x.png"), 0, 0, 0) 
@@ -49,9 +51,30 @@ x_vals_display_robot = [x_vals_display_robot]
 y_vals_display_robot = [y_vals_display_robot]
 theta_vals_display_robot = [theta_vals_display_robot]
 
-animation_window.animate(x_vals_display_robot, y_vals_display_robot, theta_vals_display_robot)
+# animation_window.animate(x_vals_display_robot, y_vals_display_robot, theta_vals_display_robot)
 
+def real_time_data_generator(num_robots):
+    while True:
+        x_values = [[random.randint(0, 100) for _ in range(num_robots)]]
+        y_values = [[random.randint(0, 100) for _ in range(num_robots)]]
+        theta_values = [[random.uniform(0, 2 * 3.14159265359) for _ in range(num_robots)]]
+        yield x_values, y_values, theta_values
 
+def start_data_generator():
+    num_robots = 1
+    data_generator = real_time_data_generator(num_robots)
+    
+    while True:
+        x_values, y_values, theta_values = next(data_generator)
+        # Pass data to the animation window here (you may need to add a thread lock)
+        animation_window.animate(x_values, y_values, theta_values)
+        time.sleep(0.5)  # Delay to control data generation rate
+
+run_animation = True
+while run_animation == True:
+    data_generator = real_time_data_generator(1)
+    animation_window.start_animation(data_generator)
+    run_animation = False
 
 # def get_and_process_data():
 #     for pose_data in get_pose_continuous(robotat, [1], 'quat', max_attempts=5):

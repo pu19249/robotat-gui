@@ -238,12 +238,20 @@ class py_game_animation():
 
 
 class py_game_monitoring(py_game_animation):
-    def start_animation(self, x_values, y_values, theta_values):
+    
+    def animate(self, real_time_data_generator):
+        self.initialize()  # Initialize pygame
+        self.start_animation(real_time_data_generator)
+
+    def start_animation(self, real_time_data_generator):
         index = 0  # Initialize the index for accessing x_values and y_values
-        animation_running = False
-        
+        animation_running = True
+        x_values, y_values, theta_values = next(real_time_data_generator)
         for robot_index in range(len(self.robot_characters)):
-            x_robot, y_robot, theta_robot = next(real_time_data_generator)  # Get real-time data
+            
+            x_robot = x_values[0][robot_index]  # Initial x position
+            y_robot = y_values[0][robot_index]  # Initial y position
+            theta_robot = theta_values[0][robot_index]  # Initial theta value
             self.robot_characters[robot_index].update(theta_robot, x_robot, y_robot)
             self.robot_characters[robot_index].rotate_move()
 
@@ -252,7 +260,7 @@ class py_game_monitoring(py_game_animation):
         pygame.time.delay(10)
 
         while self.run:
-            
+            x_values, y_values, theta_values = next(real_time_data_generator)
             self.clock.tick(60)
             self.play.draw()  # Update the play button
 
@@ -266,10 +274,10 @@ class py_game_monitoring(py_game_animation):
             self.play.draw()
             self.display_initial_positions() # this keeps the robots at their final position even when the time has finished :D
             
-            if self.play.action and not animation_running:
-                print('START')
-                animation_running = True  # Start the animation
-                index = 0  # Reset the index
+            # if self.play.action and not animation_running:
+            #     print('START')
+            animation_running = True  # Start the animation
+            index = 0  # Reset the index
             
             for i in range(len(self.robot_characters)):
                     for j in range(i + 1, len(self.robot_characters)):
