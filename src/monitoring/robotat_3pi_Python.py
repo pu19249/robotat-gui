@@ -6,6 +6,7 @@ from scipy.spatial.transform import Rotation as R
 import warnings
 import struct
 import sys
+import threading
 
 def robotat_connect():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -65,7 +66,7 @@ def get_pose_continuous(tcp_obj, agents_ids, rotrep, max_attempts=10):
             time.sleep(0.1)
             
 
-    print("Reached maximum number of attempts. Exiting.")
+    #print("Reached maximum number of attempts. Exiting.")
     yield None
 
 
@@ -175,13 +176,31 @@ def robotat_3pi_force_stop(tcp_obj, robot):
 robotat = robotat_connect()
 robotat.recv(2048)
 
-while(1): 
-    for pose_data in get_pose_continuous(robotat, [7], 'quat', max_attempts=5):
-        if pose_data is not None:
-            print(pose_data)
-        else:
-            break
-    time.sleep(0.5)
+# while(1): 
+#     for pose_data in get_pose_continuous(robotat, [1], 'quat', max_attempts=5):
+#         if pose_data is not None:
+#             print(pose_data)
+#         else:
+#             break
+#     time.sleep(0.5)
+
+def get_and_process_data(marker):
+    while(1):
+        for pose_data in get_pose_continuous(robotat, [marker], 'quat', max_attempts=5):
+            if pose_data is not None:
+                print(f"Marker {marker}: {pose_data[0][0]}")
+            else:
+                break
+        time.sleep(0.5)
+
+# Create threads for each marker
+marker1_thread = threading.Thread(target=get_and_process_data, args=(1,))
+marker2_thread = threading.Thread(target=get_and_process_data, args=(17,))
+
+# Start the threads
+marker1_thread.start()
+marker2_thread.start()
+
 
 # Example usage:
 # robot = robotat_3pi_connect(robotat, [6])  # Change the agent_id as needed

@@ -61,8 +61,7 @@ for i in range(len(robots)):
                          robots[i].get('img'),
                          lambda state, goal=current_goal,
                          ctrl_func=controller_function:
-                         ctrl_func(state, goal),
-                         animation_window.screen))
+                         ctrl_func(state, goal)))
     
     characters.append((robots[i].get('img'),
                              robots[i].get('state')[0],

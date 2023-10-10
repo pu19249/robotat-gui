@@ -27,7 +27,7 @@
      <bool>true</bool>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="simulator_tab">
      <attribute name="title">
@@ -37,7 +37,7 @@
       <property name="geometry">
        <rect>
         <x>80</x>
-        <y>20</y>
+        <y>60</y>
         <width>181</width>
         <height>61</height>
        </rect>
@@ -59,7 +59,7 @@
       <property name="geometry">
        <rect>
         <x>80</x>
-        <y>100</y>
+        <y>160</y>
         <width>181</width>
         <height>61</height>
        </rect>
@@ -72,7 +72,7 @@
       <property name="geometry">
        <rect>
         <x>80</x>
-        <y>540</y>
+        <y>500</y>
         <width>181</width>
         <height>61</height>
        </rect>
@@ -107,13 +107,13 @@
        </property>
       </widget>
      </widget>
-     <widget class="QLabel" name="label">
+     <widget class="QLabel" name="message_sim">
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>620</y>
+        <y>580</y>
         <width>321</width>
-        <height>61</height>
+        <height>101</height>
        </rect>
       </property>
       <property name="frameShape">
@@ -122,15 +122,18 @@
       <property name="frameShadow">
        <enum>QFrame::Sunken</enum>
       </property>
+      <property name="lineWidth">
+       <number>3</number>
+      </property>
       <property name="text">
-       <string>TextLabel</string>
+       <string>Consola de mensajes</string>
       </property>
      </widget>
      <widget class="QPushButton" name="plot">
       <property name="geometry">
        <rect>
         <x>80</x>
-        <y>460</y>
+        <y>400</y>
         <width>181</width>
         <height>61</height>
        </rect>
@@ -143,7 +146,7 @@
       <property name="geometry">
        <rect>
         <x>120</x>
-        <y>400</y>
+        <y>340</y>
         <width>95</width>
         <height>20</height>
        </rect>
@@ -156,7 +159,7 @@
       <property name="geometry">
        <rect>
         <x>100</x>
-        <y>340</y>
+        <y>280</y>
         <width>141</width>
         <height>41</height>
        </rect>
@@ -228,7 +231,7 @@
      <widget class="QGroupBox" name="groupBox">
       <property name="geometry">
        <rect>
-        <x>480</x>
+        <x>80</x>
         <y>100</y>
         <width>301</width>
         <height>281</height>
@@ -402,7 +405,7 @@
         <x>20</x>
         <y>100</y>
         <width>481</width>
-        <height>201</height>
+        <height>141</height>
        </rect>
       </property>
       <property name="title">
@@ -421,30 +424,10 @@
         <string/>
        </property>
       </widget>
-      <widget class="QTableWidget" name="ESP_IP_3">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>40</y>
-         <width>121</width>
-         <height>141</height>
-        </rect>
-       </property>
-       <row>
-        <property name="text">
-         <string>1</string>
-        </property>
-       </row>
-       <column>
-        <property name="text">
-         <string>IP</string>
-        </property>
-       </column>
-      </widget>
       <widget class="QComboBox" name="comboBox">
        <property name="geometry">
         <rect>
-         <x>20</x>
+         <x>40</x>
          <y>80</y>
          <width>73</width>
          <height>22</height>
@@ -490,39 +473,23 @@
         <string>Cargar</string>
        </property>
       </widget>
-     </widget>
-     <widget class="QGroupBox" name="groupBox_3">
-      <property name="geometry">
-       <rect>
-        <x>520</x>
-        <y>440</y>
-        <width>301</width>
-        <height>121</height>
-       </rect>
-      </property>
-      <property name="title">
-       <string>Data de un sketch nuevo</string>
-      </property>
-      <widget class="QPushButton" name="select_world_5">
+      <widget class="QLabel" name="label_4">
        <property name="geometry">
         <rect>
-         <x>60</x>
-         <y>40</y>
-         <width>181</width>
-         <height>61</height>
+         <x>80</x>
+         <y>60</y>
+         <width>55</width>
+         <height>16</height>
         </rect>
        </property>
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
        <property name="text">
-        <string>Buscar</string>
-       </property>
-       <property name="autoDefault">
-        <bool>false</bool>
-       </property>
-       <property name="default">
-        <bool>false</bool>
-       </property>
-       <property name="flat">
-        <bool>false</bool>
+        <string>IP</string>
        </property>
       </widget>
      </widget>

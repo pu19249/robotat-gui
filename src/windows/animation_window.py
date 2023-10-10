@@ -147,11 +147,106 @@ class py_game_animation():
         animation_running = False
         
         for robot_index in range(len(self.robot_characters)):
+            
             x_robot = x_values[0][robot_index]  # Initial x position
             y_robot = y_values[0][robot_index]  # Initial y position
             theta_robot = theta_values[0][robot_index]  # Initial theta value
             self.robot_characters[robot_index].update(theta_robot, x_robot, y_robot)
             self.robot_characters[robot_index].rotate_move()
+
+        pygame.display.flip()
+        pygame.time.delay(10)
+
+        while self.run:
+            
+            self.clock.tick(60)
+            self.play.draw()  # Update the play button
+
+            for e in pygame.event.get():
+                if e.type == pygame.QUIT:
+                    self.run = False
+                    break
+                elif e.type == pygame.VIDEORESIZE:
+                    self.screen_x, self.screen_y = e.w, e.h
+                    self.screen = pygame.display.set_mode((self.screen_x, self.screen_y), pygame.RESIZABLE)
+
+                    # Calculate the aspect ratio of the original image
+                    original_aspect_ratio = self.original_size[0] / self.original_size[1]
+
+                    # Calculate the maximum width based on the height to maintain aspect ratio
+                    max_width = int(self.screen_y * original_aspect_ratio)
+
+                    # Use the smaller of max_width and screen_x to avoid exceeding the screen dimensions
+                    new_width = min(max_width, self.screen_x)
+
+                    # Calculate the corresponding height
+                    new_height = int(new_width / original_aspect_ratio)
+
+                    self.grid = pygame.transform.scale(self.grid_img, (new_width, new_height))
+
+            self.screen.fill(self.background_color)
+            self.screen.blit(self.grid, (0, 0))
+            self.play.draw()
+            self.display_initial_positions() # this keeps the robots at their final position even when the time has finished :D
+            
+            if self.play.action and not animation_running:
+                print('START')
+                animation_running = True  # Start the animation
+                index = 0  # Reset the index
+            
+            for i in range(len(self.robot_characters)):
+                    for j in range(i + 1, len(self.robot_characters)):
+                        if robot_character.check_collision(self.robot_characters[i], self.robot_characters[j]):
+                            # Handle collision here (e.g., change color, stop movement, etc.)
+                            print('collision')
+                            animation_running = False  # Stop the animation
+                            pygame.time.delay(1000)
+                            self.run = False
+
+            for robot in self.robot_characters:
+                if not self.bounding_box.collidepoint(robot.x, robot.y):
+                    # Handle collision with bounding box (e.g., stop movement, change direction, etc.)
+                    print('collision')
+                    animation_running = False  # Stop the animation
+                    pygame.time.delay(1000)
+                    self.run = False
+                    
+
+            if animation_running and index < len(x_values):
+                
+                for i in range(len(self.robot_characters)):
+                    x_robot = x_values[index][i]  # x-value for the i-th robot
+                    y_robot = y_values[index][i]  # corresponding y-value for the i-th robot
+                    theta_robot = theta_values[index][i]  # corresponding theta-value for the i-th robot
+
+                    robot = self.robot_characters[i]
+
+                    # Update character attributes and animations
+                    robot.update(theta_robot, x_robot, y_robot)
+                    robot.rotate_move()
+
+                pygame.display.flip()
+                pygame.time.delay(10)
+                index += 1
+
+            pygame.display.flip()
+
+            if animation_running and index >= len(x_values):
+                animation_running = False  # Stop the animation
+
+        pygame.quit()  # Quit Pygame after the loop finishes
+
+
+class py_game_monitoring(py_game_animation):
+    def start_animation(self, x_values, y_values, theta_values):
+        index = 0  # Initialize the index for accessing x_values and y_values
+        animation_running = False
+        
+        for robot_index in range(len(self.robot_characters)):
+            x_robot, y_robot, theta_robot = next(real_time_data_generator)  # Get real-time data
+            self.robot_characters[robot_index].update(theta_robot, x_robot, y_robot)
+            self.robot_characters[robot_index].rotate_move()
+
 
         pygame.display.flip()
         pygame.time.delay(10)

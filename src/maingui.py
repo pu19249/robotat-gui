@@ -52,17 +52,30 @@ class UI(QMainWindow):
         self.save_data = self.findChild(QPushButton, "save_data")
         self.play_animation = self.findChild(QPushButton, "play_animation")
         self.robot_graph_selection = self.findChild(QComboBox, "robot_graph_selection")
+        self.state_display = self.findChild(QRadioButton, "state")
+        self.velocities_display = self.findChild(QRadioButton, "velocities")
+        
         # Define clicking actions for each of the buttons
         self.select_world.clicked.connect(self.open_world_windows)
         self.plot.clicked.connect(self.plot_simulation)
         self.save_data.clicked.connect(self.save_sim_data)
         self.play_animation.clicked.connect(self.play_animation_window)
         self.robot_graph_selection.currentIndexChanged.connect(self.update_plot)
+        self.state_display.setChecked(True)
+        self.state_display.toggled.connect(lambda:self.btnstate(self.state_display))
 
+        # Define global flags
+        self.variables_to_display = "State"
         # Show the App
         self.show()
 
     # Methods for handling clicking actions
+    def btnstate(self, b):
+         if b.isChecked():
+            self.variables_to_display = "State"
+         else:
+            self.variables_to_display = "Velocities"
+				
     def open_world_windows(self):
         self.fname = QFileDialog.getOpenFileName(self, "Choose world", worlds_dir, "JSON files (*.json)")
         if self.fname:
@@ -79,6 +92,7 @@ class UI(QMainWindow):
     def update_plot(self):
         self.selected_robot = self.robot_graph_selection.currentIndex()  # Get the selected index
         self.plot_simulation()
+
     def plot_simulation(self):
         t0 = self.world['t0']
         tf = self.world['tf']
@@ -88,19 +102,28 @@ class UI(QMainWindow):
             # Data is not available, return without plotting
             return
         self.MplWidget.canvas.axes.clear()  # Clear the previous plot
-        
+        self.MplWidget.canvas.axes.grid()
         num_results = self.x_results_plt.shape[0]  # Assuming all robots have the same number of results
         t = np.linspace(t0, tf, num_results)
+        if (self.variables_to_display == "State"):
+            # Plot the selected robot's state variables
+            self.MplWidget.canvas.axes.plot(t, self.x_results_plt[:, self.selected_robot], label=f'Robot {self.selected_robot+1} - x')
+            self.MplWidget.canvas.axes.plot(t, self.y_results_plt[:, self.selected_robot], label=f'Robot {self.selected_robot+1} - y')
+            self.MplWidget.canvas.axes.plot(t, self.theta_vals_display[:, self.selected_robot], label=f'Robot {self.selected_robot+1} - theta')
 
-        # Plot the selected robot's state variables
-        self.MplWidget.canvas.axes.plot(t, self.x_results_plt[:, self.selected_robot], label=f'Robot {self.selected_robot+1} - x')
-        self.MplWidget.canvas.axes.plot(t, self.y_results_plt[:, self.selected_robot], label=f'Robot {self.selected_robot+1} - y')
-        self.MplWidget.canvas.axes.plot(t, self.theta_vals_display[:, self.selected_robot], label=f'Robot {self.selected_robot+1} - theta')
+            self.MplWidget.canvas.axes.legend(loc='upper right')
+            self.MplWidget.canvas.axes.set_title(f'Variables de estado para Robot {self.selected_robot+1}')
+            self.MplWidget.canvas.draw()
 
-        self.MplWidget.canvas.axes.legend(loc='upper right')
-        self.MplWidget.canvas.axes.set_title(f'Variables de estado para Robot {self.selected_robot+1}')
-        self.MplWidget.canvas.draw()
+        elif (self.variables_to_display == "Velocities"):
+            # Plot the selected robot's velocities
+            self.MplWidget.canvas.axes.plot(t, self.x_results_plt[:, self.selected_robot], label=f'Robot {self.selected_robot+1} - linear velocity')
+            self.MplWidget.canvas.axes.plot(t, self.y_results_plt[:, self.selected_robot], label=f'Robot {self.selected_robot+1} - angular velocity')
+            
 
+            self.MplWidget.canvas.axes.legend(loc='upper right')
+            self.MplWidget.canvas.axes.set_title(f'Velocidades para Robot {self.selected_robot+1}')
+            self.MplWidget.canvas.draw()
 
 
 

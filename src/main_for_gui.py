@@ -143,5 +143,6 @@ def calculate_simulation(world, robots, pololu):
     return x_vals_display, y_vals_display, theta_vals_display, x_results_plt, y_results_plt
 
 def run_animation(animation_window, x_vals_display, y_vals_display, theta_vals_display):
+    print(x_vals_display, y_vals_display, theta_vals_display)
     # run the animation with the results for each robot
     animation_window.animate(x_vals_display, y_vals_display, theta_vals_display)
