@@ -260,23 +260,6 @@ class py_game_monitoring(py_game_animation):
                 if e.type == pygame.QUIT:
                     self.run = False
                     break
-                elif e.type == pygame.VIDEORESIZE:
-                    self.screen_x, self.screen_y = e.w, e.h
-                    self.screen = pygame.display.set_mode((self.screen_x, self.screen_y), pygame.RESIZABLE)
-
-                    # Calculate the aspect ratio of the original image
-                    original_aspect_ratio = self.original_size[0] / self.original_size[1]
-
-                    # Calculate the maximum width based on the height to maintain aspect ratio
-                    max_width = int(self.screen_y * original_aspect_ratio)
-
-                    # Use the smaller of max_width and screen_x to avoid exceeding the screen dimensions
-                    new_width = min(max_width, self.screen_x)
-
-                    # Calculate the corresponding height
-                    new_height = int(new_width / original_aspect_ratio)
-
-                    self.grid = pygame.transform.scale(self.grid_img, (new_width, new_height))
 
             self.screen.fill(self.background_color)
             self.screen.blit(self.grid, (0, 0))

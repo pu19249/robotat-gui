@@ -173,8 +173,8 @@ def robotat_3pi_force_stop(tcp_obj, robot):
     
     tcp_obj.send(robot.tcpsock, cbormsg)
 # Uso
-robotat = robotat_connect()
-robotat.recv(2048)
+# robotat = robotat_connect()
+# robotat.recv(2048)
 
 # while(1): 
 #     for pose_data in get_pose_continuous(robotat, [1], 'quat', max_attempts=5):
@@ -194,12 +194,12 @@ def get_and_process_data(marker):
         time.sleep(0.5)
 
 # Create threads for each marker
-marker1_thread = threading.Thread(target=get_and_process_data, args=(1,))
-marker2_thread = threading.Thread(target=get_and_process_data, args=(17,))
+# marker1_thread = threading.Thread(target=get_and_process_data, args=(1,))
+# marker2_thread = threading.Thread(target=get_and_process_data, args=(17,))
 
-# Start the threads
-marker1_thread.start()
-marker2_thread.start()
+# # Start the threads
+# marker1_thread.start()
+# marker2_thread.start()
 
 
 # Example usage:
