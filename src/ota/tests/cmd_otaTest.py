@@ -1,31 +1,33 @@
 import sys
-import subprocess
 import os
+import subprocess
 import time
 from pathlib import Path
-
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(parent_dir)
-from wifi_connect import is_connected_to_network, connect, createNewConnection
+from wifi_connect import NetworkManager
+
+NetWork = NetworkManager()
 
 Robotat_SSID = 'Robotat'
 Robotat_Password = 'iemtbmcit116'
+NetWork.define_network_parameters(Robotat_SSID, Robotat_Password)
 retries_connection = 0
 retries_update = 0
 max_retries_connection = 3
 max_retries_update = 3
 
-if not is_connected_to_network(Robotat_SSID):
+if not NetWork.is_connected_to_network():
     print('Not connected to Robotat')
     print('Connecting ...')
-    createNewConnection(Robotat_SSID, Robotat_SSID, Robotat_Password)
-    connect(Robotat_SSID, Robotat_SSID)
+    NetWork.create_new_connection(Robotat_SSID)
+    NetWork.connect(Robotat_SSID)
     connected = True
     print('Connected to ', Robotat_SSID)
     while connected == False and retries_connection != max_retries_connection:
         print('Retrying connection')
         time.sleep(3)
-        connect(Robotat_SSID, Robotat_SSID)
+        NetWork.connect(Robotat_SSID)
         retries_connection += 1
         connected = True
         print('Connected to ', Robotat_SSID)

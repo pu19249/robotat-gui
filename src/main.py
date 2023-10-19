@@ -8,7 +8,6 @@ from windows.map_coordinates import inverse_change_coordinates
 import numpy as np
 import pygame
 
-
 # Load json file (using with automatically closes the file when exiting the block)
 with open('worlds/world_definition.json') as f:
     world = json.load(f)

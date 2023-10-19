@@ -4,3 +4,4 @@
 
 # Choose whether to load data from simulation or another file to upload
 
+from wifi_connect import NetworkManager

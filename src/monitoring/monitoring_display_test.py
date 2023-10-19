@@ -1,11 +1,22 @@
 import sys
-sys.path.append('C:\\Users\\jpu20\\Documents\\robotat-gui\\src')
+import threading
+import time
 import random
+import os
+# sys.path.append('C:\\Users\\jpu20\\Documents\\robotat-gui\\src')
+# Get the current script's directory
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Get the parent directory
+parent_dir = os.path.dirname(current_dir)
+
+# Add the parent directory to the sys.path
+sys.path.append(parent_dir)
+
 from windows.animation_window import *
 from robotat_3pi_Python import *
 from windows.map_coordinates import inverse_change_coordinates
-import threading
-import time
+
 
 pictures_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'pictures')
 
@@ -16,6 +27,8 @@ animation_window.initialize()
 # Connect to robotat
 # robotat = robotat_connect()
 # robotat.recv(2048)
+robotat = Robotat()
+
 
 # Initialize arrays to display and save data
 x_data = []
@@ -38,7 +51,7 @@ theta_test = [[50,60]]
 
 # Prepare data as the animation window expects it (list of lists for each x, y, theta for each robot) according to how its received from the server (list of x, y, orientation)
 def get_and_process_data():
-    for pose_data in get_pose_continuous(robotat, [1], 'quat', max_attempts=5):
+    for pose_data in robotat.get_pose_continuous(robotat, [1], 'quat', max_attempts=5):
         # if pose_data is not None:
         #     print(pose_data)
         # else:

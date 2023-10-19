@@ -12,8 +12,8 @@
 #include <WiFi.h>
 #include "BasicOTA.hpp"
 
-#define SSID      "Robotat"
-#define PASSWORD  "iemtbmcit116"
+#define SSID      "TIGO-F4CD"
+#define PASSWORD  "4NJ667300826"
 
 BasicOTA OTA;
 
