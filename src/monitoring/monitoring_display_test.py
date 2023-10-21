@@ -21,13 +21,13 @@ from windows.map_coordinates import inverse_change_coordinates
 pictures_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'pictures')
 
 # Initialize animation window child class
-animation_window = py_game_monitoring(760, 960)
+animation_window = py_game_animation(760, 960)
 animation_window.initialize()
 
 # Connect to robotat
-# robotat = robotat_connect()
-# robotat.recv(2048)
-robotat = Robotat()
+robotat = robotat_connect()
+robotat.recv(2048)
+# robotat = Robotat()
 
 
 # Initialize arrays to display and save data
@@ -51,11 +51,12 @@ theta_test = [[50,60]]
 
 # Prepare data as the animation window expects it (list of lists for each x, y, theta for each robot) according to how its received from the server (list of x, y, orientation)
 def get_and_process_data():
-    for pose_data in robotat.get_pose_continuous(robotat, [1], 'quat', max_attempts=5):
+    for pose_data in get_pose_continuous(robotat, [19], 'quat', max_attempts=5):
         # if pose_data is not None:
         #     print(pose_data)
         # else:
         #     print('no data')
+        print(pose_data)
         x_vals_real_time = [pose_data[0][0]]
         y_vals_real_time = [pose_data[0][1]]
         theta_vals_real_time = [pose_data[0][2]]
@@ -65,7 +66,7 @@ def get_and_process_data():
         print(f"x: {x_vals_real_time}, y: {y_vals_real_time}, theta: {theta_vals_real_time}")
 
         # animation_window.start_animation(x_vals_real_time, y_vals_real_time, theta_vals_real_time)
-        time.sleep(0.5)
+        time.sleep(1)
     return x_vals_real_time, y_vals_real_time, theta_vals_real_time
 
 def map_data(x_vals_real_time, y_vals_real_time, theta_vals_real_time):
@@ -85,10 +86,11 @@ def map_data(x_vals_real_time, y_vals_real_time, theta_vals_real_time):
             # print(f"x: {x_val}, y: {y_val} => x_new: {x_new_val}, y_new: {y_new_val}")
 
     # Wrap the final arrays in a list
+    
     x_vals_display_robot = [x_vals_display_robot]
     y_vals_display_robot = [y_vals_display_robot]
     theta_vals_display_robot = [theta_vals_display_robot]
-
+    
     return x_vals_display_robot, y_vals_display_robot, theta_vals_display_robot
 
 # animation_window.animate(x_vals_display_robot, y_vals_display_robot, theta_vals_display_robot)
@@ -105,15 +107,16 @@ def real_time_data_generator(num_robots):
 
 # MAIN TEST LOOP
 run_animation = True
-while run_animation == True:
+# while run_animation == True:
     # data_generator = real_time_data_generator(1)
     # animation_window.start_animation(data_generator)
-    x_vals_real_time, y_vals_real_time, theta_vals_real_time = get_and_process_data()
-    x_vals_display_robot, y_vals_display_robot, theta_vals_display_robot = map_data(x_vals_real_time, y_vals_real_time, theta_vals_real_time)
-    animation_window.start_animation((x_vals_display_robot, y_vals_display_robot, theta_vals_display_robot))
-    run_animation = False
+x_vals_real_time, y_vals_real_time, theta_vals_real_time = get_and_process_data()
+x_vals_display_robot, y_vals_display_robot, theta_vals_display_robot = map_data(x_vals_real_time, y_vals_real_time, theta_vals_real_time)
+animation_window.start_animation((x_vals_display_robot, y_vals_display_robot, theta_vals_display_robot))
+run_animation = False
 
-
+# while(1):
+#     x_vals_real_time, y_vals_real_time, theta_vals_real_time = get_and_process_data()
 # def start_animation(x_data, y_data, theta_data):
 #     # Add code to start animation here
 #     animation_window.update_robot_characters(x_data, y_data, theta_data)

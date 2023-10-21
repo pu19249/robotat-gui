@@ -5,234 +5,310 @@ import numpy as np
 from scipy.spatial.transform import Rotation as R
 import warnings
 import struct
-from typing import *
+import sys
+import threading
+import random
+import os
+import ctypes
+# This solves scaling issues for the independent pygame window
+ctypes.windll.user32.SetProcessDPIAware()
+
+# sys.path.append('C:\\Users\\jpu20\\Documents\\robotat-gui\\src')
+# Get the current script's directory
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Get the parent directory
+parent_dir = os.path.dirname(current_dir)
+
+# Add the parent directory to the sys.path
+sys.path.append(parent_dir)
+
+from windows.animation_window import *
+from robotat_3pi_Python import *
+from windows.map_coordinates import inverse_change_coordinates, change_coordinates
 
 
-class Robotat:
-    """
-    A class used to establish Robotat's methods to connect with server
-    from compupter (client). When instanced automatically tries to
-    establish the connection.
+pictures_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'pictures')
 
-    Attributes
-    ----------
-    sock : sock
-        socket object of type TCP
-    server_address : tuple
-        IP address of server and preestablished port
-    robot : dict
-        It holds the connection properties for the Pololu.
-    """
+# Initialize animation window child class
+animation_window = py_game_animation(850, 960)
+animation_window.initialize()
 
-    def __init__(self) -> None:
-        self.robot = {}
-        """ Attemps socket creation and connection with server."""
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server_address = ("192.168.50.200", 1883)
+def robotat_connect():
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_address = ('192.168.50.200', 1883)
 
-        self.sock.connect(self.server_address)
-        self.sock.settimeout(1)
-        print("Connecting to %s port %s" % self.server_address)
+    print("Connecting to %s port %s" % server_address)
+    try:
+        sock.connect(server_address)
+        sock.settimeout(1)
+    except:
+        print('No response from server')
+        quit()
+    return sock
+
+def robotat_disconnect(tcp_obj):
+    tcp_obj.sendall(tcp_obj, b'EXIT')
+    print('Disconnected from Robotat Server.')
+
+def get_pose_continuous(tcp_obj, agents_ids, rotrep, max_attempts=10):
+    # tcp_obj.settimeout(1)
+    #tcp_obj.recv(2048)
+    for attempt in range(max_attempts):
         try:
-            self.sock.connect(self.server_address)
-            self.sock.settimeout(1)
-            self.sock.recv(2048)
-        except:
-            print("No response from server")
-            quit()
+            #print("DEB1")
+            #print(len(tcp_obj.recv(2048)))
+            
+            if min(agents_ids) > 0 and max(agents_ids) <= 100:
+                s = {
+                    "dst": 1,
+                    "cmd": 1,
+                    "pld": agents_ids
+                }
 
-    def robotat_disconnect(self):
-        """Sends command to server to close the connection."""
-        self.sock.sendall(self.sock, b"EXIT")
-        print("Disconnected from Robotat Server.")
+                tcp_obj.send(json.dumps(s).encode())
+                data_str = tcp_obj.recv(2048)
+                mocap_data = json.loads(data_str)
 
-    def get_pose_continuous(self, agents_ids: list[int], rotrep: str, max_attempts: int = 10):
-        """Yields marker's pose.
+                mocap_data = np.array(mocap_data)
+                num_agents = len(agents_ids)
+                mocap_data = mocap_data.reshape(num_agents, 7)
 
-        Args:
-        ----------
-        agents_id : int
-            Receives the marker ID placed on the Pololu physically.
-        rotrep : str
-            Specifies the type of orientation to work with.
-        max_attemps : int
-            Specify a different number of maximum attempts to fetch marker's pose
-            default is 10 attempts
-        """
-        for attempt in range(max_attempts):
-            try:
-                if min(agents_ids) > 0 and max(agents_ids) <= 100:
-                    s = {"dst": 1, "cmd": 1, "pld": agents_ids}
+                if rotrep != 'quat':
+                    quat_columns = mocap_data[:, 3:]
+                    euler_angles = R.from_quat(quat_columns).as_euler('xyz', degrees=True)
+                    mocap_data[:, 3:] = np.rad2deg(euler_angles)
+                    mocap_data = mocap_data[:, :-1]
 
-                    self.sock.send(json.dumps(s).encode())
-                    data_str = self.sock.recv(2048)
-                    mocap_data = json.loads(data_str)
+                yield mocap_data
+                break
 
-                    mocap_data = np.array(mocap_data)
-                    num_agents = len(agents_ids)
-                    mocap_data = mocap_data.reshape(num_agents, 7)
+            else:
+                print('ERROR: Invalid ID(s).')
+                
 
-                    if rotrep != "quat":
-                        quat_columns = mocap_data[:, 3:]
-                        euler_angles = R.from_quat(quat_columns).as_euler(
-                            "xyz", degrees=True
-                        )
-                        mocap_data[:, 3:] = np.rad2deg(euler_angles)
-                        mocap_data = mocap_data[:, :-1]
+        except socket.timeout:
+            print("Timeout count:", attempt + 1)
+            time.sleep(0.1)
+            
 
-                    yield mocap_data
-                    break
-
-                else:
-                    print("ERROR: Invalid ID(s).")
-
-            except socket.timeout:
-                print("Timeout count:", attempt + 1)
-                time.sleep(0.1)
-
-        yield None
-
-    def robotat_3pi_connect(self, agent_id: int):
-        """Establishes TCP connection with Pololu's ESP32.
-
-        Args:
-        ----------
-        agent_id : int
-            Receives the marker ID placed on the Pololu physically.
-        """
-
-        if len(agent_id) != 1:
-            raise ValueError("Can only pair with a single 3Pi agent.")
-
-        agent_id = agent_id[0]
-        if (agent_id < 0) or (agent_id > 19):
-            raise ValueError("Invalid agent ID. Allowed IDs: 0 - 19.")
-
-        id = agent_id
-
-        if agent_id > 9:
-            ip = "192.168.50.1"
-        else:
-            ip = "192.168.50.10"
-
-        ip = f"{ip}{agent_id}"
-        port = 8888
-
-        try:
-            robot_connection = self.sock.connect((ip, port))
-        except Exception as e:
-            print(f"ERROR: Could not connect to the robot. {e}")
-
-        self.robot = {"ip": ip, "id": id, "port": port, "tcpsock": robot_connection}
-
-    def robotat_3pi_disconnect(self):
-        """Deletes robot connection."""
-        del self.robot
-        print("Disconnected from robot.")
-
-    def robotat_3pi_set_wheel_velocities(self, dphiL: float, dphiR: float):
-        """
-        Sends left wheel velocity and right wheel velocity to Pololu's ESP32.
-
-        Attributes:
-        -------------
-        dphil : float
-        dphiR : float
-            Right and left wheel velocities in rpm.
-
-        Raises:
-        ------------
-        Warning when any of the wheels velocities is over max accepted (+/- 850 rpm).
-        """
-        wheel_maxvel_rpm = 850
-        wheel_minvel_rpm = -850
-
-        if dphiL > wheel_maxvel_rpm:
-            message = f"Left wheel speed saturated to  {wheel_maxvel_rpm} rpm"
-            warnings.warn(message)
-            dphiL = wheel_maxvel_rpm
-
-        if dphiR > wheel_maxvel_rpm:
-            message = f"Right wheel speed saturated to  {wheel_maxvel_rpm} rpm"
-            warnings.warn(message)
-            dphiR = wheel_maxvel_rpm
-
-        if dphiL < wheel_minvel_rpm:
-            message = f"Left wheel speed saturated to  {wheel_minvel_rpm} rpm"
-            warnings.warn(message)
-            dphiL = wheel_minvel_rpm
-
-        if dphiR < wheel_minvel_rpm:
-            message = f"Right wheel speed saturated to  {wheel_minvel_rpm} rpm"
-            warnings.warn(message)
-            dphiR = wheel_minvel_rpm
-
-        # encode to a simple CBOR array
-        cbormsg = np.zeros((1, 11))
-        cbormsg[0] = 130
-        cbormsg[1] = 250
-        # Convert to bytes
-        dphiL_bytes = struct.pack("f", dphiL)
-        # Extract the first byte (8-bit unsigned integer)
-        dphiL_uint8 = dphiL_bytes[0]
-        cbormsg[2:5] = np.fliplr(dphiL_uint8)
-        cbormsg[6] = 250
-        dphiR_bytes = struct.pack("f", dphiR)
-        # Extract the first byte (8-bit unsigned integer)
-        dphiR_uint8 = dphiR_bytes[0]
-        cbormsg[7:10] = np.fliplr(dphiR_uint8)
-
-        self.sock.send(self.robot.tcpsock, cbormsg)
-
-    def robotat_3pi_force_stop(self):
-        """
-        Sets left wheel velocity and right wheel velocity to 0.
-        """
-        dphiL = 0
-        dphiR = 0
-        # encode to a simple CBOR array
-        cbormsg = np.zeros((1, 11))
-        cbormsg[0] = 130
-        cbormsg[1] = 250
-        # Convert to bytes
-        dphiL_bytes = struct.pack("f", dphiL)
-        # Extract the first byte (8-bit unsigned integer)
-        dphiL_uint8 = dphiL_bytes[0]
-        cbormsg[2:5] = np.fliplr(dphiL_uint8)
-        cbormsg[6] = 250
-        dphiR_bytes = struct.pack("f", dphiR)
-        # Extract the first byte (8-bit unsigned integer)
-        dphiR_uint8 = dphiR_bytes[0]
-        cbormsg[7:10] = np.fliplr(dphiR_uint8)
-
-        self.sock.send(self.robot.tcpsock, cbormsg)
-
-    def get_and_process_data(self, marker: int):
-        """
-        It calls the generator method 'get_pose_continuous' and
-        iterates over the object to get the data and be able to extract
-        position and orientation results.
-        """
-        while 1:
-            for pose_data in self.get_pose_continuous([marker], "quat", max_attempts=5):
-                if pose_data is not None:
-                    print(f"Marker {marker}: {pose_data[0][0]}")
-                else:
-                    break
-            time.sleep(0.5)
+    #print("Reached maximum number of attempts. Exiting.")
+    yield None
 
 
+def robotat_3pi_connect(tcp_obj, agent_id):
+    if len(agent_id) != 1:
+        raise ValueError('Can only pair with a single 3Pi agent.')
+
+    agent_id = agent_id[0]
+    if (agent_id < 0) or (agent_id > 19):
+        raise ValueError('Invalid agent ID. Allowed IDs: 0 - 19.')
+
+    id = agent_id
+
+    if agent_id > 9:
+        ip = '192.168.50.1'
+    else:
+        ip = '192.168.50.10'
+
+    ip = f"{ip}{agent_id}"
+    port = 8888
+    
+    
+    try:
+        robot_connection = tcp_obj.connect((ip, port))
+    except Exception as e:
+        print(f'ERROR: Could not connect to the robot. {e}')
+    
+    robot = {
+        "ip": ip,
+        "id": id,
+        "port": port,
+        "tcpsock": robot_connection
+    }
+    return robot
+
+
+def robotat_3pi_disconnect(robot):
+    del robot
+    print('Disconnected from robot.')
+
+
+def robotat_3pi_set_wheel_velocities(tcp_obj, robot, dphiL, dphiR):
+    wheel_maxvel_rpm = 850
+    wheel_minvel_rpm = -850
+    
+    if(dphiL > wheel_maxvel_rpm):
+        message = f"Left wheel speed saturated to  {wheel_maxvel_rpm} rpm"
+        warnings.warn(message)
+        dphiL = wheel_maxvel_rpm
+    
+
+    if(dphiR > wheel_maxvel_rpm):
+        message = f"Right wheel speed saturated to  {wheel_maxvel_rpm} rpm"
+        warnings.warn(message)
+        dphiR = wheel_maxvel_rpm
+    
+
+    if(dphiL < wheel_minvel_rpm):
+        message = f"Left wheel speed saturated to  {wheel_minvel_rpm} rpm"
+        warnings.warn(message)
+        dphiL = wheel_minvel_rpm
+    
+
+    if(dphiR < wheel_minvel_rpm):
+        message = f"Right wheel speed saturated to  {wheel_minvel_rpm} rpm"
+        warnings.warn(message)
+        dphiR = wheel_minvel_rpm
+    
+
+    # encode to a simple CBOR array
+    cbormsg = np.zeros((1,11))
+    cbormsg[0] = 130
+    cbormsg[1] = 250
+    # Convert to bytes
+    dphiL_bytes = struct.pack('f', dphiL)
+    # Extract the first byte (8-bit unsigned integer)
+    dphiL_uint8 = dphiL_bytes[0]
+    cbormsg[2:5] = np.fliplr(dphiL_uint8)
+    cbormsg[6] = 250
+    dphiR_bytes = struct.pack('f', dphiR)
+    # Extract the first byte (8-bit unsigned integer)
+    dphiR_uint8 = dphiR_bytes[0]
+    cbormsg[7:10] = np.fliplr(dphiR_uint8)
+    
+    tcp_obj.send(robot.tcpsock, cbormsg)
+
+def robotat_3pi_force_stop(tcp_obj, robot):
+    dphiL = 0
+    dphiR = 0
+    # encode to a simple CBOR array
+    cbormsg = np.zeros((1,11))
+    cbormsg[0] = 130
+    cbormsg[1] = 250
+    # Convert to bytes
+    dphiL_bytes = struct.pack('f', dphiL)
+    # Extract the first byte (8-bit unsigned integer)
+    dphiL_uint8 = dphiL_bytes[0]
+    cbormsg[2:5] = np.fliplr(dphiL_uint8)
+    cbormsg[6] = 250
+    dphiR_bytes = struct.pack('f', dphiR)
+    # Extract the first byte (8-bit unsigned integer)
+    dphiR_uint8 = dphiR_bytes[0]
+    cbormsg[7:10] = np.fliplr(dphiR_uint8)
+    
+    tcp_obj.send(robot.tcpsock, cbormsg)
+
+robotat = robotat_connect()
+robotat.recv(2048)
+# Initialize arrays to display and save data
+x_data = []
+y_data = []
+theta_data = []
+x_vals_display_robot = []
+y_vals_display_robot = []
+theta_vals_display_robot = []
+x_results_raw = []
+y_results_raw = []
+
+
+# First we need to create the object that represents and updates the position and rotation of the Pololu img (first one robot only)
+character = (os.path.join(pictures_dir, "pololu_img_x.png"), 0, 0, 0) 
+animation_window.add_robot_character(*character)
+
+x_test = [[10,20]]
+y_test = [[30,40]]
+theta_test = [[50,60]]
+
+# Prepare data as the animation window expects it (list of lists for each x, y, theta for each robot) according to how its received from the server (list of x, y, orientation)
+def get_and_process_data():
+    for pose_data in get_pose_continuous(robotat, [13], 'quat', max_attempts=5):
+        # if pose_data is not None:
+        #     print(pose_data)
+        # else:
+        #     print('no data')
+        print(pose_data)
+        x_vals_real_time = [pose_data[0][0]]
+        y_vals_real_time = [pose_data[0][1]]
+        theta_vals_real_time = [pose_data[0][2]]
+        x_data.append(x_vals_real_time)
+        y_data.append(y_vals_real_time)
+        theta_data.append(theta_vals_real_time)
+        print(f"x: {x_vals_real_time}, y: {y_vals_real_time}, theta: {theta_vals_real_time}")
+        
+        # animation_window.start_animation(x_vals_real_time, y_vals_real_time, theta_vals_real_time)
+        time.sleep(1)
+        break
+    return x_vals_real_time, y_vals_real_time, theta_vals_real_time
+
+def map_data(x_vals_real_time, y_vals_real_time, theta_vals_real_time):
+    x_vals_display_robot = []
+    y_vals_display_robot = []
+    theta_vals_display_robot = []
+    # this part makes the mapping to display in the complete animation window 
+    for x, y, theta in zip(x_vals_real_time, y_vals_real_time, theta_vals_real_time):
+        # for x_val, y_val, theta_val in zip(x, y, theta):
+        x_raw, y_raw = x, y
+        x_new_val, y_new_val = inverse_change_coordinates(x_raw*100, y_raw*100, 960, 760)
+            
+        theta_new_val = np.rad2deg(theta)  # theta_val, not just theta
+        x_vals_display_robot.append(x_new_val)
+        y_vals_display_robot.append(y_new_val)
+        theta_vals_display_robot.append(theta_new_val)
+        x_results_raw.append(x_raw)
+        y_results_raw.append(y_raw)
+            # Print statement for debugging
+            # print(f"x: {x_val}, y: {y_val} => x_new: {x_new_val}, y_new: {y_new_val}")
+        
+    # Wrap the final arrays in a list
+    x_vals_display_robot = [x_vals_display_robot]
+    y_vals_display_robot = [y_vals_display_robot]
+    theta_vals_display_robot = [theta_vals_display_robot]
+    print(f"X: {x_vals_display_robot}, Y: {y_vals_display_robot}, THETA: {theta_vals_display_robot}")
+    return x_vals_display_robot, y_vals_display_robot, theta_vals_display_robot
+
+# animation_window.animate(x_vals_display_robot, y_vals_display_robot, theta_vals_display_robot)
+
+def real_time_data_generator(num_robots):
+    while True:
+        x_values = [[random.randint(0, 100) for _ in range(num_robots)]]
+        y_values = [[random.randint(0, 100) for _ in range(num_robots)]]
+        theta_values = [[random.uniform(0, 2 * 3.14159265359) for _ in range(num_robots)]]
+        yield x_values, y_values, theta_values
+
+
+
+
+# MAIN TEST LOOP
+run_animation = True
+while run_animation == True:
+    # data_generator = real_time_data_generator(1)
+    # animation_window.start_animation(data_generator)
+    x_vals_real_time, y_vals_real_time, theta_vals_real_time = get_and_process_data()
+    x_vals_display_robot1, y_vals_display_robot1, theta_vals_display_robot1 = map_data(x_vals_real_time, y_vals_real_time, theta_vals_real_time)
+    print(x_vals_display_robot1)
+    animation_window.start_animation(x_vals_display_robot1, y_vals_display_robot1, theta_vals_display_robot1)
+    # run_animation = False
 # Uso
 # robotat = robotat_connect()
 # robotat.recv(2048)
 
-# while(1):
-#     for pose_data in get_pose_continuous(robotat, [1], 'quat', max_attempts=5):
+# while(1): 
+#     for pose_data in get_pose_continuous(robotat, [19], 'quat', max_attempts=5):
 #         if pose_data is not None:
 #             print(pose_data)
 #         else:
 #             break
-#     time.sleep(0.5)
+#     time.sleep(1)
+
+# def get_and_process_data(marker):
+#     while(1):
+#         for pose_data in get_pose_continuous(robotat, [marker], 'quat', max_attempts=5):
+#             if pose_data is not None:
+#                 print(f"Marker {marker}: {pose_data[0][0]}")
+#             else:
+#                 break
+#         time.sleep(0.5)
 
 # Create threads for each marker
 # marker1_thread = threading.Thread(target=get_and_process_data, args=(1,))
