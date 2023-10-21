@@ -1,11 +1,27 @@
+"""
+This test file is not editable in terms of controller. It does not reflect
+the functionality of physical parameters, IP, or any other. This script
+was used to validate basic simulation flow and runge kutta simulation
+and it plots using matplotlib instead of pygame that is the current use for
+animation handling.
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import sys
+import os
+
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(parent_dir)
 from robots.robot_pololu import Pololu
 
 # Robot object definitions
-Robot1 = Pololu([0.0, 0.0, 0.0], [0.01, 0.5, 100, 100], 6.0, 1.1, 0, 0, 0)
-
+Robot1 = Pololu([0.0, 0.0, 0.0], [0.01, 0.5, 100, 100], 1, "1.1", "path", "controller")
+script_dir = os.path.dirname(os.path.abspath(__file__))
+pictures_dir = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "pictures"
+)
 # Simulation parameters
 dt = 0.001  # sample period
 t0 = 0  # initial time
@@ -69,7 +85,7 @@ for n in range(N):
     eO = thetag - theta
     eO = np.arctan2(np.sin(eO), np.cos(eO))
 
-    kP = v0 * (1 - np.exp(-alpha * eP ** 2)) / eP
+    kP = v0 * (1 - np.exp(-alpha * eP**2)) / eP
     v = kP * eP
 
     eO_D = eO - eO_1
@@ -98,33 +114,32 @@ for n in range(N):
 fig1, ax1 = plt.subplots()
 t = np.arange(t0, tf + dt, dt)
 ax1.plot(t, XI.T, linewidth=1)
-ax1.set_xlabel('$t$', fontsize=16)
-ax1.set_ylabel('$\\mathbf{x}(t)$', fontsize=16)
-l = ax1.legend(['$x(t)$', '$y(t)$', '$\\theta(t)$'],
-               loc='best', prop={'size': 12})
-ax1.grid(True, which='minor')
-ax1.grid(True, which='major')
+ax1.set_xlabel("$t$", fontsize=16)
+ax1.set_ylabel("$\\mathbf{x}(t)$", fontsize=16)
+l = ax1.legend(["$x(t)$", "$y(t)$", "$\\theta(t)$"], loc="best", prop={"size": 12})
+ax1.grid(True, which="minor")
+ax1.grid(True, which="major")
 plt.show()
 
 # Figure 2 - Robot animation
 figure2 = plt.figure()
 # Set appropriate limits for x and y axes
 ax = plt.axes(xlim=(-10, 10), ylim=(-10, 10))
-plt.grid(True, which='minor')
-plt.grid(True, which='major')
+plt.grid(True, which="minor")
+plt.grid(True, which="major")
 
 # Plotting the trajectory if applicable
 if seltraj:
-    plt.plot(traj[0, :], traj[1, :], 'k')
+    plt.plot(traj[0, :], traj[1, :], "k")
 
-trajplot, = plt.plot([], [], '--k', linewidth=1)
+(trajplot,) = plt.plot([], [], "--k", linewidth=1)
 # Load the robot image
-robot_image = plt.imread("pololu_img.png")
+robot_image = plt.imread(os.path.join(pictures_dir, "pololu_img.png"))
 robotplot = plt.imshow(robot_image, extent=(-0.15, 0.15, -0.15, 0.15))
 
 
-plt.xlabel('$x$', fontsize=16)
-plt.ylabel('$y$', fontsize=16)
+plt.xlabel("$x$", fontsize=16)
+plt.ylabel("$y$", fontsize=16)
 
 
 def update_plot(n):
@@ -133,12 +148,18 @@ def update_plot(n):
     y = q[1]
     theta = q[2]
 
-    trajplot.set_data(np.append(trajplot.get_xdata(), x),
-                      np.append(trajplot.get_ydata(), y))
+    trajplot.set_data(
+        np.append(trajplot.get_xdata(), x), np.append(trajplot.get_ydata(), y)
+    )
 
     BV = np.array([[-0.1, 0, 0.1], [0, 0.3, 0]])
-    IV = np.dot([[np.cos(theta - np.pi / 2), -np.sin(theta - np.pi / 2)],
-                [np.sin(theta - np.pi / 2), np.cos(theta - np.pi / 2)]], BV)
+    IV = np.dot(
+        [
+            [np.cos(theta - np.pi / 2), -np.sin(theta - np.pi / 2)],
+            [np.sin(theta - np.pi / 2), np.cos(theta - np.pi / 2)],
+        ],
+        BV,
+    )
 
     # Update the vertices of the polygon
     robotplot.set_extent((x - 1, x + 1, y - 1, y + 1))
@@ -148,6 +169,7 @@ def update_plot(n):
 
 # Update the FuncAnimation call
 animation_variable = animation.FuncAnimation(
-    figure2, update_plot, frames=N + 1, interval=dt * 10)
+    figure2, update_plot, frames=N + 1, interval=dt * 10
+)
 
 plt.show()

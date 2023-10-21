@@ -1,9 +1,17 @@
+"""
+This script could be used to test Pololu img moving in pygame.
+"""
+
 import sys
+import os
 import pygame
 from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import Qt, QTimer, QRectF
-
+script_dir = os.path.dirname(os.path.abspath(__file__))
+pictures_dir = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "pictures"
+)
 
 class PygameGraphicsView(QGraphicsView):
     def __init__(self, parent=None):
@@ -20,7 +28,7 @@ class PygameGraphicsView(QGraphicsView):
         self.clock = pygame.time.Clock()
 
         # Load image
-        self.img = pygame.image.load('pololu_img.png').convert()
+        self.img = pygame.image.load(os.path.join(pictures_dir, "pololu_img.png")).convert()
         self.img_rect = self.img.get_rect(center=self.screen.get_rect().center)
         self.degree = 0
 
@@ -69,34 +77,3 @@ if __name__ == '__main__':
     view.show()
     sys.exit(app.exec_())
 
-
-# import pygame
-
-# pygame.init()
-# screen = pygame.display.set_mode([400, 400])
-# pygame.display.set_caption('Rotating image example')
-# clock = pygame.time.Clock()
-
-# img = pygame.image.load('pololu_img.png').convert()
-
-# img_rect = img.get_rect(center=screen.get_rect().center)
-# degree = 0
-
-# while degree < 360:
-#     for event in pygame.event.get():
-#         if event.type == pygame.QUIT:
-#             done = True
-
-#     # rotate image
-#     rot_img = pygame.transform.rotate(img, degree)
-#     img_rect = rot_img.get_rect(center=img_rect.center)
-
-#     # copy image to screen
-#     screen.fill((0, 0, 0))
-#     screen.blit(rot_img, img_rect)
-#     pygame.display.flip()
-
-#     clock.tick(60)
-#     degree += 1
-
-# pygame.quit()

@@ -6,8 +6,15 @@ from controllers.pid_controller import pd_controller
 from controllers.lqi import lqi_controller
 from windows.map_coordinates import inverse_change_coordinates
 import numpy as np
-import pygame
+from typing import *
 
+"""
+This methods are meant to work with the GUI widgets (simulation tab). They are organized in a way
+that they can follow the simulation flow:
+1. Choose world
+2. Start animation
+3. Displayed useful data
+"""
 # Define a dictionary to map controller names to controller functions
 controller_map = {
     'exponential_pid': exponential_pid,
@@ -15,12 +22,15 @@ controller_map = {
     'lqi_controller': lqi_controller
 }
 
-def load_world(file_path):
+# 
+def load_world(file_path: str):
+    
     with open(file_path) as f:
         world = json.load(f)
         return world
 
-def initialize_animation(world):
+def initialize_animation(world: dict):
+    
     # define the animation dimensions based on the json information - initialize animation window
     animation_window = py_game_animation(
         world.get('x_dimension_arena'),
@@ -30,7 +40,10 @@ def initialize_animation(world):
     return animation_window
 
 
-def create_objects(world, animation_window):
+def create_objects(world: dict, animation_window):
+    """
+    animation_window : pygame object created
+    """
     pololu = []
     characters = []
     traj = []
@@ -76,7 +89,7 @@ def create_objects(world, animation_window):
 
     return robots, pololu
 
-def calculate_simulation(world, robots, pololu):
+def calculate_simulation(world, robots: list, pololu: list):
     # Simulation params based on json
     dt = world['dt']
     t0 = world['t0']
@@ -139,10 +152,10 @@ def calculate_simulation(world, robots, pololu):
     x_results_plt = x_results_plt[1:]
     y_results_plt = np.array(list(zip(*y_results_plt)))
     y_results_plt = y_results_plt[1:]
-    
+
     return x_vals_display, y_vals_display, theta_vals_display, x_results_plt, y_results_plt
 
-def run_animation(animation_window, x_vals_display, y_vals_display, theta_vals_display):
-    print(x_vals_display, y_vals_display, theta_vals_display)
+def run_animation(animation_window, x_vals_display: np.ndarray, y_vals_display, theta_vals_display):
+    # print(x_vals_display, y_vals_display, theta_vals_display)
     # run the animation with the results for each robot
     animation_window.animate(x_vals_display, y_vals_display, theta_vals_display)
