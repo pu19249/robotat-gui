@@ -10,6 +10,7 @@ import threading
 import random
 import os
 import ctypes
+import queue
 # This solves scaling issues for the independent pygame window
 ctypes.windll.user32.SetProcessDPIAware()
 
@@ -30,6 +31,7 @@ from windows.map_coordinates import inverse_change_coordinates, change_coordinat
 
 pictures_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'pictures')
 
+data_queue = queue.Queue()
 # Initialize animation window child class
 animation_window = py_game_animation(850, 960)
 animation_window.initialize()
@@ -281,14 +283,30 @@ def real_time_data_generator(num_robots):
 
 # MAIN TEST LOOP
 run_animation = True
-while run_animation == True:
-    # data_generator = real_time_data_generator(1)
-    # animation_window.start_animation(data_generator)
-    x_vals_real_time, y_vals_real_time, theta_vals_real_time = get_and_process_data()
-    x_vals_display_robot1, y_vals_display_robot1, theta_vals_display_robot1 = map_data(x_vals_real_time, y_vals_real_time, theta_vals_real_time)
-    print(x_vals_display_robot1)
+def get_data_thread(run_flag):
+    while run_flag == True:
+        # data_generator = real_time_data_generator(1)
+        # animation_window.start_animation(data_generator)
+        x_vals_real_time, y_vals_real_time, theta_vals_real_time = get_and_process_data()
+        x_vals_display_robot1, y_vals_display_robot1, theta_vals_display_robot1 = map_data(x_vals_real_time, y_vals_real_time, theta_vals_real_time)
+        print(x_vals_display_robot1)
+        # animation_window.start_animation(x_vals_display_robot1, y_vals_display_robot1, theta_vals_display_robot1)
+        # run_animation = False
+        data_queue.put((x_vals_display_robot1, y_vals_display_robot1, theta_vals_display_robot1), block=False)
+
+
+def display_robot_thread(data):
+    x_vals_display_robot1, y_vals_display_robot1, theta_vals_display_robot1 = data.get()
     animation_window.start_animation(x_vals_display_robot1, y_vals_display_robot1, theta_vals_display_robot1)
-    # run_animation = False
+
+if __name__ =="__main__":
+    t1 = threading.Thread(target=get_data_thread, args=(run_animation,))
+    t2 = threading.Thread(target=display_robot_thread, args=(data_queue,))
+
+    # starting thread 1
+    t1.start()
+    # starting thread 2
+    t2.start()
 # Uso
 # robotat = robotat_connect()
 # robotat.recv(2048)

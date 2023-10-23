@@ -166,8 +166,36 @@ class ota_tab(QWidget):
     def __init__(self):
         super(ota_tab, self).__init__()
         # Load uic file
-        uic.loadUi("simulator_tab.ui ", self)
+        uic.loadUi("ota_tab.ui ", self)
 
+        # Define our widgets
+        self.status_label = self.findChild(QLabel, "status_mssg")
+        self.from_simulator = self.findChild(QRadioButton, "from_simulator")
+        self.from_new_sketch = self.findChild(QRadioButton, "from_new_sketch")
+        self.simulator_group = self.findChild(QGroupBox, "simulator_group")
+        self.new_sketch_group = self.findChild(QGroupBox, "new_sketch_group")
+        self.progress_bar_group = self.findChild(QGroupBox, "progress_bar_group")
+        self.code_preview = self.findChild(QTextBrowser, "code_preview")
+        print(type(self.from_simulator))
+        print(type(self.new_sketch_group))
+        # Define clicking actions for each of the buttons
+        self.new_sketch_group.setVisible(False)
+        self.from_simulator.setChecked(True)
+        self.from_simulator.toggled.connect(lambda:self.btnstate(self.from_simulator))
+    # Methods for handling clicking actions
+    def btnstate(self, b):
+         if b.isChecked():
+            self.status_label.setText('Se cargará data del JSON de simulación.')
+            self.simulator_group.setVisible(True)
+            self.new_sketch_group.setVisible(False)
+         else:
+            self.status_label.setText('Data de un nuevo sketch \nRevisar los requisitos del nuevo sketch.')
+            # self.status_label.setText('Revisar los requisitos del nuevo sketch.')
+            self.new_sketch_group.setVisible(True)
+            self.simulator_group.setVisible(False)
+
+
+        
 class monitoring_tab(QWidget):
     def __init__(self):
         super(monitoring_tab, self).__init__()
