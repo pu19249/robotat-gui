@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>simulator_tab</class>
+ <widget class="QWidget" name="simulator_tab">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1125</width>
+    <height>710</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="sizeIncrement">
+   <size>
+    <width>500</width>
+    <height>500</height>
+   </size>
+  </property>
+  <property name="baseSize">
+   <size>
+    <width>500</width>
+    <height>500</height>
+   </size>
+  </property>
+  <property name="mouseTracking">
+   <bool>false</bool>
+  </property>
+  <property name="windowTitle">
+   <string>simulator_tab</string>
+  </property>
+  <widget class="QRadioButton" name="state">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>280</y>
+     <width>141</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Variables de estado</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="select_world">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>60</y>
+     <width>181</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Seleccionar el mundo</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
+   <property name="default">
+    <bool>false</bool>
+   </property>
+   <property name="flat">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="play_animation">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>160</y>
+     <width>181</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Reproducir</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="save_data">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>500</y>
+     <width>181</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Guardar datos</string>
+   </property>
+  </widget>
+  <widget class="QRadioButton" name="velocities">
+   <property name="geometry">
+    <rect>
+     <x>100</x>
+     <y>340</y>
+     <width>95</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Velocidades</string>
+   </property>
+  </widget>
+  <widget class="MplWidget" name="MplWidget" native="true">
+   <property name="geometry">
+    <rect>
+     <x>340</x>
+     <y>0</y>
+     <width>761</width>
+     <height>701</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="acceptDrops">
+    <bool>false</bool>
+   </property>
+   <widget class="QComboBox" name="robot_graph_selection">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>20</y>
+      <width>73</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QLabel" name="message_sim">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>580</y>
+     <width>301</width>
+     <height>101</height>
+    </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::Box</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Sunken</enum>
+   </property>
+   <property name="lineWidth">
+    <number>3</number>
+   </property>
+   <property name="text">
+    <string>Consola de mensajes</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="plot">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>400</y>
+     <width>181</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Graficar</string>
+   </property>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MplWidget</class>
+   <extends>QWidget</extends>
+   <header>mplwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

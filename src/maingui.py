@@ -33,6 +33,25 @@ controller_map = {
 class UI(QMainWindow):
     def __init__(self):
         super(UI, self).__init__()
+        # Load uic file
+        # uic.loadUi("main_gui.ui", self)
+        # Create and add tabs
+        # Set the size of the main window
+        self.resize(1121, 741)
+        self.tab_widget = QTabWidget()
+        
+        self.tab1_simulation = simulator_tab()
+        self.tab2_ota = ota_tab()
+        self.tab3_monitoring = monitoring_tab()
+        self.tab_widget.addTab(self.tab1_simulation, "Simulador")
+        self.tab_widget.addTab(self.tab2_ota, "Programador")
+        self.tab_widget.addTab(self.tab3_monitoring, "Monitoreo")
+        self.setCentralWidget(self.tab_widget)
+        self.show()
+
+class simulator_tab(QWidget):
+    def __init__(self):
+        super(simulator_tab, self).__init__()
         self.fname = None
         self.world = None
         self.robots = None
@@ -43,7 +62,7 @@ class UI(QMainWindow):
         self.theta_vals_display = None
         self.selected_robot = None
         # Load uic file
-        uic.loadUi("main_gui.ui", self)
+        uic.loadUi("simulator_tab.ui ", self)
         
         # Define our widgets
         self.console_label = self.findChild(QLabel, "message_sim")
@@ -55,6 +74,7 @@ class UI(QMainWindow):
         self.state_display = self.findChild(QRadioButton, "state")
         self.velocities_display = self.findChild(QRadioButton, "velocities")
         
+
         # Define clicking actions for each of the buttons
         self.select_world.clicked.connect(self.open_world_windows)
         self.plot.clicked.connect(self.plot_simulation)
@@ -63,11 +83,12 @@ class UI(QMainWindow):
         self.robot_graph_selection.currentIndexChanged.connect(self.update_plot)
         self.state_display.setChecked(True)
         self.state_display.toggled.connect(lambda:self.btnstate(self.state_display))
+        
 
         # Define global flags
         self.variables_to_display = "State"
         # Show the App
-        self.show()
+        # self.show()
 
     # Methods for handling clicking actions
     def btnstate(self, b):
@@ -138,7 +159,20 @@ class UI(QMainWindow):
         self.x_vals_display, self.y_vals_display, self.theta_vals_display, self.x_results_plt, self.y_results_plt = calculate_simulation(self.world, self.robots, self.pololu)
         run_animation(self.animation_window, self.x_vals_display, self.y_vals_display, self.theta_vals_display)
 
-        
+    # def hide_show(self):
+
+
+class ota_tab(QWidget):
+    def __init__(self):
+        super(ota_tab, self).__init__()
+        # Load uic file
+        uic.loadUi("simulator_tab.ui ", self)
+
+class monitoring_tab(QWidget):
+    def __init__(self):
+        super(monitoring_tab, self).__init__()
+        # Load uic file
+        uic.loadUi("simulator_tab.ui ", self)
 
 # Initialize the App
 app = QApplication(sys.argv)

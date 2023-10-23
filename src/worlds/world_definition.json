@@ -16,7 +16,7 @@
       },
       "ID_robot": 1,
       "IP": "192.192.1.0",
-      "state": [-50, -50, 0],
+      "state": [0, 0, 0],
       "controller": "exponential_pid"
     },
     {

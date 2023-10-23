@@ -62,3 +62,37 @@ def inverse_change_coordinates(x_new: numpy.float64, y_new: numpy.float64, heigh
             y = y_new + height / 2 - 15
 
     return x, y
+
+def change_coordinates(x, y, height, length):
+    x = x*2
+    y = y*2
+    if x < 0 and y < 0:
+        x_new = length/2 + abs(x)
+        y_new = height/2 + abs(y)
+    elif x > 0 and y < 0:
+        x_new = length/2 - x
+        y_new = height/2 + abs(y)
+    elif x < 0 and y > 0:
+        x_new = length/2 + abs(x)
+        y_new = height/2 - y
+    else:
+        x_new = length/2 - x
+        y_new = height/2 - y
+    return x_new, y_new
+
+# if (x < 0 && y < 0)
+#     x = 190 + abs(x)*100;
+#     y = 240 + abs(y)*100;
+# elseif (x < 0 && y > 0)
+#     x = 190 + abs(x)*100;
+#     y = 240-y*100;
+# elseif (x > 0 && y < 0)
+#     x = 190-x*100;
+#     y = 240 + abs(y)*100;
+# else
+#     x = 190-x*100;
+#     y = 240-y*100;
+# end
+
+# x, y = change_coordinates(-0.06, 0.005, 960, 760)
+# print(x, y)

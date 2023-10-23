@@ -202,7 +202,7 @@
        </rect>
       </property>
      </widget>
-     <widget class="QRadioButton" name="radioButton">
+     <widget class="QRadioButton" name="from_simulator">
       <property name="geometry">
        <rect>
         <x>100</x>
@@ -215,7 +215,7 @@
        <string>De simulador</string>
       </property>
      </widget>
-     <widget class="QRadioButton" name="radioButton_2">
+     <widget class="QRadioButton" name="from_new_sketch">
       <property name="geometry">
        <rect>
         <x>260</x>

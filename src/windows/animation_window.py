@@ -177,6 +177,7 @@ class py_game_animation:
         y_size : int
             (x, y) size of the animation window (in this value the actual size of the
             Robotat platform and scaling needs to be taken into account).
+            
         """
         grid_file = os.path.join(pictures_dir, "grid_back_coord.png")
 

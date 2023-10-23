@@ -222,7 +222,7 @@ theta_test = [[50,60]]
 
 # Prepare data as the animation window expects it (list of lists for each x, y, theta for each robot) according to how its received from the server (list of x, y, orientation)
 def get_and_process_data():
-    for pose_data in get_pose_continuous(robotat, [13], 'quat', max_attempts=5):
+    for pose_data in get_pose_continuous(robotat, [13], 'eulxyz', max_attempts=5):
         # if pose_data is not None:
         #     print(pose_data)
         # else:
