@@ -372,44 +372,99 @@ class py_game_monitoring(py_game_animation):
     What changes here is the start_animation method, instead of iteration over data, it receives
     constantly new data as it's intended for real time display of the motion of the robots.
     The data is obtained by an external system (OptiTrack).
-    """
-    def animate(self, real_time_data_generator):
-        self.initialize()  # Initialize pygame
-        self.start_animation(real_time_data_generator)
+    # """
+    def __init__(self, width, height, xcoords, ycoords, data_src_funct):
+        super().__init__(width, height)
+        self.xcoords = xcoords
+        self.ycoords = ycoords
+        self.data_src_funct = data_src_funct
 
-    def start_animation(self, real_time_data_generator):
-        index = 0  # Initialize the index for accessing x_values and y_values
+    def animate(self, x_values: numpy.ndarray,
+        y_values: numpy.ndarray,
+        theta_values: numpy.ndarray,):
+        self.initialize()  # Initialize pygame
+        self.start_animation(x_values, y_values, theta_values)
+
+    def start_animation(
+        self
+        # x_values: numpy.ndarray,
+        # y_values: numpy.ndarray,
+        # theta_values: numpy.ndarray,
+    ):
+        """
+        It takes the arrays to animate the robots based on simulation data,
+        it also handles the pygame events to start and stop the animation. The basic flow of this is
+        that it iterates over the robot_characters added previously, and for each index it looks for the
+        corresponding data on the numpy arrays, to assign the corresponding x, y, theta data for each robot.
+        Then with the robot_character methods, it updates the picture position and orientation, deleting the
+        previous one until it reaches the final data.
+
+        """
+        
+        index = (
+            0  # Initialize the index for accessing x_values, y_values and theta_values
+        )
         animation_running = True
-        x_values, y_values, theta_values = next(real_time_data_generator)
-        for robot_index in range(len(self.robot_characters)):
-            x_robot = x_values[0][robot_index]  # Initial x position
-            y_robot = y_values[0][robot_index]  # Initial y position
-            theta_robot = theta_values[0][robot_index]  # Initial theta value
-            self.robot_characters[robot_index].update(theta_robot, x_robot, y_robot)
-            self.robot_characters[robot_index].rotate_move()
+
+        # for robot_index in range(len(self.robot_characters)):
+        #     x_robot = x_values[0][robot_index]  # Initial x position
+        #     y_robot = y_values[0][robot_index]  # Initial y position
+        #     theta_robot = theta_values[0][robot_index]  # Initial theta value
+        #     self.robot_characters[robot_index].update(theta_robot, x_robot, y_robot)
+        #     self.robot_characters[robot_index].rotate_move()
 
         pygame.display.flip()
         pygame.time.delay(10)
 
         while self.run:
-            x_values, y_values, theta_values = next(real_time_data_generator)
             self.clock.tick(60)
             self.play.draw()  # Update the play button
-
+            # self.robot_characters[0].x = self.xcoords
+            # self.robot_characters[0].y = self.ycoords
+            x_values, y_values, theta_values = self.data_src_funct()
+            print(x_values, y_values, theta_values)
+            for x, y in zip(x_values, y_values):
+                for robot in self.robot_characters:
+                                robot.x = int(x[0])
+                                robot.y = int(y[0])
+                            
+            # Flag to terminate window correctly without crashing all Python execution
             for e in pygame.event.get():
                 if e.type == pygame.QUIT:
                     self.run = False
-                    break
+                # elif e.type == pygame.KEYDOWN:
+                #     if e.key == pygame.K_LEFT:
+                #         # Move the robot left (adjust as needed)
+                #         # Example assuming robot_characters is a list
+                #         for robot in self.robot_characters:
+                #             robot.x = x_values
+                #             robot.y = y_values
+
+                #     elif e.key == pygame.K_RIGHT:
+                #         # Move the robot right (adjust as needed)
+                #         # Example assuming robot_characters is a list
+                #         for robot in self.robot_characters:
+                #             robot.x += 1
+                #     elif e.key == pygame.K_UP:
+                #         # Move the robot up (adjust as needed)
+                #         # Example assuming robot_characters is a list
+                #         for robot in self.robot_characters:
+                #             robot.y -= 1
+                #     elif e.key == pygame.K_DOWN:
+                #         # Move the robot down (adjust as needed)
+                #         # Example assuming robot_characters is a list
+                #         for robot in self.robot_characters:
+                #             robot.y += 1
 
             self.screen.fill(self.background_color)
             self.screen.blit(self.grid, (0, 0))
             self.play.draw()
             self.display_initial_positions()  # this keeps the robots at their final position even when the time has finished :D
 
-            # if self.play.action and not animation_running:
-            #     print('START')
-            animation_running = True  # Start the animation
-            index = 0  # Reset the index
+            if self.play.action and not animation_running:
+                print("START")
+                animation_running = True  # Start the animation
+                index = 0  # Reset the index
 
             for i in range(len(self.robot_characters)):
                 for j in range(i + 1, len(self.robot_characters)):
@@ -419,7 +474,7 @@ class py_game_monitoring(py_game_animation):
                         # Handle collision here (e.g., change color, stop movement, etc.)
                         print("collision")
                         animation_running = False  # Stop the animation
-                        pygame.time.delay(1000)
+                        pygame.time.delay(1000)  # Wait until pygame window closes
                         self.run = False
 
             for robot in self.robot_characters:
@@ -430,21 +485,20 @@ class py_game_monitoring(py_game_animation):
                     pygame.time.delay(1000)
                     self.run = False
 
-            if animation_running and index < len(x_values):
+            if animation_running:#and index < len(x_values):
                 for i in range(len(self.robot_characters)):
-                    x_robot = x_values[index][i]  # x-value for the i-th robot
-                    y_robot = y_values[index][
-                        i
-                    ]  # corresponding y-value for the i-th robot
-                    theta_robot = theta_values[index][
-                        i
-                    ]  # corresponding theta-value for the i-th robot
+                    x_robot = x_values[index][i]
+                    y_robot = y_values[index][i]
+                    theta_robot = theta_values[index][i]
 
                     robot = self.robot_characters[i]
 
                     # Update character attributes and animations
                     robot.update(theta_robot, x_robot, y_robot)
                     robot.rotate_move()
+
+                    pygame.display.flip()
+                    pygame.time.delay(10)
 
                 pygame.display.flip()
                 pygame.time.delay(10)

@@ -30,11 +30,10 @@ from windows.map_coordinates import inverse_change_coordinates, change_coordinat
 
 
 pictures_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'pictures')
-
+xtemp = 100
+ytemp = 100
 data_queue = queue.Queue()
-# Initialize animation window child class
-animation_window = py_game_animation(850, 960)
-animation_window.initialize()
+
 
 def robotat_connect():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -201,8 +200,8 @@ def robotat_3pi_force_stop(tcp_obj, robot):
     
     tcp_obj.send(robot.tcpsock, cbormsg)
 
-robotat = robotat_connect()
-robotat.recv(2048)
+# robotat = robotat_connect()
+# robotat.recv(2048)
 # Initialize arrays to display and save data
 x_data = []
 y_data = []
@@ -216,7 +215,7 @@ y_results_raw = []
 
 # First we need to create the object that represents and updates the position and rotation of the Pololu img (first one robot only)
 character = (os.path.join(pictures_dir, "pololu_img_x.png"), 0, 0, 0) 
-animation_window.add_robot_character(*character)
+
 
 x_test = [[10,20]]
 y_test = [[30,40]]
@@ -224,19 +223,19 @@ theta_test = [[50,60]]
 
 # Prepare data as the animation window expects it (list of lists for each x, y, theta for each robot) according to how its received from the server (list of x, y, orientation)
 def get_and_process_data():
-    for pose_data in get_pose_continuous(robotat, [13], 'eulxyz', max_attempts=5):
+    for pose_data in get_pose_continuous(robotat, [1], 'quat', max_attempts=5):
         # if pose_data is not None:
         #     print(pose_data)
         # else:
         #     print('no data')
-        print(pose_data)
+        # print(pose_data)
         x_vals_real_time = [pose_data[0][0]]
         y_vals_real_time = [pose_data[0][1]]
         theta_vals_real_time = [pose_data[0][2]]
         x_data.append(x_vals_real_time)
         y_data.append(y_vals_real_time)
         theta_data.append(theta_vals_real_time)
-        print(f"x: {x_vals_real_time}, y: {y_vals_real_time}, theta: {theta_vals_real_time}")
+        # print(f"x: {x_vals_real_time}, y: {y_vals_real_time}, theta: {theta_vals_real_time}")
         
         # animation_window.start_animation(x_vals_real_time, y_vals_real_time, theta_vals_real_time)
         time.sleep(1)
@@ -266,7 +265,7 @@ def map_data(x_vals_real_time, y_vals_real_time, theta_vals_real_time):
     x_vals_display_robot = [x_vals_display_robot]
     y_vals_display_robot = [y_vals_display_robot]
     theta_vals_display_robot = [theta_vals_display_robot]
-    print(f"X: {x_vals_display_robot}, Y: {y_vals_display_robot}, THETA: {theta_vals_display_robot}")
+    # print(f"X: {x_vals_display_robot}, Y: {y_vals_display_robot}, THETA: {theta_vals_display_robot}")
     return x_vals_display_robot, y_vals_display_robot, theta_vals_display_robot
 
 # animation_window.animate(x_vals_display_robot, y_vals_display_robot, theta_vals_display_robot)
@@ -289,24 +288,71 @@ def get_data_thread(run_flag):
         # animation_window.start_animation(data_generator)
         x_vals_real_time, y_vals_real_time, theta_vals_real_time = get_and_process_data()
         x_vals_display_robot1, y_vals_display_robot1, theta_vals_display_robot1 = map_data(x_vals_real_time, y_vals_real_time, theta_vals_real_time)
-        print(x_vals_display_robot1)
         # animation_window.start_animation(x_vals_display_robot1, y_vals_display_robot1, theta_vals_display_robot1)
         # run_animation = False
         data_queue.put((x_vals_display_robot1, y_vals_display_robot1, theta_vals_display_robot1), block=False)
+        # print(data_queue.get())
 
 
 def display_robot_thread(data):
     x_vals_display_robot1, y_vals_display_robot1, theta_vals_display_robot1 = data.get()
-    animation_window.start_animation(x_vals_display_robot1, y_vals_display_robot1, theta_vals_display_robot1)
+    print(x_vals_display_robot1)
+    
+    animation_window.start_animation(numpy.array(x_vals_display_robot1), numpy.array(y_vals_display_robot1), numpy.array(theta_vals_display_robot1))
 
-if __name__ =="__main__":
-    t1 = threading.Thread(target=get_data_thread, args=(run_animation,))
-    t2 = threading.Thread(target=display_robot_thread, args=(data_queue,))
+# if __name__ =="__main__":
+#     t1 = threading.Thread(target=get_data_thread, args=(run_animation,))
+#     t2 = threading.Thread(target=display_robot_thread, args=(data_queue,))
 
-    # starting thread 1
-    t1.start()
-    # starting thread 2
-    t2.start()
+#     # starting thread 1
+#     t1.start()
+#     # starting thread 2
+#     t2.start()
+x_values = [100]
+y_values = [100]
+theta_values = [100]
+# Initialize animation window child class
+
+def get_data():
+    
+    time.sleep(0.3 )
+    x_values[0] += 1
+    y_values[0] += 1
+    theta_values[0] += 1
+    return [x_values], [y_values], [theta_values]
+data_source = lambda: get_data()
+animation_window = py_game_monitoring(850, 960, xtemp, ytemp, get_data)
+animation_window.add_robot_character(*character)
+animation_window.initialize()
+while True:
+    # x_values, y_values, theta_values = get_data()
+    animation_window.start_animation()
+    # print(x_values, y_values, theta_values)
+
+
+# MAIN TEST LOOP
+# if __name__ == "__main__":
+#     run_animation = True
+
+
+#     while run_animation == True:
+#         print(x_values, y_values, theta_values)
+#         animation_window.start_animation([x_values], [y_values], [theta_values])
+
+        # # Update robot positions based on received data
+        # for i in range(len(animation_window.robot_characters)):
+        #     x_robot = x_values[0][i]
+        #     y_robot = y_values[0][i]
+        #     theta_robot = theta_values[0][i]
+        #     animation_window.robot_characters[i].update(theta_robot, x_robot, y_robot)
+        #     animation_window.robot_characters[i].rotate_move()
+
+        # Update the data for the next iteration
+        
+
+        
+        # run_animation = False
+# Uso
 # Uso
 # robotat = robotat_connect()
 # robotat.recv(2048)
