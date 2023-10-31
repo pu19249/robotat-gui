@@ -422,11 +422,15 @@ class py_game_monitoring(py_game_animation):
             # self.robot_characters[0].x = self.xcoords
             # self.robot_characters[0].y = self.ycoords
             x_values, y_values, theta_values = self.data_src_funct()
-            print(x_values, y_values, theta_values)
-            for x, y in zip(x_values, y_values):
+           
+            # print(x_values, y_values, theta_values)
+            for x, y, theta in zip(x_values, y_values, theta_values):
                 for robot in self.robot_characters:
-                                robot.x = int(x[0])
-                                robot.y = int(y[0])
+                    robot.degree = float(theta[0])
+                    robot.x = int(x[0])
+                    robot.y = int(y[0])
+                    
+                    # print(robot.theta)
                             
             # Flag to terminate window correctly without crashing all Python execution
             for e in pygame.event.get():
@@ -466,31 +470,30 @@ class py_game_monitoring(py_game_animation):
                 animation_running = True  # Start the animation
                 index = 0  # Reset the index
 
-            # for i in range(len(self.robot_characters)):
-            #     for j in range(i + 1, len(self.robot_characters)):
-            #         if robot_character.check_collision(
-            #             self.robot_characters[i], self.robot_characters[j]
-            #         ):
-            #             # Handle collision here (e.g., change color, stop movement, etc.)
-            #             print("collision")
-            #             animation_running = False  # Stop the animation
-            #             pygame.time.delay(1000)  # Wait until pygame window closes
-            #             self.run = False
+            for i in range(len(self.robot_characters)):
+                for j in range(i + 1, len(self.robot_characters)):
+                    if robot_character.check_collision(
+                        self.robot_characters[i], self.robot_characters[j]
+                    ):
+                        # Handle collision here (e.g., change color, stop movement, etc.)
+                        print("collision")
+                        animation_running = False  # Stop the animation
+                        pygame.time.delay(1000)  # Wait until pygame window closes
+                        self.run = False
 
-            # for robot in self.robot_characters:
-            #     if not self.bounding_box.collidepoint(robot.x, robot.y):
-            #         # Handle collision with bounding box (e.g., stop movement, change direction, etc.)
-            #         print("collision")
-            #         animation_running = False  # Stop the animation
-            #         pygame.time.delay(1000)
-            #         self.run = False
+            for robot in self.robot_characters:
+                if not self.bounding_box.collidepoint(robot.x, robot.y):
+                    # Handle collision with bounding box (e.g., stop movement, change direction, etc.)
+                    print("collision")
+                    animation_running = False  # Stop the animation
+                    pygame.time.delay(1000)
+                    self.run = False
 
             if animation_running:#and index < len(x_values):
                 for i in range(len(self.robot_characters)):
                     x_robot = x_values[index][i]
                     y_robot = y_values[index][i]
                     theta_robot = theta_values[index][i]
-
                     robot = self.robot_characters[i]
 
                     # Update character attributes and animations

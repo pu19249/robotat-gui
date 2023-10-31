@@ -76,10 +76,13 @@ def get_pose_continuous(tcp_obj, agents_ids, rotrep, max_attempts=10):
                 mocap_data = mocap_data.reshape(num_agents, 7)
 
                 if rotrep != 'quat':
-                    quat_columns = mocap_data[:, 3:]
-                    euler_angles = R.from_quat(quat_columns).as_euler('xyz', degrees=True)
-                    mocap_data[:, 3:] = np.rad2deg(euler_angles)
-                    mocap_data = mocap_data[:, :-1]
+                    try:
+                        euler_angles = np.rad2deg(R.from_quat(mocap_data[:, 3:]).as_euler('xyz', degrees=True))
+                        mocap_data[:, 3:6] = euler_angles
+                        mocap_data = mocap_data[:, :-1]
+                    except ValueError as e:
+                        print("Invalid Euler angle sequence:", e)
+
 
                 yield mocap_data
                 break
@@ -223,7 +226,7 @@ theta_test = [[50,60]]
 
 # Prepare data as the animation window expects it (list of lists for each x, y, theta for each robot) according to how its received from the server (list of x, y, orientation)
 def get_and_process_data():
-    for pose_data in get_pose_continuous(robotat, [11], 'quat', max_attempts=5):
+    for pose_data in get_pose_continuous(robotat, [11], 'eulxyz', max_attempts=5):
         # if pose_data is not None:
         #     print(pose_data)
         # else:
@@ -231,7 +234,8 @@ def get_and_process_data():
         # print(pose_data)
         x_vals_real_time = [pose_data[0][0]]
         y_vals_real_time = [pose_data[0][1]]
-        theta_vals_real_time = [pose_data[0][2]]
+        theta_vals_real_time = [pose_data[0][5]]
+        # print(theta_vals_real_time)
         x_data.append(x_vals_real_time)
         y_data.append(y_vals_real_time)
         theta_data.append(theta_vals_real_time)
@@ -253,7 +257,8 @@ def map_data(x_vals_real_time, y_vals_real_time, theta_vals_real_time):
         x_raw, y_raw = x, y
         x_new_val, y_new_val = inverse_change_coordinates(x_raw*100, y_raw*100, 960, 760)
             
-        theta_new_val = np.rad2deg(theta)  # theta_val, not just theta
+        theta_new_val = theta  # theta_val, not just theta
+        
         x_vals_display_robot.append(x_new_val)
         y_vals_display_robot.append(y_new_val)
         theta_vals_display_robot.append(theta_new_val)
@@ -266,6 +271,7 @@ def map_data(x_vals_real_time, y_vals_real_time, theta_vals_real_time):
     x_vals_display_robot = [x_vals_display_robot]
     y_vals_display_robot = [y_vals_display_robot]
     theta_vals_display_robot = [theta_vals_display_robot]
+   
     # print(f"X: {x_vals_display_robot}, Y: {y_vals_display_robot}, THETA: {theta_vals_display_robot}")
     return x_vals_display_robot, y_vals_display_robot, theta_vals_display_robot
 
@@ -298,6 +304,7 @@ def get_data():
     # map_data(x_values, y_values, theta_values)
     x_vals_real_time, y_vals_real_time, theta_vals_real_time = get_and_process_data()
     x_vals_display_robot, y_vals_display_robot, theta_vals_display_robot = map_data(x_vals_real_time, y_vals_real_time, theta_vals_real_time)
+    
     return x_vals_display_robot, y_vals_display_robot, theta_vals_display_robot
 
 data_source = lambda: get_data()
@@ -338,7 +345,7 @@ while True:
 # robotat.recv(2048)
 
 # while(1): 
-#     for pose_data in get_pose_continuous(robotat, [19], 'quat', max_attempts=5):
+#     for pose_data in get_pose_continuous(robotat, [11], 'eulxyz', max_attempts=5):
 #         if pose_data is not None:
 #             print(pose_data)
 #         else:
