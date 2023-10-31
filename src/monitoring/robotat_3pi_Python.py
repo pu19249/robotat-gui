@@ -200,8 +200,8 @@ def robotat_3pi_force_stop(tcp_obj, robot):
     
     tcp_obj.send(robot.tcpsock, cbormsg)
 
-# robotat = robotat_connect()
-# robotat.recv(2048)
+robotat = robotat_connect()
+robotat.recv(2048)
 # Initialize arrays to display and save data
 x_data = []
 y_data = []
@@ -223,7 +223,7 @@ theta_test = [[50,60]]
 
 # Prepare data as the animation window expects it (list of lists for each x, y, theta for each robot) according to how its received from the server (list of x, y, orientation)
 def get_and_process_data():
-    for pose_data in get_pose_continuous(robotat, [1], 'quat', max_attempts=5):
+    for pose_data in get_pose_continuous(robotat, [11], 'quat', max_attempts=5):
         # if pose_data is not None:
         #     print(pose_data)
         # else:
@@ -238,8 +238,9 @@ def get_and_process_data():
         # print(f"x: {x_vals_real_time}, y: {y_vals_real_time}, theta: {theta_vals_real_time}")
         
         # animation_window.start_animation(x_vals_real_time, y_vals_real_time, theta_vals_real_time)
-        time.sleep(1)
+        # time.sleep(0.5)
         break
+    
     return x_vals_real_time, y_vals_real_time, theta_vals_real_time
 
 def map_data(x_vals_real_time, y_vals_real_time, theta_vals_real_time):
@@ -282,44 +283,23 @@ def real_time_data_generator(num_robots):
 
 # MAIN TEST LOOP
 run_animation = True
-def get_data_thread(run_flag):
-    while run_flag == True:
-        # data_generator = real_time_data_generator(1)
-        # animation_window.start_animation(data_generator)
-        x_vals_real_time, y_vals_real_time, theta_vals_real_time = get_and_process_data()
-        x_vals_display_robot1, y_vals_display_robot1, theta_vals_display_robot1 = map_data(x_vals_real_time, y_vals_real_time, theta_vals_real_time)
-        # animation_window.start_animation(x_vals_display_robot1, y_vals_display_robot1, theta_vals_display_robot1)
-        # run_animation = False
-        data_queue.put((x_vals_display_robot1, y_vals_display_robot1, theta_vals_display_robot1), block=False)
-        # print(data_queue.get())
 
-
-def display_robot_thread(data):
-    x_vals_display_robot1, y_vals_display_robot1, theta_vals_display_robot1 = data.get()
-    print(x_vals_display_robot1)
-    
-    animation_window.start_animation(numpy.array(x_vals_display_robot1), numpy.array(y_vals_display_robot1), numpy.array(theta_vals_display_robot1))
-
-# if __name__ =="__main__":
-#     t1 = threading.Thread(target=get_data_thread, args=(run_animation,))
-#     t2 = threading.Thread(target=display_robot_thread, args=(data_queue,))
-
-#     # starting thread 1
-#     t1.start()
-#     # starting thread 2
-#     t2.start()
-x_values = [100]
-y_values = [100]
-theta_values = [100]
+x_values = [1]
+y_values = [1]
+theta_values = [1]
 # Initialize animation window child class
 
 def get_data():
     
-    time.sleep(0.3 )
-    x_values[0] += 1
-    y_values[0] += 1
-    theta_values[0] += 1
-    return [x_values], [y_values], [theta_values]
+    # time.sleep(0.3)
+    # x_values[0] += 1
+    # y_values[0] += 1
+    # theta_values[0] += 1
+    # map_data(x_values, y_values, theta_values)
+    x_vals_real_time, y_vals_real_time, theta_vals_real_time = get_and_process_data()
+    x_vals_display_robot, y_vals_display_robot, theta_vals_display_robot = map_data(x_vals_real_time, y_vals_real_time, theta_vals_real_time)
+    return x_vals_display_robot, y_vals_display_robot, theta_vals_display_robot
+
 data_source = lambda: get_data()
 animation_window = py_game_monitoring(850, 960, xtemp, ytemp, get_data)
 animation_window.add_robot_character(*character)
@@ -373,15 +353,6 @@ while True:
 #             else:
 #                 break
 #         time.sleep(0.5)
-
-# Create threads for each marker
-# marker1_thread = threading.Thread(target=get_and_process_data, args=(1,))
-# marker2_thread = threading.Thread(target=get_and_process_data, args=(17,))
-
-# # Start the threads
-# marker1_thread.start()
-# marker2_thread.start()
-
 
 # Example usage:
 # robot = robotat_3pi_connect(robotat, [6])  # Change the agent_id as needed
