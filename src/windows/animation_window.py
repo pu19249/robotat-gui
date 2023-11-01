@@ -373,10 +373,8 @@ class py_game_monitoring(py_game_animation):
     constantly new data as it's intended for real time display of the motion of the robots.
     The data is obtained by an external system (OptiTrack).
     # """
-    def __init__(self, width, height, xcoords, ycoords, data_src_funct):
+    def __init__(self, width, height, data_src_funct):
         super().__init__(width, height)
-        self.xcoords = xcoords
-        self.ycoords = ycoords
         self.data_src_funct = data_src_funct
 
     def animate(self, x_values: numpy.ndarray,
@@ -419,8 +417,6 @@ class py_game_monitoring(py_game_animation):
         while self.run:
             self.clock.tick(60)
             self.play.draw()  # Update the play button
-            # self.robot_characters[0].x = self.xcoords
-            # self.robot_characters[0].y = self.ycoords
             x_values, y_values, theta_values = self.data_src_funct()
            
             # print(x_values, y_values, theta_values)
@@ -436,29 +432,7 @@ class py_game_monitoring(py_game_animation):
             for e in pygame.event.get():
                 if e.type == pygame.QUIT:
                     self.run = False
-                # elif e.type == pygame.KEYDOWN:
-                #     if e.key == pygame.K_LEFT:
-                #         # Move the robot left (adjust as needed)
-                #         # Example assuming robot_characters is a list
-                #         for robot in self.robot_characters:
-                #             robot.x = x_values
-                #             robot.y = y_values
 
-                #     elif e.key == pygame.K_RIGHT:
-                #         # Move the robot right (adjust as needed)
-                #         # Example assuming robot_characters is a list
-                #         for robot in self.robot_characters:
-                #             robot.x += 1
-                #     elif e.key == pygame.K_UP:
-                #         # Move the robot up (adjust as needed)
-                #         # Example assuming robot_characters is a list
-                #         for robot in self.robot_characters:
-                #             robot.y -= 1
-                #     elif e.key == pygame.K_DOWN:
-                #         # Move the robot down (adjust as needed)
-                #         # Example assuming robot_characters is a list
-                #         for robot in self.robot_characters:
-                #             robot.y += 1
 
             self.screen.fill(self.background_color)
             self.screen.blit(self.grid, (0, 0))
