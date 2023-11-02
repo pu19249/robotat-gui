@@ -377,17 +377,8 @@ class py_game_monitoring(py_game_animation):
         super().__init__(width, height)
         self.data_src_funct = data_src_funct
 
-    def animate(self, x_values: numpy.ndarray,
-        y_values: numpy.ndarray,
-        theta_values: numpy.ndarray,):
-        self.initialize()  # Initialize pygame
-        self.start_animation(x_values, y_values, theta_values)
-
     def start_animation(
         self
-        # x_values: numpy.ndarray,
-        # y_values: numpy.ndarray,
-        # theta_values: numpy.ndarray,
     ):
         """
         It takes the arrays to animate the robots based on simulation data,
@@ -436,7 +427,6 @@ class py_game_monitoring(py_game_animation):
 
             self.screen.fill(self.background_color)
             self.screen.blit(self.grid, (0, 0))
-            self.play.draw()
             self.display_initial_positions()  # this keeps the robots at their final position even when the time has finished :D
 
             if self.play.action and not animation_running:
