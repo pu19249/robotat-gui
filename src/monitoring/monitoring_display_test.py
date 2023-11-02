@@ -1,6 +1,7 @@
 import ctypes
 import sys
 import os
+import csv
 
 # Get the current script's directory
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -15,8 +16,7 @@ from windows.animation_window import *
 from robotat_3pi_Python import *
 from windows.map_coordinates import inverse_change_coordinates
 
-
-
+################ END OF IMPORTS ##############################
 
 # This solves scaling issues for the independent pygame window
 ctypes.windll.user32.SetProcessDPIAware()
@@ -47,12 +47,12 @@ character = (os.path.join(pictures_dir, "pololu_img_x.png"), 0, 0, 0)
 
 # Prepare data as the animation window expects it (list of lists for each x, y, theta for each robot) according to how its received from the server (list of x, y, orientation)
 def get_and_process_data():
-    for pose_data in get_pose_continuous(robotat, [11], "eulxyz", max_attempts=5):
-        # if pose_data is not None:
-        #     print(pose_data)
-        # else:
-        #     print('no data')
-        # print(pose_data)
+    for pose_data in get_pose_continuous(robotat, [2], "eulxyz", max_attempts=5):
+        if pose_data is not None:
+            print(pose_data)
+        else:
+            print('no data')
+        print(pose_data)
         x_vals_real_time = [pose_data[0][0]]
         y_vals_real_time = [pose_data[0][1]]
         theta_vals_real_time = [pose_data[0][5]]
@@ -65,7 +65,7 @@ def get_and_process_data():
         # animation_window.start_animation(x_vals_real_time, y_vals_real_time, theta_vals_real_time)
         # time.sleep(0.5)
         break
-
+    # print(theta_vals_real_time)
     return x_vals_real_time, y_vals_real_time, theta_vals_real_time
 
 
@@ -113,7 +113,7 @@ def get_data():
     x_vals_display_robot, y_vals_display_robot, theta_vals_display_robot = map_data(
         x_vals_real_time, y_vals_real_time, theta_vals_real_time
     )
-
+    # print(theta_vals_display_robot)
     return x_vals_display_robot, y_vals_display_robot, theta_vals_display_robot
 
 
@@ -121,7 +121,19 @@ data_source = lambda: get_data()
 animation_window = py_game_monitoring(850, 960, get_data)
 animation_window.add_robot_character(*character)
 animation_window.initialize()
+# Open the file in append mode once, outside the loop
+file_name = input('Type file name for the csv: ')
+with open(file_name+'.csv', 'a', newline='') as file:
+    writer = csv.writer(file)
+    field = ["x position", "y position", "orientation"] # titles of the columns
+
+    # Write the field names only once, not in every iteration
+    writer.writerow(field)
+
 while True:
     # x_values, y_values, theta_values = get_data()
     animation_window.start_animation()
     # print(x_values, y_values, theta_values)
+    
+    # Assuming x_vals_display_robot, y_vals_display_robot, theta_vals_display_robot are your data
+    # writer.writerow([x_vals_display_robot, y_vals_display_robot, theta_vals_display_robot])

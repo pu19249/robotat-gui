@@ -5,9 +5,8 @@ import numpy as np
 from scipy.spatial.transform import Rotation as R
 import warnings
 import struct
-
-
-
+import math
+from squaternion import Quaternion
 def robotat_connect():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_address = ("192.168.50.200", 1883)
@@ -26,6 +25,27 @@ def robotat_disconnect(tcp_obj):
     tcp_obj.sendall(tcp_obj, b"EXIT")
     print("Disconnected from Robotat Server.")
 
+def euler_from_quaternion(x, y, z, w):
+        """
+        Convert a quaternion into euler angles (roll, pitch, yaw)
+        roll is rotation around x in radians (counterclockwise)
+        pitch is rotation around y in radians (counterclockwise)
+        yaw is rotation around z in radians (counterclockwise)
+        """
+        t0 = +2.0 * (w * x + y * z)
+        t1 = +1.0 - 2.0 * (x * x + y * y)
+        roll_x = math.atan2(t0, t1)
+     
+        t2 = +2.0 * (w * y - z * x)
+        t2 = +1.0 if t2 > +1.0 else t2
+        t2 = -1.0 if t2 < -1.0 else t2
+        pitch_y = math.asin(t2)
+     
+        t3 = +2.0 * (w * z + x * y)
+        t4 = +1.0 - 2.0 * (y * y + z * z)
+        yaw_z = math.atan2(t3, t4)
+     
+        return roll_x, pitch_y, yaw_z # in radians
 
 def get_pose_continuous(tcp_obj, agents_ids, rotrep, max_attempts=10):
     # tcp_obj.settimeout(1)
@@ -48,13 +68,21 @@ def get_pose_continuous(tcp_obj, agents_ids, rotrep, max_attempts=10):
 
                 if rotrep != "quat":
                     try:
-                        euler_angles = np.rad2deg(
-                            R.from_quat(mocap_data[:, 3:]).as_euler("xyz", degrees=True)
-                        )
-                        mocap_data[:, 3:6] = euler_angles
-                        mocap_data = mocap_data[:, :-1]
+                        euler = mocap_data[:, 3:]
+                        # print('euler1', euler)
+                        # print('euler2', euler[0][0], euler[0][1], euler[0][2], euler[0][3])
+                        q = Quaternion(euler[0][0], euler[0][1], euler[0][2], euler[0][3])
+                        eu = q.to_euler(degrees=True)
+                        # roll, pitch, yaw = euler_from_quaternion(euler[0][0], euler[0][1], euler[0][2], euler[0][3])
+
+                        # print(roll, pitch, yaw)
+                        # print(eu)
+                        mocap_data[:, 3:6] = eu
+                        mocap_data =  mocap_data[:, :-1]
+                        print(mocap_data)
                     except ValueError as e:
                         print("Invalid Euler angle sequence:", e)
+                        
 
                 yield mocap_data
                 break
@@ -68,6 +96,7 @@ def get_pose_continuous(tcp_obj, agents_ids, rotrep, max_attempts=10):
 
     # print("Reached maximum number of attempts. Exiting.")
     yield None
+
 
 
 def robotat_3pi_connect(tcp_obj, agent_id):
@@ -174,7 +203,7 @@ def robotat_3pi_force_stop(tcp_obj, robot):
 # robotat.recv(2048)
 
 # while(1):
-#     for pose_data in get_pose_continuous(robotat, [11], 'eulxyz', max_attempts=5):
+#     for pose_data in get_pose_continuous(robotat, [19], 'eulxyz', max_attempts=5):
 #         if pose_data is not None:
 #             print(pose_data)
 #         else:
