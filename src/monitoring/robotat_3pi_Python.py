@@ -79,7 +79,7 @@ def get_pose_continuous(tcp_obj, agents_ids, rotrep, max_attempts=10):
                         # print(eu)
                         mocap_data[:, 3:6] = eu
                         mocap_data =  mocap_data[:, :-1]
-                        print(mocap_data)
+                        # print(mocap_data)
                     except ValueError as e:
                         print("Invalid Euler angle sequence:", e)
                         
