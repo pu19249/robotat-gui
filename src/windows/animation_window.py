@@ -3,6 +3,8 @@ import os
 import ctypes
 from typing import *
 import numpy
+import math
+import csv
 
 # Get the directory path of the current script, abspath because of the tree structure
 # that everything is on different folders
@@ -177,7 +179,7 @@ class py_game_animation:
         y_size : int
             (x, y) size of the animation window (in this value the actual size of the
             Robotat platform and scaling needs to be taken into account).
-            
+
         """
         grid_file = os.path.join(pictures_dir, "grid_back_coord.png")
 
@@ -372,14 +374,13 @@ class py_game_monitoring(py_game_animation):
     What changes here is the start_animation method, instead of iteration over data, it receives
     constantly new data as it's intended for real time display of the motion of the robots.
     The data is obtained by an external system (OptiTrack).
-    # """
+    #"""
+
     def __init__(self, width, height, data_src_funct):
         super().__init__(width, height)
         self.data_src_funct = data_src_funct
 
-    def start_animation(
-        self
-    ):
+    def start_animation(self):
         """
         It takes the arrays to animate the robots based on simulation data,
         it also handles the pygame events to start and stop the animation. The basic flow of this is
@@ -389,7 +390,7 @@ class py_game_monitoring(py_game_animation):
         previous one until it reaches the final data.
 
         """
-        
+
         index = (
             0  # Initialize the index for accessing x_values, y_values and theta_values
         )
@@ -409,21 +410,31 @@ class py_game_monitoring(py_game_animation):
             self.clock.tick(60)
             self.play.draw()  # Update the play button
             x_values, y_values, theta_values = self.data_src_funct()
-           
+            with open("test" + ".csv", "a", newline="") as file:
+                writer = csv.writer(file)
+                field = [
+                    "x position",
+                    "y position",
+                    "orientation",
+                ]  # titles of the columns
+                writer.writerow(i for i in field)
+                # Write the field names only once, not in every iteration
+                # writer.writerow(field)
+                writer.writerow([x_values[0][0], y_values[0][0], theta_values[0][0]])
+            print(x_values, y_values, theta_values)
             # print(x_values, y_values, theta_values)
             for x, y, theta in zip(x_values, y_values, theta_values):
                 for robot in self.robot_characters:
-                    robot.degree = float(theta[0])
+                    robot.degree = float(theta[0]) + 180
                     robot.x = int(x[0])
                     robot.y = int(y[0])
-                    
+
                     # print(robot.theta)
-                            
+
             # Flag to terminate window correctly without crashing all Python execution
             for e in pygame.event.get():
                 if e.type == pygame.QUIT:
                     self.run = False
-
 
             self.screen.fill(self.background_color)
             self.screen.blit(self.grid, (0, 0))
@@ -453,7 +464,7 @@ class py_game_monitoring(py_game_animation):
                     pygame.time.delay(1000)
                     self.run = False
 
-            if animation_running:#and index < len(x_values):
+            if animation_running:  # and index < len(x_values):
                 for i in range(len(self.robot_characters)):
                     x_robot = x_values[index][i]
                     y_robot = y_values[index][i]

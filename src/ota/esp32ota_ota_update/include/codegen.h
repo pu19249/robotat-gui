@@ -13,7 +13,7 @@ extern "C" {
 // ====================================================================================================
 // Function prototypes
 // ====================================================================================================
-void control(double x, double y, double theta, double * wheel_speeds);
+void control(double goal_x, double goal_y, double x, double y, double theta, double * wheel_speeds);
 
 #ifdef __cplusplus
 }
