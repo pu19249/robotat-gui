@@ -2,8 +2,6 @@ import ctypes
 import sys
 import os
 import csv
-import multiprocessing
-import threading
 
 # Get the current script's directory
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -116,7 +114,8 @@ def get_data():
         x_vals_real_time, y_vals_real_time, theta_vals_real_time
     )
     # print(theta_vals_display_robot)
-    return x_vals_display_robot, y_vals_display_robot, theta_vals_display_robot
+    return x_vals_display_robot, y_vals_display_robot, theta_vals_display_robot, \
+        x_vals_real_time, y_vals_real_time, theta_vals_real_time
 
 
 data_source = lambda: get_data()

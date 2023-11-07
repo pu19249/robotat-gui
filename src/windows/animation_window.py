@@ -403,31 +403,33 @@ class py_game_monitoring(py_game_animation):
         #     self.robot_characters[robot_index].update(theta_robot, x_robot, y_robot)
         #     self.robot_characters[robot_index].rotate_move()
 
-        pygame.display.flip()
+        #pygame.display.flip()
         pygame.time.delay(10)
 
         while self.run:
             self.clock.tick(60)
             self.play.draw()  # Update the play button
-            x_values, y_values, theta_values = self.data_src_funct()
-            with open("test" + ".csv", "a", newline="") as file:
+            x_values, y_values, theta_values, x_raw, y_raw, theta_raw = self.data_src_funct()
+            with open("chepito" + ".csv", "a", newline="") as file:
                 writer = csv.writer(file)
                 field = [
                     "x position",
                     "y position",
                     "orientation",
                 ]  # titles of the columns
-                writer.writerow(i for i in field)
+                #writer.writerow(i for i in field)
                 # Write the field names only once, not in every iteration
                 # writer.writerow(field)
-                writer.writerow([x_values[0][0], y_values[0][0], theta_values[0][0]])
-            print(x_values, y_values, theta_values)
+                writer.writerow([x_raw[0], y_raw[0], theta_raw[0]])
+            print(x_raw, y_raw, theta_raw)
             # print(x_values, y_values, theta_values)
             for x, y, theta in zip(x_values, y_values, theta_values):
                 for robot in self.robot_characters:
                     robot.degree = float(theta[0]) + 180
                     robot.x = int(x[0])
                     robot.y = int(y[0])
+                    # Flip the character over the x-axis
+            
 
                     # print(robot.theta)
 
@@ -470,7 +472,6 @@ class py_game_monitoring(py_game_animation):
                     y_robot = y_values[index][i]
                     theta_robot = theta_values[index][i]
                     robot = self.robot_characters[i]
-
                     # Update character attributes and animations
                     robot.update(theta_robot, x_robot, y_robot)
                     robot.rotate_move()
@@ -483,6 +484,7 @@ class py_game_monitoring(py_game_animation):
                 index += 1
 
             pygame.display.flip()
+            # pygame.transform.flip(self.screen, True, False)
 
             if animation_running and index >= len(x_values):
                 animation_running = False  # Stop the animation

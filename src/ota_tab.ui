@@ -136,17 +136,17 @@
      <string/>
     </property>
    </widget>
-   <widget class="QComboBox" name="comboBox">
+   <widget class="QComboBox" name="ip_list">
     <property name="geometry">
      <rect>
-      <x>40</x>
+      <x>12</x>
       <y>80</y>
-      <width>73</width>
-      <height>22</height>
+      <width>101</width>
+      <height>21</height>
      </rect>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="search_new_sketch">
     <property name="geometry">
      <rect>
       <x>140</x>
@@ -159,7 +159,7 @@
      <string>Buscar</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_2">
+   <widget class="QPushButton" name="prepare_esp32">
     <property name="geometry">
      <rect>
       <x>240</x>
@@ -172,7 +172,7 @@
      <string>Preparar</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_3">
+   <widget class="QPushButton" name="load_new_sketch">
     <property name="geometry">
      <rect>
       <x>340</x>

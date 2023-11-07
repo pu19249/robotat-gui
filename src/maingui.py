@@ -15,7 +15,7 @@ import pygame
 from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as NavigationToolbar)
 import random
 from PyQt5.QtWidgets import *
-
+from ota.ota_main import *
 
 # define Worlds directory
 # Get the directory path of the current script, abspath because of the tree structure that everything is on different folders
@@ -172,28 +172,57 @@ class ota_tab(QWidget):
         self.status_label = self.findChild(QLabel, "status_mssg")
         self.from_simulator = self.findChild(QRadioButton, "from_simulator")
         self.from_new_sketch = self.findChild(QRadioButton, "from_new_sketch")
-        self.simulator_group = self.findChild(QGroupBox, "simulator_group")
-        self.new_sketch_group = self.findChild(QGroupBox, "new_sketch_group")
-        self.progress_bar_group = self.findChild(QGroupBox, "progress_bar_group")
         self.code_preview = self.findChild(QTextBrowser, "code_preview")
-        print(type(self.from_simulator))
-        print(type(self.new_sketch_group))
+        # SIMULATOR GROUP
+        self.simulator_group = self.findChild(QGroupBox, "simulator_group")
+        # NEW SKETCH GROUP
+        self.new_sketch_group = self.findChild(QGroupBox, "new_sketch_group")
+        self.ip_list = self.findChild(QComboBox, "ip_list")
+        self.load_new_sketch = self.findChild(QPushButton, "load_new_sketch")
+        self.prepare_esp32 = self.findChild(QPushButton, "prepare_esp32")
+        self.search_new_sketch = self.findChild(QPushButton, "search_new_sketch")
+
+        #
+        self.progress_bar_group = self.findChild(QGroupBox, "progress_bar_group")
+
+
         # Define clicking actions for each of the buttons
         self.new_sketch_group.setVisible(False)
         self.from_simulator.setChecked(True)
         self.from_simulator.toggled.connect(lambda:self.btnstate(self.from_simulator))
+        self.search_new_sketch.clicked.connect(self.sketch_browser)
+        self.prepare_esp32.clicked.connect(self.prepare_esp32_funct)
+        self.load_new_sketch.clicked.connect(self.upload_esp32_funct)
+        # geek list
+        ip_list = ["192.168.50.101", "192.168.50.102", "192.168.50.103",
+                    "192.168.50.104", "192.168.50.105", "192.168.50.106",
+                    "192.168.50.107", "192.168.50.108", "192.168.50.109"]
+ 
+        # adding list of items to combo box
+        self.ip_list.addItems(ip_list)
+
     # Methods for handling clicking actions
     def btnstate(self, b):
-         if b.isChecked():
+        if b.isChecked():
             self.status_label.setText('Se cargará data del JSON de simulación.')
             self.simulator_group.setVisible(True)
             self.new_sketch_group.setVisible(False)
-         else:
+        else:
             self.status_label.setText('Data de un nuevo sketch \nRevisar los requisitos del nuevo sketch.')
             # self.status_label.setText('Revisar los requisitos del nuevo sketch.')
             self.new_sketch_group.setVisible(True)
             self.simulator_group.setVisible(False)
 
+    def sketch_browser(self):
+        self.fname = QFileDialog.getOpenFileName(self, "Choose platformio project")
+        
+    def prepare_esp32_funct(self):
+        prepare_esp_for_update()
+        self.status_label.setText('ESP32 listo para recibir actualiizaciones OTA.')
+    
+    def upload_esp32_funct(self):
+        load_sketch(self.fname)
+        self.status_label.setText('ESP32 actualizado.')
 
         
 class monitoring_tab(QWidget):

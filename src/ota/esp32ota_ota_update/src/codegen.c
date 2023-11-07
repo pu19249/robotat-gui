@@ -1,5 +1,6 @@
 #include "codegen.h"
-
+#include <math.h>
+#include <stdio.h>
 
 void control(double goal_x, double goal_y, double x0, double y0, double theta0, double *wheel_speeds)
 {
@@ -25,6 +26,9 @@ void control(double goal_x, double goal_y, double x0, double y0, double theta0, 
       phi_r = 0;
 
     }
+    wheel_speeds[0] = phi_ell;
+    wheel_speeds[1] = phi_r;
+
 }
 
 // double v(double goal_x, double goal_y, double theta0, double x0, double y0) {
