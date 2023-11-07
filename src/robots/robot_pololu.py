@@ -61,6 +61,7 @@ class Pololu:
         )
         # To store the simulation results (X, Y, Theta)
         self.simulation_results = None
+        self.velocities_simulation_results = None
 
     def dynamics(self, state: list[float], u: list[float]):
         """
@@ -95,6 +96,7 @@ class Pololu:
         -------------
         u: numpy.ndarray
             [v, w]
+        v, w
         """
         u = self.controller(state, goal)
 
@@ -159,6 +161,8 @@ class Pololu:
         self.X = np.zeros(N + 1)
         self.Y = np.zeros(N + 1)
         self.Theta = np.zeros(N + 1)
+        self.V = np.zeros(N + 1)
+        self.W = np.zeros(N + 1)
         # arrays initialization
         self.XI[:, 0] = self.state
 
@@ -172,8 +176,11 @@ class Pololu:
 
             # store the state variables trajectories and inputs
             self.XI[:, n + 1] = self.state
-            self.U[:, n + 1] = u
+            u1 = u.tolist()
+            self.U[:, n + 1] = u1
             # Store the values of position and orientation
+            self.V[n + 1] = u1[0]
+            self.W[n + 1] = u1[1]
             self.X[n + 1] = self.state[0]
             self.Y[n + 1] = self.state[1]
             self.Theta[n + 1] = self.state[2]
@@ -182,6 +189,7 @@ class Pololu:
         self.simulated = True  # Mark the simulation as completed
         # Store the simulation results
         self.simulation_results = (self.X, self.Y, self.Theta)
+        self.velocities_simulation_results = (self.V, self.W)
         # Return the state and input arrays
         return self.X, self.Y, self.Theta
 
@@ -193,7 +201,10 @@ class Pololu:
         if not self.simulated:
             raise ValueError("Simulation not performed yet.")
         return self.simulation_results
-
+    
+    def get_velocities_results(self):
+        return self.velocities_simulation_results
+    
     def get_number_of_steps(self):
         if not self.simulated:
             raise ValueError("Simulation not performed yet.")

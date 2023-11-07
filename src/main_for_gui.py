@@ -102,6 +102,8 @@ def calculate_simulation(world, robots: list, pololu: list):
     x_results_plt = []
     y_results_plt = []
     theta_results_plt = []
+    v_plot = []
+    w_plot = []
     
     for i in range(len(robots)):
         landmark_id = robots[i].get('ID_robot')
@@ -113,12 +115,26 @@ def calculate_simulation(world, robots: list, pololu: list):
             
         traj = pololu[i].simulate_robot(dt, t0, tf, current_goal)
         x_results, y_results, theta_results = pololu[i].get_simulation_results()
-
+        v_simulation, w_simulation = pololu[i].get_velocities_results()
+        print(v_simulation)
         x_vals_display_robot = []
         y_vals_display_robot = []
         theta_vals_display_robot = []
         x_results_raw = []
         y_results_raw = []
+        v_display = []
+        w_display = []
+        
+        v_plot_robot = []
+        w_plot_robot = []
+
+        for v, w in zip(v_simulation, w_simulation):
+            v_display.append(v)
+            w_display.append(w)
+        # print(v_display)
+        v_plot.append(v_display)
+        w_plot.append(w_display)
+
 
         # this part makes the mapping to display in the commplete animation window 
         for x, y, theta in zip(x_results, y_results, theta_results):
@@ -141,6 +157,10 @@ def calculate_simulation(world, robots: list, pololu: list):
         y_results_plt.append(y_results_raw)
     # Remove the first value from each list
     
+    v_plot_robot = np.array(list(zip(*v_plot)))[1:]
+    w_plot_robot = np.array(list(zip(*w_plot)))[1:]
+    # print(w_plot_robot)
+
     x_vals_display = np.array(list(zip(*x_vals_display)))
     x_vals_display = x_vals_display[1:]
     y_vals_display = np.array(list(zip(*y_vals_display)))
@@ -152,8 +172,8 @@ def calculate_simulation(world, robots: list, pololu: list):
     x_results_plt = x_results_plt[1:]
     y_results_plt = np.array(list(zip(*y_results_plt)))
     y_results_plt = y_results_plt[1:]
-
-    return x_vals_display, y_vals_display, theta_vals_display, x_results_plt, y_results_plt
+    print(v_plot_robot)
+    return x_vals_display, y_vals_display, theta_vals_display, x_results_plt, y_results_plt, v_plot_robot, w_plot_robot
 
 def run_animation(animation_window, x_vals_display: np.ndarray, y_vals_display, theta_vals_display):
     # print(x_vals_display, y_vals_display, theta_vals_display)

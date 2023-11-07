@@ -1,0 +1,40 @@
+{
+  "t0": 0,
+  "tf": 50,
+  "dt": 0.1,
+  "no_robots": 1,
+  "x_dimension_arena": 850,
+  "y_dimension_arena": 960,
+  "robots": [
+    {
+      "img": "pictures/pololu_img_x.png",
+      "physical_params": {
+        "ell": 10,
+        "radius": 5,
+        "vel_left_max": 500,
+        "vel_right_max": 500
+      },
+      "ID_robot": 1,
+      "IP": "192.192.1.0",
+      "state": [0, 0, 0],
+      "controller": "exponential_pid"
+    }
+  ],
+  "obstacle": {
+    "id": 1,
+    "pos": [100, 100],
+    "orientation": [1, 2, 3],
+    "type": "rect",
+    "dimensions": [10, 10]
+  },
+  "landmarks": [
+    {
+    "id": 1,
+    "pos": [10, 50]
+  },
+  {
+    "id": 2,
+    "pos": [100, 50]
+  }
+]
+}

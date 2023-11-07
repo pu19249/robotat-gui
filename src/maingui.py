@@ -61,6 +61,8 @@ class simulator_tab(QWidget):
         self.y_results_plt  = None
         self.theta_vals_display = None
         self.selected_robot = None
+        self.v = None
+        self.w = None
         # Load uic file
         uic.loadUi("simulator_tab.ui ", self)
         
@@ -138,8 +140,8 @@ class simulator_tab(QWidget):
 
         elif (self.variables_to_display == "Velocities"):
             # Plot the selected robot's velocities
-            self.MplWidget.canvas.axes.plot(t, self.x_results_plt[:, self.selected_robot], label=f'Robot {self.selected_robot+1} - linear velocity')
-            self.MplWidget.canvas.axes.plot(t, self.y_results_plt[:, self.selected_robot], label=f'Robot {self.selected_robot+1} - angular velocity')
+            self.MplWidget.canvas.axes.plot(t, self.v[:, self.selected_robot], label=f'Robot {self.selected_robot+1} - linear velocity')
+            self.MplWidget.canvas.axes.plot(t, self.w[:, self.selected_robot], label=f'Robot {self.selected_robot+1} - angular velocity')
             
 
             self.MplWidget.canvas.axes.legend(loc='upper right')
@@ -156,7 +158,7 @@ class simulator_tab(QWidget):
         self.animation_window = initialize_animation(self.world)
         # Create objects
         self.robots, self.pololu = create_objects(self.world, self.animation_window)
-        self.x_vals_display, self.y_vals_display, self.theta_vals_display, self.x_results_plt, self.y_results_plt = calculate_simulation(self.world, self.robots, self.pololu)
+        self.x_vals_display, self.y_vals_display, self.theta_vals_display, self.x_results_plt, self.y_results_plt, self.v, self.w = calculate_simulation(self.world, self.robots, self.pololu)
         run_animation(self.animation_window, self.x_vals_display, self.y_vals_display, self.theta_vals_display)
 
     # def hide_show(self):
@@ -229,7 +231,7 @@ class monitoring_tab(QWidget):
     def __init__(self):
         super(monitoring_tab, self).__init__()
         # Load uic file
-        uic.loadUi("simulator_tab.ui ", self)
+        uic.loadUi("monitoring_tab.ui ", self)
 
 # Initialize the App
 app = QApplication(sys.argv)
