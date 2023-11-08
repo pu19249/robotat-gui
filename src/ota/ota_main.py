@@ -27,7 +27,9 @@ def prepare_esp_for_update():
         capture_output=True,
         text=True,
     )
-
+    output = compile_result.stdout
+    output = output.strip()  # Remove leading/trailing whitespace and newlines
+    print(output)
     # Manages the error retrying 3 times before giving it up
     if compile_result.returncode != 0:
         # this indicates the error ocurred in the .cpp file, it must be debugged manually if the script is proven to be working
@@ -81,3 +83,5 @@ def load_sketch(file_path):
         exit(1)
 
     print("ESP32 ready to receive ")
+
+# prepare_esp_for_update()

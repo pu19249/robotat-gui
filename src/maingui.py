@@ -16,12 +16,15 @@ from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as Navigati
 import random
 from PyQt5.QtWidgets import *
 from ota.ota_main import *
+from PyQt5.QtCore import QThread, pyqtSignal
+import subprocess
+from pathlib import Path
 
 # define Worlds directory
 # Get the directory path of the current script, abspath because of the tree structure that everything is on different folders
 script_dir = os.path.dirname(os.path.abspath(__file__))
 worlds_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src/worlds')
-print(worlds_dir)
+# print(worlds_dir)
 
 # Define a dictionary to map controller names to controller functions
 controller_map = {
@@ -29,6 +32,39 @@ controller_map = {
     'pd_controller': pd_controller,
     'lqi_controller': lqi_controller
 }
+
+# Define a dictionary to handle possible errors in try except blocks
+error_dict = {
+    1: "Seleccionar el mundo JSON a cargar antes de ejecutar otras acciones.",
+    2: "Error: Another specific error message",
+    3: "Hubo colisión entre los robots o con el borde la de la plataforma."
+    # Add more error codes and messages as needed
+}
+class Worker(QThread):
+    progress = pyqtSignal(str)
+
+    def run(self):
+        sketch_directory = os.path.join(str(Path(__file__).parent), "ota/esp32dev_ota_prepare")
+        compile_result = subprocess.Popen(
+            ["platformio", "run", "--target", "upload", "--environment", "esp32dev"],
+            cwd=sketch_directory,
+            stdout=subprocess.PIPE,
+            text=True,
+            bufsize=1,
+            universal_newlines=True
+        )
+
+        for line in compile_result.stdout:
+            self.progress.emit(line.strip())
+
+        compile_result.stdout.close()
+
+        if compile_result.returncode != 0:
+            print("Compilation failed:", compile_result.stderr)
+            exit(1)
+
+        self.progress.emit("ESP32 ready to receive")
+
 
 class UI(QMainWindow):
     def __init__(self):
@@ -68,6 +104,7 @@ class simulator_tab(QWidget):
         
         # Define our widgets
         self.console_label = self.findChild(QLabel, "message_sim")
+        self.console_label.setWordWrap(True)
         self.select_world = self.findChild(QPushButton, "select_world")
         self.plot = self.findChild(QPushButton, "plot")
         self.save_data = self.findChild(QPushButton, "save_data")
@@ -100,17 +137,22 @@ class simulator_tab(QWidget):
             self.variables_to_display = "Velocities"
 				
     def open_world_windows(self):
-        self.fname = QFileDialog.getOpenFileName(self, "Choose world", worlds_dir, "JSON files (*.json)")
-        if self.fname:
-            self.world = load_world(self.fname[0])  # Extract the file path from the tuple
-        self.no_robots = self.world['no_robots']
-        print(self.no_robots)
-        # Clear existing items in the ComboBox
-        self.robot_graph_selection.clear()
-        
-        # Add items to the ComboBox based on the number of robots
-        for i in range(self.no_robots):
-            self.robot_graph_selection.addItem(f'Robot {i+1}')
+        try:
+            self.fname = QFileDialog.getOpenFileName(self, "Choose world", worlds_dir, "JSON files (*.json)")
+            if self.fname:
+                self.world = load_world(self.fname[0])  # Extract the file path from the tuple
+            self.no_robots = self.world['no_robots']
+            # print(self.no_robots)
+            # Clear existing items in the ComboBox
+            self.robot_graph_selection.clear()
+            
+            # Add items to the ComboBox based on the number of robots
+            for i in range(self.no_robots):
+                self.robot_graph_selection.addItem(f'Robot {i+1}')
+        except:
+            error_code = 1  # You can determine the error code based on the exception
+            error_message = error_dict.get(error_code, "Unknown error")
+            self.console_label.setText(error_message)
 
     def update_plot(self):
         self.selected_robot = self.robot_graph_selection.currentIndex()  # Get the selected index
@@ -155,11 +197,19 @@ class simulator_tab(QWidget):
 
     def play_animation_window(self):
         # Show the animation window
-        self.animation_window = initialize_animation(self.world)
-        # Create objects
-        self.robots, self.pololu = create_objects(self.world, self.animation_window)
-        self.x_vals_display, self.y_vals_display, self.theta_vals_display, self.x_results_plt, self.y_results_plt, self.v, self.w = calculate_simulation(self.world, self.robots, self.pololu)
-        run_animation(self.animation_window, self.x_vals_display, self.y_vals_display, self.theta_vals_display)
+        try:
+            self.animation_window = initialize_animation(self.world)
+            # Create objects
+            self.robots, self.pololu = create_objects(self.world, self.animation_window)
+            self.x_vals_display, self.y_vals_display, self.theta_vals_display, self.x_results_plt, self.y_results_plt, self.v, self.w = calculate_simulation(self.world, self.robots, self.pololu)
+            run_animation(self.animation_window, self.x_vals_display, self.y_vals_display, self.theta_vals_display)
+            if self.animation_window.index_error == 3:
+                error_code = self.animation_window.index_error  # You can determine the error code based on the exception
+                error_message = error_dict.get(error_code, "Unknown error")
+                self.console_label.setText(error_message)
+        except:
+            self.console_label.setText('Seleccionar el mundo JSON de simulación primero.')
+            
 
     # def hide_show(self):
 
@@ -172,6 +222,7 @@ class ota_tab(QWidget):
 
         # Define our widgets
         self.status_label = self.findChild(QLabel, "status_mssg")
+        self.status_label.setWordWrap(True)
         self.from_simulator = self.findChild(QRadioButton, "from_simulator")
         self.from_new_sketch = self.findChild(QRadioButton, "from_new_sketch")
         self.code_preview = self.findChild(QTextBrowser, "code_preview")
@@ -210,7 +261,7 @@ class ota_tab(QWidget):
             self.simulator_group.setVisible(True)
             self.new_sketch_group.setVisible(False)
         else:
-            self.status_label.setText('Data de un nuevo sketch \nRevisar los requisitos del nuevo sketch.')
+            self.status_label.setText('Recordar presionar el botón de Boot del ESP32 durante el proceso de preparación. \nData de un nuevo sketch \nRevisar los requisitos del nuevo sketch.')
             # self.status_label.setText('Revisar los requisitos del nuevo sketch.')
             self.new_sketch_group.setVisible(True)
             self.simulator_group.setVisible(False)
@@ -219,9 +270,13 @@ class ota_tab(QWidget):
         self.fname = QFileDialog.getOpenFileName(self, "Choose platformio project")
         
     def prepare_esp32_funct(self):
-        prepare_esp_for_update()
-        self.status_label.setText('ESP32 listo para recibir actualiizaciones OTA.')
-    
+        self.thread = Worker()
+        self.thread.progress.connect(self.updateLabel)
+        self.thread.start()
+        # prepare_esp_for_update()
+        self.status_label.setText('ESP32 listo para recibir actualizaciones OTA.')
+    def updateLabel(self, output):
+        self.code_preview.append(output)
     def upload_esp32_funct(self):
         load_sketch(self.fname)
         self.status_label.setText('ESP32 actualizado.')
@@ -236,6 +291,7 @@ class monitoring_tab(QWidget):
 # Initialize the App
 app = QApplication(sys.argv)
 UIWindow = UI()
+UIWindow.show()
 
 app.exec_()
 

@@ -116,7 +116,7 @@ def calculate_simulation(world, robots: list, pololu: list):
         traj = pololu[i].simulate_robot(dt, t0, tf, current_goal)
         x_results, y_results, theta_results = pololu[i].get_simulation_results()
         v_simulation, w_simulation = pololu[i].get_velocities_results()
-        print(v_simulation)
+        # print(v_simulation)
         x_vals_display_robot = []
         y_vals_display_robot = []
         theta_vals_display_robot = []
@@ -172,7 +172,7 @@ def calculate_simulation(world, robots: list, pololu: list):
     x_results_plt = x_results_plt[1:]
     y_results_plt = np.array(list(zip(*y_results_plt)))
     y_results_plt = y_results_plt[1:]
-    print(v_plot_robot)
+    # print(v_plot_robot)
     return x_vals_display, y_vals_display, theta_vals_display, x_results_plt, y_results_plt, v_plot_robot, w_plot_robot
 
 def run_animation(animation_window, x_vals_display: np.ndarray, y_vals_display, theta_vals_display):

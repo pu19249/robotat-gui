@@ -290,7 +290,7 @@ class py_game_animation:
             0  # Initialize the index for accessing x_values, y_values and theta_values
         )
         animation_running = False
-
+        index_error = 0
         for robot_index in range(len(self.robot_characters)):
             x_robot = x_values[0][robot_index]  # Initial x position
             y_robot = y_values[0][robot_index]  # Initial y position
@@ -327,18 +327,20 @@ class py_game_animation:
                         self.robot_characters[i], self.robot_characters[j]
                     ):
                         # Handle collision here (e.g., change color, stop movement, etc.)
-                        print("collision")
+                        print("Collision")
                         animation_running = False  # Stop the animation
                         pygame.time.delay(1000)  # Wait until pygame window closes
                         self.run = False
+                        self.index_error = 3
 
             for robot in self.robot_characters:
                 if not self.bounding_box.collidepoint(robot.x, robot.y):
                     # Handle collision with bounding box (e.g., stop movement, change direction, etc.)
-                    print("collision")
+                    print("Collision")
                     animation_running = False  # Stop the animation
                     pygame.time.delay(1000)
                     self.run = False
+                    self.index_error = 3
 
             if animation_running and index < len(x_values):
                 for i in range(len(self.robot_characters)):
@@ -421,7 +423,7 @@ class py_game_monitoring(py_game_animation):
                 # Write the field names only once, not in every iteration
                 # writer.writerow(field)
                 writer.writerow([x_raw[0], y_raw[0], theta_raw[0]])
-            print(x_raw, y_raw, theta_raw)
+            # print(x_raw, y_raw, theta_raw)
             # print(x_values, y_values, theta_values)
             for x, y, theta in zip(x_values, y_values, theta_values):
                 for robot in self.robot_characters:
