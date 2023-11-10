@@ -19,8 +19,10 @@
 // ================================================================================
 // Variable definitions
 // ================================================================================
-#define SSID "Robotat"
-#define PASSWORD "iemtbmcit116"
+// #define SSID "Robotat"
+// #define PASSWORD "iemtbmcit116"
+#define SSID "HUAWEI Y8s"
+#define PASSWORD "003831e381aa"
 
 BasicOTA OTA;
 // variables for blinking an LED with Millis
@@ -37,7 +39,7 @@ static const unsigned int control_time_ms = 100; // período de muestreo del con
 volatile float phi_ell = 0;                      // en rpm
 volatile float phi_r = 0;                        // en rpm
 // WiFi+Robotat
-const unsigned robot_id = 6; // PONER EL NÚMERO DE MARKER AQUÍ
+const unsigned robot_id = 7; // PONER EL NÚMERO DE MARKER AQUÍ
 const char *ssid = "Robotat";
 const char *password = "iemtbmcit116";
 const char *host = "192.168.50.200";
@@ -103,20 +105,20 @@ void connect2robotat_task(void *p_params)
         ey = doc["data"][5].as<double>();
         ez = doc["data"][6].as<double>();
 
-        Serial.print("x = ");
-        Serial.print(x);
-        Serial.print(", y = ");
-        Serial.print(y);
-        Serial.print(", z = ");
-        Serial.print(z);
-        Serial.print(", n = ");
-        Serial.print(n);
-        Serial.print(", ex = ");
-        Serial.print(ex);
-        Serial.print(", ey = ");
-        Serial.print(ey);
-        Serial.print(", ez = ");
-        Serial.println(ez);
+        // Serial.print("x = ");
+        // Serial.print(x);
+        // Serial.print(", y = ");
+        // Serial.print(y);
+        // Serial.print(", z = ");
+        // Serial.print(z);
+        // Serial.print(", n = ");
+        // Serial.print(n);
+        // Serial.print(", ex = ");
+        // Serial.print(ex);
+        // Serial.print(", ey = ");
+        // Serial.print(ey);
+        // Serial.print(", ez = ");
+        // Serial.println(ez);
       }
       else
       {
@@ -142,36 +144,53 @@ void control_algorithm_task(void *p_params)
     double q[4] = {n, ex, ey, ez};
     roll = atan2((q[0] * q[1] + q[2] * q[3]), 0.5 - (q[1] * q[1] + q[2] * q[2]));
     pitch = asin(2.0 * (q[0] * q[2] - q[1] * q[3]));
-    yaw = atan2((q[1] * q[2] + q[0] * q[3]), 0.5 - (q[2] * q[2] + q[3] * q[3]));
-    double theta = yaw;
+    yaw = atan2(2*(q[1] * q[2] + q[0] * q[3]), 1 - 2*(q[2] * q[2] + q[3] * q[3]));
+    
     // to degrees
     yaw *= 180.0 / PI;
     pitch *= 180.0 / PI;
     roll *= 180.0 / PI;
-    Serial.println("theta");
-    Serial.print(theta);
-    control(100.00, 100.00, x, y, theta, temp);
+    double theta = yaw;
+    Serial.print("theta");
+    Serial.println(theta);
+    control(0.0, -0.0, x, y, theta, temp);
     // phi_ell = temp[0];
     // phi_r = temp[1];
 
-    if ((phi_ell || phi_r) > 200)
-    {
-      phi_ell = 0;
-      phi_r = 0;
-    }
+
     phi_ell = temp[0];
     phi_r = temp[1];
-    Serial.println("phi_ell");
-    Serial.print(phi_ell);
-    Serial.println("phi_r");
-    Serial.print(phi_r);
+    if (phi_ell > 80.0)
+    {
+      phi_ell = 0;
+    }
+    else if(phi_ell < -80){
+      phi_ell = 0;
+    }
+    if (phi_r > 80.0)
+    {
+      phi_r = 0;
+    }
+    else if(phi_r < -80){
+      phi_r = 0;
+    }
+
+    // Serial.print("phi_ell");
+    // Serial.println(phi_ell);
+    // Serial.print("phi_r");
+    // Serial.println(phi_r);
     vTaskDelay(1000 / portTICK_PERIOD_MS); // delay de 1 segundo (thread safe)
   }
 }
 
 void setup()
 {
-  Serial.begin(115200);
+  // Serial.begin(115200);
+ 
+
+  Serial.begin(115200);  // ***NO MODIFICAR***
+  Serial2.begin(115200); // ***NO MODIFICAR***
+  TinyCBOR.init();       // ***NO MODIFICAR***
   Serial.println("Startup");
   WiFi.mode(WIFI_STA);
   WiFi.begin(SSID, PASSWORD);
@@ -187,11 +206,6 @@ void setup()
   Serial.println("Ready");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
-
-  Serial.begin(115200);  // ***NO MODIFICAR***
-  Serial2.begin(115200); // ***NO MODIFICAR***
-  TinyCBOR.init();       // ***NO MODIFICAR***
-
   // Si alguna de sus librerías requiere setup, colocarlo aquí
   // WiFi+Robotat
   if (robot_id < 10)
