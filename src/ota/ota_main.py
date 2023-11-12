@@ -10,7 +10,7 @@ import os
 import subprocess
 import time
 from pathlib import Path
-from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtCore import QThread, pyqtSignal, QRunnable
 
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(parent_dir)
@@ -87,10 +87,12 @@ from ota.wifi_connect import NetworkManager
 
 
 
-class prepare_esp_for_update(QThread):
+class Worker_prepare_esp_for_update(QThread):
+    finished = pyqtSignal()
     progress = pyqtSignal(str)
 
     def run(self):
+        print('subiendo!')
         sketch_directory = os.path.join(
             str(Path(__file__).parent), "esp32dev_ota_prepare"
         )
@@ -107,19 +109,24 @@ class prepare_esp_for_update(QThread):
             self.progress.emit(line.strip())
 
         compile_result.stdout.close()
-
+        compile_result.kill()
         if compile_result.returncode != 0:
-            print("Compilation failed:", compile_result.stderr)
-            exit(1)
+            self.progress.emit("Compilation failed")#, compile_result.stderr)
+            # exit(1)
+        else:
+            self.progress.emit("ESP32 ready to receive")
+        compile_result.kill()
 
-        self.progress.emit("ESP32 ready to receive")
+        
+        self.finished.emit()
 
 
-class load_sketch(QThread):
+class Worker_load_sketch(QThread):
+    finished = pyqtSignal()
     progress = pyqtSignal(str)
 
     def __init__(self, file_path, parent=None):
-        super(load_sketch, self).__init__(parent)
+        super(Worker_load_sketch, self).__init__(parent)
         self.file_path = file_path
 
         # Initialize NetworkManager and configure network parameters
@@ -164,19 +171,19 @@ class load_sketch(QThread):
             bufsize=1,
             universal_newlines=True,
         )
-
+        
         for line in compile_result.stdout:
             self.progress.emit(line.strip())
 
-        for line in compile_result.stderr:
-            self.progress.emit(line.strip())
-
         compile_result.stdout.close()
-        compile_result.stderr.close()
-
+        compile_result.kill()
         if compile_result.returncode != 0:
-            print("Compilation failed:", compile_result.stderr)
-            exit(1)
+            self.progress.emit("Compilation failed")#, compile_result.stderr)
+            # exit(1)
+        else:
+            self.progress.emit("ESP32 ready to receive")
+        compile_result.kill()
 
-        self.progress.emit("ESP32 ready to receive")
+        
+        self.finished.emit()
 

@@ -5,9 +5,9 @@ from sympy.utilities.codegen import codegen
 x0, y0, theta0, goal_x, goal_y = symbols('x0 y0 theta0 goal_x goal_y')
 
 # Definir la función pd_controller_sim
-kp = 0.10
-ki = 0.01
-kd = 0.1
+kp = 2.0
+ki = 0.001
+kd = 0.0
 
 x = x0
 y = y0
@@ -25,6 +25,8 @@ eO = (sin(eO) / cos(eO))
 
 v = kp * eP + ki * eP + kd * eO
 w = kp * eO + ki * eO + kd * eO
+print(v)
+print(w)
 
 # Convertir las expresiones a código C
 [(c_name, c_code), (h_name, c_header)] = codegen(('v', v), "C99", "test", header=False, empty=False)

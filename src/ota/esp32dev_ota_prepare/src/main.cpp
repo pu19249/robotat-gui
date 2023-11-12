@@ -12,10 +12,10 @@
 #include <WiFi.h>
 #include "BasicOTA.hpp"
 
-// #define SSID      "Robotat"
-// #define PASSWORD  "iemtbmcit116"
-#define SSID "HUAWEI Y8s"
-#define PASSWORD "003831e381aa"
+#define SSID      "Robotat"
+#define PASSWORD  "iemtbmcit116"
+// #define SSID "HUAWEI Y8s"
+// #define PASSWORD "003831e381aa"
 
 BasicOTA OTA;
 

@@ -19,10 +19,10 @@
 // ================================================================================
 // Variable definitions
 // ================================================================================
-// #define SSID "Robotat"
-// #define PASSWORD "iemtbmcit116"
-#define SSID "HUAWEI Y8s"
-#define PASSWORD "003831e381aa"
+#define SSID "Robotat"
+#define PASSWORD "iemtbmcit116"
+// #define SSID "HUAWEI Y8s"
+// #define PASSWORD "003831e381aa"
 
 BasicOTA OTA;
 // variables for blinking an LED with Millis
@@ -153,33 +153,36 @@ void control_algorithm_task(void *p_params)
     double theta = yaw;
     Serial.print("theta");
     Serial.println(theta);
-    control(0.0, -0.0, x, y, theta, temp);
+    control(0.0, 0.0, x, y, theta, temp);
     // phi_ell = temp[0];
     // phi_r = temp[1];
 
 
-    phi_ell = temp[0];
-    phi_r = temp[1];
-    if (phi_ell > 80.0)
+    // phi_ell = temp[0];
+    // phi_r = temp[1];
+    Serial.print("phi_ell");
+    Serial.println(phi_ell);
+    Serial.print("phi_r");
+    Serial.println(phi_r);
+    phi_ell = 10;
+    phi_r = 10;
+    if (phi_ell > 100.0)
     {
       phi_ell = 0;
     }
-    else if(phi_ell < -80){
+    else if(phi_ell < -100){
       phi_ell = 0;
     }
-    if (phi_r > 80.0)
+    if (phi_r > 100.0)
     {
       phi_r = 0;
     }
-    else if(phi_r < -80){
+    else if(phi_r < -100){
       phi_r = 0;
     }
 
-    // Serial.print("phi_ell");
-    // Serial.println(phi_ell);
-    // Serial.print("phi_r");
-    // Serial.println(phi_r);
-    vTaskDelay(1000 / portTICK_PERIOD_MS); // delay de 1 segundo (thread safe)
+
+    vTaskDelay(10 / portTICK_PERIOD_MS); // delay de 1 segundo (thread safe)
   }
 }
 

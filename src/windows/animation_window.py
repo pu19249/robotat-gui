@@ -412,7 +412,7 @@ class py_game_monitoring(py_game_animation):
             self.clock.tick(60)
             self.play.draw()  # Update the play button
             x_values, y_values, theta_values, x_raw, y_raw, theta_raw = self.data_src_funct()
-            with open("chepito" + ".csv", "a", newline="") as file:
+            with open("cuadrante3" + ".csv", "a", newline="") as file:
                 writer = csv.writer(file)
                 field = [
                     "x position",

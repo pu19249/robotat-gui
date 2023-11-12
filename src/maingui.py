@@ -16,7 +16,8 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 import random
 from PyQt5.QtWidgets import *
 from ota.ota_main import *
-from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtCore import QThread, pyqtSignal, QObject, QThreadPool, QRunnable
+from PyQt5 import QtGui
 import subprocess
 from pathlib import Path
 
@@ -53,6 +54,8 @@ class UI(QMainWindow):
         # Create and add tabs
         # Set the size of the main window
         self.setFixedSize(1121, 741)
+        self.setWindowIcon(QtGui.QIcon("pictures/Logo UVG-06.png"))
+        self.setWindowTitle("ROBOTAT")
         self.tab_widget = QTabWidget()
 
         self.tab1_simulation = simulator_tab()
@@ -245,7 +248,9 @@ class ota_tab(QWidget):
         super(ota_tab, self).__init__()
         # Load uic file
         uic.loadUi("ota_tab.ui ", self)
-
+        self.fname = None
+        # self.thread1 = prepare_esp_for_update()
+        # self.thread2 = load_sketch(self.fname)
         # Define our widgets
         self.status_label = self.findChild(QLabel, "status_mssg")
         self.status_label.setWordWrap(True)
@@ -307,20 +312,54 @@ class ota_tab(QWidget):
             print(f"Selected folder: {self.fname}")
 
     def prepare_esp32_funct(self):
-        self.thread = prepare_esp_for_update()
-        self.thread.progress.connect(self.updateLabel)
+        self.thread = QThread()
+        self.worker = Worker_prepare_esp_for_update()
+        self.worker.moveToThread(self.thread)
+        # Step 5: Connect signals and slots
+        self.thread.started.connect(self.worker.run)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.thread.finished.connect(self.thread.deleteLater)
+        self.worker.progress.connect(self.updateLabel)
+        # Step 6: Start the thread
         self.thread.start()
-        # prepare_esp_for_update()
-        self.status_label.setText("ESP32 listo para recibir actualizaciones OTA.")
+
+        # Final resets
+        self.prepare_esp32.setEnabled(False)
+        self.thread.finished.connect(
+            lambda: self.prepare_esp32.setEnabled(True)
+        )
+        self.thread.finished.connect(
+            lambda: self.status_label.setText("Ejecutando proceso de carga serial.")
+        )
+
+
 
     def updateLabel(self, output):
+        self.code_preview.clearHistory()
         self.code_preview.append(output)
 
     def upload_esp32_funct(self):
-        self.thread = load_sketch(self.fname)
-        self.thread.progress.connect(self.updateLabel)
+        self.thread = QThread()
+        self.worker = Worker_load_sketch(self.fname)
+        self.worker.moveToThread(self.thread)
+        # Step 5: Connect signals and slots
+        self.thread.started.connect(self.worker.run)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.thread.finished.connect(self.thread.deleteLater)
+        self.worker.progress.connect(self.updateLabel)
+        # Step 6: Start the thread
         self.thread.start()
-        self.status_label.setText("ESP32 actualizado.")
+
+        # Final resets
+        self.load_new_sketch.setEnabled(False)
+        self.thread.finished.connect(
+            lambda: self.load_new_sketch.setEnabled(True)
+        )
+        self.thread.finished.connect(
+            lambda: self.status_label.setText("Ejecutando proceso de carga OTA.")
+        )
 
 
 class monitoring_tab(QWidget):
