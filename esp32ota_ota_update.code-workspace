@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "src/ota/esp32ota_ota_update"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"stdio.h": "c",
+			"functional": "cpp"
+		}
+	}
+}
