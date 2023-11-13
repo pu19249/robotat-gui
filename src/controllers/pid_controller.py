@@ -1,6 +1,6 @@
 import numpy as np
 
-def pd_controller(xi, goal):
+def pid_controller(xi, goal):
     kp = 0.10  # Ajusta según tus preferencias
     ki = 0.01  # Ajusta según tus preferencias
     kd = 0.1  # Ajusta según tus preferencias

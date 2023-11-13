@@ -9,27 +9,27 @@
     {
       "img": "pictures/pololu_img_x.png",
       "physical_params": {
-        "ell": 10,
-        "radius": 5,
-        "vel_left_max": 500,
-        "vel_right_max": 500
+        "ell": 0.096,
+        "radius": 0.032,
+        "vel_left_max": 100,
+        "vel_right_max": 100
       },
       "ID_robot": 1,
-      "IP": "192.192.1.0",
-      "state": [0, 0, 0],
-      "controller": "exponential_pid"
+      "IP": "192.168.50.107",
+      "state": [-10, -50, 0],
+      "controller": "pid_controller"
     },
     {
       "img": "pictures/pololu_img_x.png",
       "physical_params": {
-        "ell": 10,
-        "radius": 5,
-        "vel_left_max": 500,
-        "vel_right_max": 500
+        "ell": 0.096,
+        "radius": 0.032,
+        "vel_left_max": 100,
+        "vel_right_max": 100
       },
       "ID_robot": 2,
-      "IP": "192.192.1.1",
-      "state": [100, 100, 0],
+      "IP": "192.168.50.107",
+      "state": [10, 30, 0],
       "controller": "pid_controller"
     }
   ],
@@ -43,11 +43,11 @@
   "landmarks": [
     {
     "id": 1,
-    "pos": [10, 50]
+    "pos": [-150, 200]
   },
   {
     "id": 2,
-    "pos": [100, 50]
+    "pos": [-90, 150]
   }
 ]
 }

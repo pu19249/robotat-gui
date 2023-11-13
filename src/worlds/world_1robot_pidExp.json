@@ -9,15 +9,15 @@
     {
       "img": "pictures/pololu_img_x.png",
       "physical_params": {
-        "ell": 10,
-        "radius": 5,
-        "vel_left_max": 500,
-        "vel_right_max": 500
+        "ell": 0.096,
+        "radius": 0.032,
+        "vel_left_max": 100,
+        "vel_right_max": 100
       },
       "ID_robot": 1,
       "IP": "192.168.50.107",
-      "state": [0, 0, 0],
-      "controller": "pd_controller"
+      "state": [10, 30, 0],
+      "controller": "exponential_pid"
     }
   ],
   "obstacle": {
@@ -30,7 +30,7 @@
   "landmarks": [
     {
     "id": 1,
-    "pos": [-150, 200]
+    "pos": [100, -200]
   }
 ]
 }
