@@ -28,6 +28,8 @@ worlds_dir = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src/worlds"
 )
 # print(worlds_dir)
+global IP_sim, controller_sim
+
 
 # Define a dictionary to map controller names to controller functions
 controller_map = {
@@ -149,6 +151,8 @@ class simulator_tab(QWidget):
         t0 = self.world["t0"]
         tf = self.world["tf"]
         dt = self.world["dt"]
+        
+
 
         if any(
             var is None
@@ -206,7 +210,12 @@ class simulator_tab(QWidget):
             self.MplWidget.canvas.draw()
 
     def save_sim_data(self):
-        pass
+        robots = self.world["robots"]
+        for i in range(len(robots)):
+            self.IP = robots[i].get('IP')
+            self.TAG = robots[i].get('TAG')
+            self.
+            print(self.IP)
 
     def play_animation_window(self):
         # Show the animation window

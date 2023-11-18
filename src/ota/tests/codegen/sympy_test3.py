@@ -12,8 +12,8 @@ kdO = 0.0
 EO = 0.0
 eO_1 = 0.0
 
-v0 = 15.0
-alpha = 0.8
+v0 = 10.0
+alpha = 0.95
 
 x = x0
 y = y0
@@ -25,11 +25,11 @@ goal_diff_y = goal_y - y
 thetag = atan2(goal_diff_y, goal_diff_x)
 eP = (goal_diff_x**2 + goal_diff_y**2)**0.5
 eO = thetag - theta
-# eO = atan2(sin(eO), cos(eO))
+eO = atan2(sin(eO), cos(eO))
 
 # linear velocity
-kP = v0 * (1 - 2.718281828459045 ** (-alpha * eP ** 2)) / eP
-v = kP * eP
+v = v0 * (1 - 2.718281828459045 ** (-alpha * eP ** 2))
+# v = kP
 
 # angular velocity
 eO_D = eO - eO_1

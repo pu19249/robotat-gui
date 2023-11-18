@@ -25,11 +25,6 @@
 // #define PASSWORD "003831e381aa"
 
 BasicOTA OTA;
-// variables for blinking an LED with Millis
-const int led = 33;               // ESP32 Pin to which onboard LED is connected
-unsigned long previousMillis = 0; // will store last time LED was updated
-const long interval = 1000;       // interval at which to blink (milliseconds)
-int ledState = LOW;               // ledState used to set the LED
 
 // ================================================================================
 // Funcionamiento básico del robot, ***NO MODIFICAR***
@@ -39,7 +34,7 @@ static const unsigned int control_time_ms = 100; // período de muestreo del con
 volatile float phi_ell = 0;                      // en rpm
 volatile float phi_r = 0;                        // en rpm
 // WiFi+Robotat
-const unsigned robot_id = 7; // PONER EL NÚMERO DE MARKER AQUÍ
+const unsigned robot_id = 4; // PONER EL NÚMERO DE MARKER AQUÍ
 const char *ssid = "Robotat";
 const char *password = "iemtbmcit116";
 const char *host = "192.168.50.200";
@@ -53,7 +48,12 @@ int t1 = 0;
 int ti = 60;
 int t2 = 180;
 
+// control
+double temp[2];
+double q[4];
+
 volatile double x, y, z, n, ex, ey, ez, roll, pitch, yaw;
+
 void encode_send_wheel_speeds_task(void *p_params)
 {
   TickType_t last_control_time;
@@ -140,56 +140,61 @@ void control_algorithm_task(void *p_params)
 {
   while (1) // loop()
   {
-    double temp[2];
-    double q[4] = {n, ex, ey, ez};
-    roll = atan2((q[0] * q[1] + q[2] * q[3]), 0.5 - (q[1] * q[1] + q[2] * q[2]));
-    pitch = asin(2.0 * (q[0] * q[2] - q[1] * q[3]));
+    
+    q[0] = n;
+    q[1] = ex;
+    q[2] = ey;
+    q[3] = ez;
+    // roll = atan2((q[0] * q[1] + q[2] * q[3]), 0.5 - (q[1] * q[1] + q[2] * q[2]));
+    // pitch = asin(2.0 * (q[0] * q[2] - q[1] * q[3]));
     yaw = atan2(2*(q[1] * q[2] + q[0] * q[3]), 1 - 2*(q[2] * q[2] + q[3] * q[3]));
     
     // to degrees
-    yaw *= 180.0 / PI;
-    pitch *= 180.0 / PI;
-    roll *= 180.0 / PI;
-    double theta = yaw;
-    Serial.print("theta");
-    Serial.println(theta);
-    control(0.0, 0.0, x, y, theta, temp);
+    // yaw *= (180.0 / PI);
+    yaw = yaw - 2.39; // desfase del marker
+    // yaw *= (180.0 / PI);
+    // pitch *= 180.0 / PI;
+    // roll *= 180.0 / PI;
+    
+    // Serial.print("theta: ");
+    // Serial.println(yaw);
+    control(0.0, 0.0, x, y, yaw, temp);
     // phi_ell = temp[0];
     // phi_r = temp[1];
 
 
-    // phi_ell = temp[0];
-    // phi_r = temp[1];
-    Serial.print("phi_ell");
+    phi_ell = temp[0];
+    phi_r = temp[1];
+    Serial.print("phi_ell: ");
     Serial.println(phi_ell);
-    Serial.print("phi_r");
+    Serial.print("phi_r: ");
     Serial.println(phi_r);
-    phi_ell = 10;
-    phi_r = 10;
-    if (phi_ell > 100.0)
+    Serial.println(" ");
+    // phi_ell = 10;
+    // phi_r = 10;
+    float limite = 100;
+    if (phi_ell > limite)
     {
-      phi_ell = 0;
+      phi_ell = limite;
     }
-    else if(phi_ell < -100){
-      phi_ell = 0;
+    if(phi_ell < -limite){
+      phi_ell = -limite;
     }
-    if (phi_r > 100.0)
+    if (phi_r > limite)
     {
-      phi_r = 0;
+      phi_r = limite;
     }
-    else if(phi_r < -100){
-      phi_r = 0;
+    if(phi_r < -limite){
+      phi_r = -limite;
     }
 
 
-    vTaskDelay(10 / portTICK_PERIOD_MS); // delay de 1 segundo (thread safe)
+    vTaskDelay(20 / portTICK_PERIOD_MS); // delay de 1 segundo (thread safe)
   }
 }
 
 void setup()
 {
-  // Serial.begin(115200);
- 
 
   Serial.begin(115200);  // ***NO MODIFICAR***
   Serial2.begin(115200); // ***NO MODIFICAR***
@@ -240,9 +245,9 @@ void setup()
   else
     Serial.println("Connection failed");
   // Creación de tasks ***NO MODIFICAR***
-  xTaskCreate(encode_send_wheel_speeds_task, "encode_send_wheel_speeds_task", 1024 * 2, NULL, configMAX_PRIORITIES, NULL);
-  xTaskCreate(connect2robotat_task, "connect2robotat_task", 1024 * 2, NULL, configMAX_PRIORITIES - 1, NULL);
-  xTaskCreate(control_algorithm_task, "control_algorithm_task", 1024 * 2, NULL, configMAX_PRIORITIES - 1, NULL);
+  xTaskCreate(encode_send_wheel_speeds_task, "encode_send_wheel_speeds_task", 1024 * 2, NULL, configMAX_PRIORITIES - 3, NULL);
+  xTaskCreate(connect2robotat_task, "connect2robotat_task", 1024 * 4, NULL, configMAX_PRIORITIES - 1, NULL);
+  xTaskCreate(control_algorithm_task, "control_algorithm_task", 1024 * 2, NULL, configMAX_PRIORITIES - 2, NULL);
 }
 
 void loop()

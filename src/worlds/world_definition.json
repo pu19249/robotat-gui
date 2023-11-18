@@ -15,6 +15,7 @@
         "vel_right_max": 500
       },
       "ID_robot": 1,
+      "TAG": 0,
       "IP": "192.192.1.0",
       "state": [0, 0, 0],
       "controller": "exponential_pid"
@@ -28,6 +29,7 @@
         "vel_right_max": 500
       },
       "ID_robot": 2,
+      "TAG": 1,
       "IP": "192.192.1.1",
       "state": [100, 100, 0],
       "controller": "pid_controller"
