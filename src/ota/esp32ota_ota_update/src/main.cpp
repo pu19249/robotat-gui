@@ -33,8 +33,10 @@ uint8_t uart_send_buffer[32] = {0};              // buffer CBOR
 static const unsigned int control_time_ms = 100; // período de muestreo del control
 volatile float phi_ell = 0;                      // en rpm
 volatile float phi_r = 0;                        // en rpm
+double WHEEL_RADIUS = (0.32/ 2);         // radio de las ruedas (en m)
+double DISTANCE_FROM_CENTER = (0.96 / 2); // distancia a ruedas (en m)
 // WiFi+Robotat
-const unsigned robot_id = 4; // PONER EL NÚMERO DE MARKER AQUÍ
+const unsigned robot_id = 1; // PONER EL NÚMERO DE MARKER AQUÍ
 const char *ssid = "Robotat";
 const char *password = "iemtbmcit116";
 const char *host = "192.168.50.200";
@@ -52,7 +54,7 @@ int t2 = 180;
 double temp[2];
 double q[4];
 
-volatile double x, y, z, n, ex, ey, ez, roll, pitch, yaw;
+volatile float x, y, z, n, ex, ey, ez, roll, pitch, yaw, v, w;
 
 void encode_send_wheel_speeds_task(void *p_params)
 {
@@ -151,41 +153,43 @@ void control_algorithm_task(void *p_params)
     
     // to degrees
     // yaw *= (180.0 / PI);
-    yaw = yaw - 2.39; // desfase del marker
+    yaw = yaw;// - 2.39; // desfase del marker
     // yaw *= (180.0 / PI);
     // pitch *= 180.0 / PI;
     // roll *= 180.0 / PI;
     
     // Serial.print("theta: ");
     // Serial.println(yaw);
-    control(0.0, 0.0, x, y, yaw, temp);
+    control(1.5, -1.5, x, y, yaw, temp);
     // phi_ell = temp[0];
     // phi_r = temp[1];
 
 
-    phi_ell = temp[0];
-    phi_r = temp[1];
+    v = temp[0];
+    w = temp[1];
+    phi_ell = (v - w*DISTANCE_FROM_CENTER) / WHEEL_RADIUS; //rad/s;
+    phi_r = (v + w*DISTANCE_FROM_CENTER) / WHEEL_RADIUS; //rad/s;
     Serial.print("phi_ell: ");
     Serial.println(phi_ell);
     Serial.print("phi_r: ");
     Serial.println(phi_r);
     Serial.println(" ");
-    // phi_ell = 10;
-    // phi_r = 10;
-    float limite = 100;
+    // phi_ell = 400;
+    // phi_r = 0;
+    float limite = 300.0;
     if (phi_ell > limite)
     {
-      phi_ell = limite;
+      phi_ell = 0.0;
     }
     if(phi_ell < -limite){
-      phi_ell = -limite;
+      phi_ell = 0.0;
     }
     if (phi_r > limite)
     {
-      phi_r = limite;
+      phi_r = 0.0;
     }
     if(phi_r < -limite){
-      phi_r = -limite;
+      phi_r = 0.0;
     }
 
 

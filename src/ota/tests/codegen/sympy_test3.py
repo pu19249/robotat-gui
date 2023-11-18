@@ -6,14 +6,14 @@ import math
 # Definir los símbolos
 x0, y0, theta0, goal_x, goal_y = symbols('x0 y0 theta0 goal_x goal_y')
 
-kpO = 10.0
-kiO = 0.001
-kdO = 0.0
+kpO = 15.0
+kiO = 0.01
+kdO = 0.01
 EO = 0.0
 eO_1 = 0.0
 
-v0 = 10.0
-alpha = 0.95
+v0 = 20.0
+alpha = 9
 
 x = x0
 y = y0

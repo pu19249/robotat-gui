@@ -214,7 +214,7 @@ class simulator_tab(QWidget):
         for i in range(len(robots)):
             self.IP = robots[i].get('IP')
             self.TAG = robots[i].get('TAG')
-            self.
+            # self.
             print(self.IP)
 
     def play_animation_window(self):

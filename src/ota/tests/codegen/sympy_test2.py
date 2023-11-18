@@ -5,9 +5,9 @@ from sympy.utilities.codegen import codegen
 x0, y0, theta0, goal_x, goal_y = symbols('x0 y0 theta0 goal_x goal_y')
 
 # Definir la función pd_controller_sim
-kp = 2.0
-ki = 0.001
-kd = 0.0
+kp = 10.0
+ki = 0.01
+kd = 0.01
 
 x = x0
 y = y0
