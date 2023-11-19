@@ -1,4 +1,4 @@
-from sympy import symbols, sin, cos
+from sympy import symbols, sin, cos, atan2
 from sympy.utilities.codegen import codegen
 
 # Definir los símbolos
@@ -21,7 +21,7 @@ thetag = goal_diff_y / goal_diff_x
 eP = (goal_diff_x**2 + goal_diff_y**2)**0.5
 
 eO = thetag - theta
-eO = (sin(eO) / cos(eO))
+eO = atan2(sin(eO), cos(eO))
 
 v = kp * eP + ki * eP + kd * eO
 w = kp * eO + ki * eO + kd * eO

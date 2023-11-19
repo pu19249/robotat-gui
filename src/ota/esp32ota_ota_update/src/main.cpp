@@ -160,7 +160,7 @@ void control_algorithm_task(void *p_params)
     
     // Serial.print("theta: ");
     // Serial.println(yaw);
-    control(1.5, -1.5, x, y, yaw, temp);
+    control(0, 0, x, y, yaw, temp);
     // phi_ell = temp[0];
     // phi_r = temp[1];
 

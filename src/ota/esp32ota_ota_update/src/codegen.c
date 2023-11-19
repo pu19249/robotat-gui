@@ -16,9 +16,9 @@ volatile float w_result;
 
 void control(double goal_x, double goal_y, double x0, double y0, double theta0, double *wheel_speeds)
 {
-    v_result = 25.0 - 25.0*pow(2.7182818284590451, -9*pow(pow(goal_x - x0, 2) + pow(goal_y - y0, 2), 1.0));
+    v_result = 15.01*sqrt(pow(goal_x - x0, 2) + pow(goal_y - y0, 2)) + 0.01*atan2(-sin(theta0 - (goal_y - y0)/(goal_x - x0)), cos(theta0 - (goal_y - y0)/(goal_x - x0)));
     //v_result = 0;
-   w_result = 15.02*atan2(-sin(theta0 - atan2(goal_y - y0, goal_x - x0)), cos(theta0 - atan2(goal_y - y0, goal_x - x0)));
+    w_result = 15.02*atan2(-sin(theta0 - (goal_y - y0)/(goal_x - x0)), cos(theta0 - (goal_y - y0)/(goal_x - x0)));
      // phi_left = (v_result*0 - w_result*DISTANCE_FROM_CENTER) / WHEEL_RADIUS; //rad/s;
     // phi_right = (v_result*0 + w_result*DISTANCE_FROM_CENTER) / WHEEL_RADIUS; //rad/s;
 
