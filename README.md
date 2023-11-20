@@ -1,5 +1,3 @@
-Your README is well-structured and provides a clear overview of your project. I've made a few minor grammatical and stylistic suggestions for improvement:
-
 # Robotat GUI - Alpha
 
 ![Robotat Logo](https://pandao.github.io/editor.md/images/logos/editormd-logo-180x180.png)
