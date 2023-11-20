@@ -110,10 +110,11 @@ def calculate_simulation(world, robots: list, pololu: list):
         closest_landmark = next((lm for lm in world['landmarks'] if lm['id'] == landmark_id), None)
         if closest_landmark is not None:
             current_goal = closest_landmark['pos']
+            print(current_goal[0]*100)
         else:
             current_goal = [0, 0]
             
-        traj = pololu[i].simulate_robot(dt, t0, tf, current_goal)
+        traj = pololu[i].simulate_robot(dt, t0, tf, [current_goal[0]*100, current_goal[1]*100])
         x_results, y_results, theta_results = pololu[i].get_simulation_results()
         v_simulation, w_simulation = pololu[i].get_velocities_results()
         # print(v_simulation)

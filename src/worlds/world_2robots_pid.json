@@ -18,7 +18,9 @@
       "TAG": 7,
       "IP": "192.168.50.107",
       "state": [-10, -50, 0],
-      "controller": "pid_controller"
+      "controller": "pid_controller",
+      "goal_x": -1.50,
+      "goal_y": 2.0
     },
     {
       "img": "pictures/pololu_img_x.png",
@@ -32,7 +34,9 @@
       "TAG": 8,
       "IP": "192.168.50.108",
       "state": [10, 30, 0],
-      "controller": "pid_controller"
+      "controller": "pid_controller",
+      "goal_x": -0.90,
+      "goal_y": 1.50
     }
   ],
   "obstacle": {
@@ -45,11 +49,11 @@
   "landmarks": [
     {
     "id": 1,
-    "pos": [-150, 200]
+    "pos": [-1.50, 2.00]
   },
   {
     "id": 2,
-    "pos": [-90, 150]
+    "pos": [-0.90, 1.50]
   }
 ]
 }

@@ -18,7 +18,9 @@
       "TAG": 0,
       "IP": "192.192.1.0",
       "state": [10, 10, 0],
-      "controller": "exponential_pid"
+      "controller": "exponential_pid",
+      "goal_x": 0.50,
+      "goal_y": 0.50
     },
     {
       "img": "pictures/pololu_img_x.png",
@@ -32,7 +34,9 @@
       "TAG": 1,
       "IP": "192.192.1.1",
       "state": [20, 20, 0],
-      "controller": "pid_controller"
+      "controller": "pid_controller",
+      "goal_x": 0.50,
+      "goal_y": 0.50
     },
     {
       "img": "pictures/pololu_img_x.png",
@@ -46,7 +50,9 @@
       "TAG": 2,
       "IP": "192.192.1.2",
       "state": [30, 30, 0],
-      "controller": "exponential_pid"
+      "controller": "exponential_pid",
+      "goal_x": 0.0,
+      "goal_y": 0.10
     }
   ],
   "obstacle": {
@@ -59,15 +65,15 @@
   "landmarks": [
     {
     "id": 1,
-    "pos": [50, 50]
+    "pos": [0.50, 0.50]
   },
   {
     "id": 2,
-    "pos": [50, 50]
+    "pos": [0.50, 0.50]
   },
   {
     "id": 3,
-    "pos": [0, 100]
+    "pos": [0, 1.00]
   }
 ]
 }

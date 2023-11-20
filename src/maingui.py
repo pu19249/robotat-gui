@@ -20,6 +20,7 @@ from PyQt5.QtCore import QThread, pyqtSignal, QObject, QThreadPool, QRunnable
 from PyQt5 import QtGui
 import subprocess
 from pathlib import Path
+import chardet
 
 # define Worlds directory
 # Get the directory path of the current script, abspath because of the tree structure that everything is on different folders
@@ -28,7 +29,12 @@ worlds_dir = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src/worlds"
 )
 # print(worlds_dir)
-global IP_sim, controller_sim
+
+IP_sim = [] 
+controller_sim = []
+TAG_sim = []
+goal_x = []
+goal_y = []
 
 
 # Define a dictionary to map controller names to controller functions
@@ -42,7 +48,8 @@ controller_map = {
 error_dict = {
     1: "Seleccionar el mundo JSON a cargar antes de ejecutar otras acciones.",
     2: "Error: Another specific error message",
-    3: "Hubo colisión entre los robots o con el borde la de la plataforma."
+    3: "Hubo colisión entre los robots o con el borde la de la plataforma.",
+    4: "No hay parámetros que guardar aún. Por favor seguir el orden recomendado de pasos."
     # Add more error codes and messages as needed
 }
 
@@ -121,6 +128,7 @@ class simulator_tab(QWidget):
 
     def open_world_windows(self):
         try:
+
             self.fname = QFileDialog.getOpenFileName(
                 self, "Choose world", worlds_dir, "JSON files (*.json)"
             )
@@ -136,6 +144,7 @@ class simulator_tab(QWidget):
             # Add items to the ComboBox based on the number of robots
             for i in range(self.no_robots):
                 self.robot_graph_selection.addItem(f"Robot {i+1}")
+
         except:
             error_code = 1  # You can determine the error code based on the exception
             error_message = error_dict.get(error_code, "Unknown error")
@@ -210,12 +219,19 @@ class simulator_tab(QWidget):
             self.MplWidget.canvas.draw()
 
     def save_sim_data(self):
-        robots = self.world["robots"]
-        for i in range(len(robots)):
-            self.IP = robots[i].get('IP')
-            self.TAG = robots[i].get('TAG')
-            # self.
-            print(self.IP)
+        try:
+            robots = self.world["robots"]
+
+            for i in range(len(robots)):
+                IP_sim.append(robots[i].get('IP'))
+                TAG_sim.append(robots[i].get('TAG'))
+                controller_sim.append(robots[i].get('controller'))
+                goal_x.append(robots[i].get('goal_x'))
+                goal_y.append(robots[i].get('goal_y'))
+        except:
+            error_code = 4  # You can determine the error code based on the exception
+            error_message = error_dict.get(error_code, "Unknown error")
+            self.console_label.setText(error_message)
 
     def play_animation_window(self):
         # Show the animation window
@@ -268,6 +284,10 @@ class ota_tab(QWidget):
         self.code_preview = self.findChild(QTextBrowser, "code_preview")
         # SIMULATOR GROUP
         self.simulator_group = self.findChild(QGroupBox, "simulator_group")
+        self.data_from_sim = self.findChild(QPushButton, "data_from_sim")
+        self.prepare_esp_sim = self.findChild(QPushButton, "prepare_esp_sim")
+        self.update_from_sim = self.findChild(QPushButton, "update_from_sim")
+        self.number_robot = self.findChild(QComboBox, "number_robot")
         # NEW SKETCH GROUP
         self.new_sketch_group = self.findChild(QGroupBox, "new_sketch_group")
         self.ip_list = self.findChild(QComboBox, "ip_list")
@@ -285,6 +305,8 @@ class ota_tab(QWidget):
         self.search_new_sketch.clicked.connect(self.sketch_browser)
         self.prepare_esp32.clicked.connect(self.prepare_esp32_funct)
         self.load_new_sketch.clicked.connect(self.upload_esp32_funct)
+        self.data_from_sim.clicked.connect(self.data_from_sim_params)
+
         # geek list
         ip_list = [
             "192.168.50.101",
@@ -307,6 +329,11 @@ class ota_tab(QWidget):
             self.status_label.setText("Se cargará data del JSON de simulación.")
             self.simulator_group.setVisible(True)
             self.new_sketch_group.setVisible(False)
+            # Add robots number according to simulation data
+            self.number_robot.clear()
+            for number in enumerate(IP_sim):
+                self.number_robot.addItem(f"{number[0]}")
+
         else:
             self.status_label.setText(
                 "Recordar presionar el botón de Boot del ESP32 durante el proceso de preparación. \nData de un nuevo sketch \nRevisar los requisitos del nuevo sketch."
@@ -370,6 +397,48 @@ class ota_tab(QWidget):
             lambda: self.status_label.setText("Ejecutando proceso de carga OTA.")
         )
 
+    def data_from_sim_params(self):
+
+        self.selected_robot_sim = (
+        self.number_robot.currentIndex()
+    )  # Get the selected index
+        print(self.selected_robot_sim)
+        print(TAG_sim[self.selected_robot_sim])
+        # Now based on the current index that value from the lists will be gotten to update the .c files
+        self.modify_ota_update_file()
+    
+    def modify_ota_update_file(self):
+        with open("ota/esp32ota_sim/src/main.cpp", 'rb') as file:
+            result1 = chardet.detect(file.read())
+        file_encoding = result1['encoding']
+        with open("ota/esp32ota_sim/src/main.cpp", 'r', encoding=file_encoding) as file:
+            lines = file.readlines()
+
+        for i, line in enumerate(lines):
+            if "const unsigned robot_id =" in line:
+                lines[i] = f" const unsigned robot_id = {TAG_sim[self.selected_robot_sim]};\n"
+            elif "float goal_x = " in line:
+                lines[i] = f" float goal_x = {goal_x[self.selected_robot_sim]};\n"
+            elif "float goal_y = " in line:
+                lines[i] = f" float goal_y = {goal_y[self.selected_robot_sim]};\n"
+        with open("ota/esp32ota_sim/src/main.cpp", 'w', encoding=file_encoding) as file:
+            file.writelines(lines)
+
+        with open("ota/esp32ota_sim/platformio.ini", 'rb') as file:
+            result2 = chardet.detect(file.read())
+        file_encoding = result2['encoding']
+        with open("ota/esp32ota_sim/platformio.ini", 'rb') as file:
+            result = chardet.detect(file.read())
+        file_encoding = result['encoding']
+        with open("ota/esp32ota_sim/platformio.ini", 'r', encoding=file_encoding) as file:
+            lines = file.readlines()
+
+        for i, line in enumerate(lines):
+            if "upload_port = " in line:
+                lines[i] = f"upload_port = {IP_sim[self.selected_robot_sim]} \n"
+            
+        with open("ota/esp32ota_sim/platformio.ini", 'w', encoding=file_encoding) as file:
+            file.writelines(lines)
 
 class monitoring_tab(QWidget):
     def __init__(self):

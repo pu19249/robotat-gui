@@ -18,7 +18,9 @@
       "TAG": 7,
       "IP": "192.168.50.107",
       "state": [10, 30, 0],
-      "controller": "exponential_pid"
+      "controller": "exponential_pid",
+      "goal_x": 1.00,
+      "goal_y": -2.00
     }
   ],
   "obstacle": {
@@ -31,7 +33,7 @@
   "landmarks": [
     {
     "id": 1,
-    "pos": [100, -200]
+    "pos": [1.00, -2.00]
   }
 ]
 }

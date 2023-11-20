@@ -92,7 +92,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Guardar datos</string>
+    <string>Guardar parámetros</string>
    </property>
   </widget>
   <widget class="QRadioButton" name="velocities">

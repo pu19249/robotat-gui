@@ -18,7 +18,9 @@
       "TAG": 7,
       "IP": "192.168.50.107",
       "state": [0, 0, 0],
-      "controller": "pid_controller"
+      "controller": "pid_controller",
+      "goal_x": -1.50,
+      "goal_y": 2.00
     }
   ],
   "obstacle": {
@@ -31,7 +33,7 @@
   "landmarks": [
     {
     "id": 1,
-    "pos": [-150, 200]
+    "pos": [-1.50, 2.00]
   }
 ]
 }

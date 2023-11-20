@@ -18,7 +18,9 @@
       "TAG": 7,
       "IP": "192.168.50.107",
       "state": [100, 100, 0],
-      "controller": "exponential_pid"
+      "controller": "exponential_pid",
+      "goal_x": 0.00,
+      "goal_y": 0.00
     },
     {
       "img": "pictures/pololu_img_x.png",
@@ -32,7 +34,9 @@
       "TAG": 8,
       "IP": "192.168.50.108",
       "state": [-100, -100, 0],
-      "controller": "exponential_pid"
+      "controller": "exponential_pid",
+      "goal_x": 0.30,
+      "goal_y": 0.80
     }
   ],
   "obstacle": {
@@ -49,7 +53,7 @@
   },
   {
     "id": 2,
-    "pos": [30, 80]
+    "pos": [0.30, 0.80]
   }
 ]
 }
