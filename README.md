@@ -6,9 +6,11 @@ This project aims to establish the foundation for developing a full desktop appl
 
 **Table of Contents**
 
-[TOCM]
-
-[TOC]
+- [Features](###features)
+- [System Requirements](###system-requirements)
+- [Repository Structure](###repository-structure)
+- [Dependencies](###dependencies)
+- [How to Run the Code](###how-to-run-the-code)
 
 ### Features
 
