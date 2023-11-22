@@ -291,6 +291,7 @@ class ota_tab(QWidget):
         # NEW SKETCH GROUP
         self.new_sketch_group = self.findChild(QGroupBox, "new_sketch_group")
         self.ip_list = self.findChild(QComboBox, "ip_list")
+        self.tag_list = self.findChild(QComboBox, "tag_list")
         self.load_new_sketch = self.findChild(QPushButton, "load_new_sketch")
         self.prepare_esp32 = self.findChild(QPushButton, "prepare_esp32")
         self.search_new_sketch = self.findChild(QPushButton, "search_new_sketch")
@@ -320,8 +321,13 @@ class ota_tab(QWidget):
             "192.168.50.109",
         ]
 
+        tag_list = [
+            "1", "2", "3", "4", "5", "6", "7", "8", "9"
+        ]
+
         # adding list of items to combo box
         self.ip_list.addItems(ip_list)
+        self.tag_list.addItems(tag_list)
 
     # Methods for handling clicking actions
     def btnstate(self, b):
@@ -346,6 +352,9 @@ class ota_tab(QWidget):
         self.fname = QFileDialog.getExistingDirectory(self, "Choose platformio project")
         if self.fname:  # Check if a folder was selected
             print(f"Selected folder: {self.fname}")
+        # IP and TAG value is also loaded (goal x, goal y and other controller no because it's supposed to be
+        # specified in the intended sketch) - based on that TAG selection the angle should be added
+
 
     def prepare_esp32_funct(self):
         self.thread = QThread()
@@ -416,6 +425,7 @@ class ota_tab(QWidget):
 
         for i, line in enumerate(lines):
             if "const unsigned robot_id =" in line:
+                # based on this TAG the angle should be added (in radians)
                 lines[i] = f" const unsigned robot_id = {TAG_sim[self.selected_robot_sim]};\n"
             elif "float goal_x = " in line:
                 lines[i] = f" float goal_x = {goal_x[self.selected_robot_sim]};\n"

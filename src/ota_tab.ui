@@ -22,7 +22,7 @@
      <x>20</x>
      <y>120</y>
      <width>481</width>
-     <height>141</height>
+     <height>201</height>
     </rect>
    </property>
    <property name="title">
@@ -96,7 +96,7 @@
    <widget class="QLabel" name="label_4">
     <property name="geometry">
      <rect>
-      <x>80</x>
+      <x>60</x>
       <y>60</y>
       <width>55</width>
       <height>16</height>
@@ -110,6 +110,35 @@
     </property>
     <property name="text">
      <string>IP</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="tag_list">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>140</y>
+      <width>61</width>
+      <height>40</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_5">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>120</y>
+      <width>55</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::NoFrame</enum>
+    </property>
+    <property name="text">
+     <string>TAG</string>
     </property>
    </widget>
   </widget>
@@ -126,10 +155,52 @@
     <string>Sketch nuevo</string>
    </property>
   </widget>
+  <widget class="QLabel" name="status_mssg">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>640</y>
+     <width>1081</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::Box</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Sunken</enum>
+   </property>
+   <property name="text">
+    <string>Mensajes de status</string>
+   </property>
+  </widget>
+  <widget class="QRadioButton" name="from_simulator">
+   <property name="geometry">
+    <rect>
+     <x>100</x>
+     <y>60</y>
+     <width>121</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>De simulador</string>
+   </property>
+  </widget>
+  <widget class="QTextBrowser" name="code_preview">
+   <property name="geometry">
+    <rect>
+     <x>520</x>
+     <y>20</y>
+     <width>581</width>
+     <height>601</height>
+    </rect>
+   </property>
+  </widget>
   <widget class="QGroupBox" name="simulator_group">
    <property name="geometry">
     <rect>
-     <x>80</x>
+     <x>100</x>
      <y>120</y>
      <width>301</width>
      <height>341</height>
@@ -214,48 +285,6 @@
      </rect>
     </property>
    </widget>
-  </widget>
-  <widget class="QLabel" name="status_mssg">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>640</y>
-     <width>1081</width>
-     <height>61</height>
-    </rect>
-   </property>
-   <property name="frameShape">
-    <enum>QFrame::Box</enum>
-   </property>
-   <property name="frameShadow">
-    <enum>QFrame::Sunken</enum>
-   </property>
-   <property name="text">
-    <string>Mensajes de status</string>
-   </property>
-  </widget>
-  <widget class="QRadioButton" name="from_simulator">
-   <property name="geometry">
-    <rect>
-     <x>100</x>
-     <y>60</y>
-     <width>121</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>De simulador</string>
-   </property>
-  </widget>
-  <widget class="QTextBrowser" name="code_preview">
-   <property name="geometry">
-    <rect>
-     <x>520</x>
-     <y>20</y>
-     <width>581</width>
-     <height>601</height>
-    </rect>
-   </property>
   </widget>
  </widget>
  <resources/>

@@ -47,7 +47,7 @@ character = (os.path.join(pictures_dir, "pololu_img_x.png"), 0, 0, 0)
 
 # Prepare data as the animation window expects it (list of lists for each x, y, theta for each robot) according to how its received from the server (list of x, y, orientation)
 def get_and_process_data():
-    for pose_data in get_pose_continuous(robotat, [7], "eulxyz", max_attempts=5):
+    for pose_data in get_pose_continuous(robotat, [1], "eulxyz", max_attempts=5):
         # if pose_data is not None:
         #     print(pose_data)
         # else:
@@ -81,7 +81,7 @@ def map_data(x_vals_real_time, y_vals_real_time, theta_vals_real_time):
             x_raw * 100, y_raw * 100, 960, 760
         )
 
-        theta_new_val = theta  # theta_val, not just theta
+        theta_new_val = theta + 180 # theta_val, not just theta
 
         x_vals_display_robot.append(x_new_val)
         y_vals_display_robot.append(y_new_val)
