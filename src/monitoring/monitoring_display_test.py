@@ -42,63 +42,81 @@ y_results_raw = []
 
 
 # First we need to create the object that represents and updates the position and rotation of the Pololu img (first one robot only)
-character = (os.path.join(pictures_dir, "pololu_img_x.png"), 0, 0, 0)
+characters = [(os.path.join(pictures_dir, "pololu_img_x.png"), 0, 0, 0), (os.path.join(pictures_dir, "pololu_img_x.png"), 100, 100, 0)]
 
 
 # Prepare data as the animation window expects it (list of lists for each x, y, theta for each robot) according to how its received from the server (list of x, y, orientation)
-def get_and_process_data():
-    for pose_data in get_pose_continuous(robotat, [1], "eulxyz", max_attempts=5):
-        # if pose_data is not None:
-        #     print(pose_data)
-        # else:
-        #     print('no data')
-        # print(pose_data)
-        x_vals_real_time = [pose_data[0][0]]
-        y_vals_real_time = [pose_data[0][1]]
-        theta_vals_real_time = [pose_data[0][5]]
-        # print(theta_vals_real_time)
-        x_data.append(x_vals_real_time)
-        y_data.append(y_vals_real_time)
-        theta_data.append(theta_vals_real_time)
-        # print(f"x: {x_vals_real_time}, y: {y_vals_real_time}, theta: {theta_vals_real_time}")
-        print(f"theta: {theta_vals_real_time}")
-        # animation_window.start_animation(x_vals_real_time, y_vals_real_time, theta_vals_real_time)
-        # time.sleep(0.5)
-        break
-    # print(theta_vals_real_time)
-    return x_vals_real_time, y_vals_real_time, theta_vals_real_time
+def get_and_process_data(robotat, marker, representation):
+    x_data = []
+    y_data = []
+    theta_data = []
+
+    for pose_data_list in get_pose_continuous(robotat, marker, representation, max_attempts=5):
+        if pose_data_list is not None:
+            for marker_data in pose_data_list:
+                x_vals_real_time = [marker_data[0]]
+                y_vals_real_time = [marker_data[1]]
+                theta_vals_real_time = [marker_data[5]]
+
+                x_data.append(x_vals_real_time)
+                y_data.append(y_vals_real_time)
+                theta_data.append(theta_vals_real_time)
+
+                # Additional processing or printing can be done here
+
+    return x_data, y_data, theta_data
+
+# def get_and_process_data(marker):
+#     try:
+#         for pose_data in get_pose_continuous(robotat, [marker], "eulxyz", max_attempts=5):
+#             # if pose_data is not None:
+#             #     print(pose_data)
+#             # else:
+#             #     print('no data')
+#             # print(pose_data)
+#             x_vals_real_time = [pose_data[0][0]]
+#             y_vals_real_time = [pose_data[0][1]]
+#             theta_vals_real_time = [pose_data[0][5]]
+#             # print(theta_vals_real_time)
+#             x_data.append(x_vals_real_time)
+#             y_data.append(y_vals_real_time)
+#             theta_data.append(theta_vals_real_time)
+#             # print(f"x: {x_vals_real_time}, y: {y_vals_real_time}, theta: {theta_vals_real_time}")
+#             # print(f"theta: {theta_vals_real_time}")
+#             # animation_window.start_animation(x_vals_real_time, y_vals_real_time, theta_vals_real_time)
+#             # time.sleep(0.5)
+#             break
+#         # print(theta_vals_real_time)
+#     except Exception as e:
+#         print(f"ERROR: {e}")
+
+#     return x_vals_real_time, y_vals_real_time, theta_vals_real_time
 
 
 def map_data(x_vals_real_time, y_vals_real_time, theta_vals_real_time):
     x_vals_display_robot = []
     y_vals_display_robot = []
     theta_vals_display_robot = []
-    # this part makes the mapping to display in the complete animation window
-    for x, y, theta in zip(x_vals_real_time, y_vals_real_time, theta_vals_real_time):
-        # for x_val, y_val, theta_val in zip(x, y, theta):
-        x_raw, y_raw = x, y
-        x_new_val, y_new_val = inverse_change_coordinates(
-            x_raw * 100, y_raw * 100, 960, 760
-        )
+    
+    for marker_x, marker_y, marker_theta in zip(x_vals_real_time, y_vals_real_time, theta_vals_real_time):
+        x_mapped = []
+        y_mapped = []
+        theta_mapped = []
 
-        theta_new_val = theta + 180 # theta_val, not just theta
+        for x, y, theta in zip(marker_x, marker_y, marker_theta):
+            x_raw, y_raw = x, y
+            x_new_val, y_new_val = inverse_change_coordinates(x_raw * 100, y_raw * 100, 960, 760)
+            theta_new_val = theta + 180
 
-        x_vals_display_robot.append(x_new_val)
-        y_vals_display_robot.append(y_new_val)
-        theta_vals_display_robot.append(theta_new_val)
-        x_results_raw.append(x_raw)
-        y_results_raw.append(y_raw)
-        # Print statement for debugging
-        # print(f"x: {x_val}, y: {y_val} => x_new: {x_new_val}, y_new: {y_new_val}")
+            x_mapped.append(x_new_val)
+            y_mapped.append(y_new_val)
+            theta_mapped.append(theta_new_val)
 
-    # Wrap the final arrays in a list
-    x_vals_display_robot = [x_vals_display_robot]
-    y_vals_display_robot = [y_vals_display_robot]
-    theta_vals_display_robot = [theta_vals_display_robot]
+        x_vals_display_robot.append(x_mapped)
+        y_vals_display_robot.append(y_mapped)
+        theta_vals_display_robot.append(theta_mapped)
 
-    # print(f"X: {x_vals_display_robot}, Y: {y_vals_display_robot}, THETA: {theta_vals_display_robot}")
     return x_vals_display_robot, y_vals_display_robot, theta_vals_display_robot
-
 
 
 
@@ -109,18 +127,21 @@ run_animation = True
 
 
 def get_data():
-    x_vals_real_time, y_vals_real_time, theta_vals_real_time = get_and_process_data()
+    x_vals_real_time, y_vals_real_time, theta_vals_real_time = get_and_process_data(robotat, [2, 1], 'eulxyz')
+
     x_vals_display_robot, y_vals_display_robot, theta_vals_display_robot = map_data(
         x_vals_real_time, y_vals_real_time, theta_vals_real_time
     )
+
     # print(theta_vals_display_robot)
     return x_vals_display_robot, y_vals_display_robot, theta_vals_display_robot, \
         x_vals_real_time, y_vals_real_time, theta_vals_real_time
 
-
 data_source = lambda: get_data()
 animation_window = py_game_monitoring(850, 960, get_data)
-animation_window.add_robot_character(*character)
+for character in characters:
+    # print(character)
+    animation_window.add_robot_character(*character)
 animation_window.initialize()
 # Open the file in append mode once, outside the loop
 
@@ -135,16 +156,6 @@ def animation_function():
         # Assuming x_vals_display_robot, y_vals_display_robot, theta_vals_display_robot are your data
         # writer.writerow([x_vals_display_robot[0][0], y_vals_display_robot[0][1], theta_vals_display_robot[0][5]])
 
-def save_csv():
-    # file_name = input('Type file name for the csv: ')
-    x_values, y_values, theta_values = get_data()
-    print(x_values, y_values, theta_values)
-    with open('110923'+'.csv', 'a', newline='') as file:
-        writer = csv.writer(file)
-        field = ["x position", "y position", "orientation"] # titles of the columns
-
-        # Write the field names only once, not in every iteration
-        writer.writerow(field)
 
 
 if __name__ == "__main__":

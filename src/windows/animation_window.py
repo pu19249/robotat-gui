@@ -412,6 +412,13 @@ class py_game_monitoring(py_game_animation):
             self.clock.tick(60)
             self.play.draw()  # Update the play button
             x_values, y_values, theta_values, x_raw, y_raw, theta_raw = self.data_src_funct()
+            # Separate data into pairs
+            pairs_x = [x_values[i:i+2] for i in range(0, len(x_values), 2)]
+            pairs_y = [y_values[i:i+2] for i in range(0, len(y_values), 2)]
+            pairs_theta = [theta_values[i:i+2] for i in range(0, len(theta_values), 2)]
+            # Print the pairs
+            # for pair in pairs_x:
+            #     print(pair)
             with open("cuadrante3" + ".csv", "a", newline="") as file:
                 writer = csv.writer(file)
                 field = [
@@ -424,16 +431,16 @@ class py_game_monitoring(py_game_animation):
                 # writer.writerow(field)
                 writer.writerow([x_raw[0], y_raw[0], theta_raw[0]])
             # print(x_raw, y_raw, theta_raw)
-            # print(x_values, y_values, theta_values)
-            for x, y, theta in zip(x_values, y_values, theta_values):
-                for robot in self.robot_characters:
-                    robot.degree = float(theta[0]) + 180
-                    robot.x = int(x[0])
-                    robot.y = int(y[0])
-                    # Flip the character over the x-axis
-            
-
-                    # print(robot.theta)
+                
+            for x, y, theta in zip(pairs_x, pairs_y, pairs_theta):
+                print(x, y, theta)
+                for i, robot in enumerate(self.robot_characters):
+                    # Use the index 'i' to get the corresponding values for the current robot
+                    robot.degree = float(theta[i][0]) + 180
+                    robot.x = int(x[i][0])
+                    robot.y = int(y[i][0])
+                    # Additional modifications to the individual robot's attributes can be added here
+                    # For example, you might want to update other attributes of the robot
 
             # Flag to terminate window correctly without crashing all Python execution
             for e in pygame.event.get():
@@ -456,30 +463,31 @@ class py_game_monitoring(py_game_animation):
                     ):
                         # Handle collision here (e.g., change color, stop movement, etc.)
                         print("collision")
-                        animation_running = False  # Stop the animation
-                        pygame.time.delay(1000)  # Wait until pygame window closes
-                        self.run = False
+                        # animation_running = False  # Stop the animation
+                        # pygame.time.delay(1000)  # Wait until pygame window closes
+                        # self.run = False
 
             for robot in self.robot_characters:
                 if not self.bounding_box.collidepoint(robot.x, robot.y):
                     # Handle collision with bounding box (e.g., stop movement, change direction, etc.)
                     print("collision")
-                    animation_running = False  # Stop the animation
-                    pygame.time.delay(1000)
-                    self.run = False
+                    # animation_running = False  # Stop the animation
+                    # pygame.time.delay(1000)
+                    # self.run = False
 
-            if animation_running:  # and index < len(x_values):
-                for i in range(len(self.robot_characters)):
-                    x_robot = x_values[index][i]
-                    y_robot = y_values[index][i]
-                    theta_robot = theta_values[index][i]
-                    robot = self.robot_characters[i]
-                    # Update character attributes and animations
-                    robot.update(theta_robot, x_robot, y_robot)
-                    robot.rotate_move()
+            # if animation_running:  # and index < len(x_values):
+            #     for i in range(len(self.robot_characters)):
+            #         x_robot = x_values[index][i]
+            #         y_robot = y_values[index][i]
+            #         theta_robot = theta_values[index][i]
+            #         robot = self.robot_characters[i]
+            #         print(x_robot, y_robot, theta_robot)
+            #         # Update character attributes and animations
+            #         robot.update(theta_robot, x_robot, y_robot)
+            #         robot.rotate_move()
 
-                    pygame.display.flip()
-                    pygame.time.delay(10)
+            #         pygame.display.flip()
+            #         pygame.time.delay(10)
 
                 pygame.display.flip()
                 pygame.time.delay(10)

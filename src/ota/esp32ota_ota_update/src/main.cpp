@@ -167,15 +167,15 @@ void control_algorithm_task(void *p_params)
 
     v = temp[0];
     w = temp[1];
-    phi_ell = (v - w*DISTANCE_FROM_CENTER) / WHEEL_RADIUS; //rad/s;
-    phi_r = (v + w*DISTANCE_FROM_CENTER) / WHEEL_RADIUS; //rad/s;
+    // phi_ell = (v - w*DISTANCE_FROM_CENTER) / WHEEL_RADIUS; //rad/s;
+    // phi_r = (v + w*DISTANCE_FROM_CENTER) / WHEEL_RADIUS; //rad/s;
     Serial.print("phi_ell: ");
     Serial.println(phi_ell);
     Serial.print("phi_r: ");
     Serial.println(phi_r);
     Serial.println(" ");
-    // phi_ell = 400;
-    // phi_r = 0;
+    phi_ell = 10;
+    phi_r = -10;
     float limite = 300.0;
     if (phi_ell > limite)
     {

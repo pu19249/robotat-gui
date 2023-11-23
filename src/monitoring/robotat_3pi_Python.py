@@ -27,6 +27,8 @@ def robotat_disconnect(tcp_obj):
 
 
 def get_pose_continuous(tcp_obj, agents_ids, rotrep, max_attempts=10):
+    mocap_data_var = []
+
     for attempt in range(max_attempts):
         try:
             if min(agents_ids) > 0 and max(agents_ids) <= 100:
@@ -41,19 +43,15 @@ def get_pose_continuous(tcp_obj, agents_ids, rotrep, max_attempts=10):
                 mocap_data = mocap_data.reshape(num_agents, 7)
 
                 if rotrep != "quat":
-                    try:
-                        euler = mocap_data[:, 3:]
-                        q = Quaternion(
-                            euler[0][0], euler[0][1], euler[0][2], euler[0][3]
-                        )
+                    for marker in mocap_data:
+                        euler = marker[3:]
+                        q = Quaternion(euler[0], euler[1], euler[2], euler[3])
                         eu = q.to_euler(degrees=True)
-                        mocap_data[:, 3:6] = eu
-                        mocap_data = mocap_data[:, :-1]
-                    except ValueError as e:
-                        print("Invalid Euler angle sequence:", e)
+                        marker[3:6] = eu
+                        marker = marker[:-1]
+                        mocap_data_var.append(marker)
 
-                yield mocap_data
-                break
+                yield mocap_data_var
 
             else:
                 print("ERROR: Invalid ID(s).")
@@ -63,6 +61,47 @@ def get_pose_continuous(tcp_obj, agents_ids, rotrep, max_attempts=10):
             time.sleep(0.1)
 
     yield None
+
+# def get_pose_continuous(tcp_obj, agents_ids, rotrep, max_attempts=10):
+#     for attempt in range(max_attempts):
+#         try:
+#             if min(agents_ids) > 0 and max(agents_ids) <= 100:
+#                 s = {"dst": 1, "cmd": 1, "pld": agents_ids}
+
+#                 tcp_obj.send(json.dumps(s).encode())
+#                 data_str = tcp_obj.recv(2048)
+#                 mocap_data = json.loads(data_str)
+
+#                 mocap_data = np.array(mocap_data)
+#                 num_agents = len(agents_ids)
+#                 mocap_data = mocap_data.reshape(num_agents, 7)
+
+#                 if rotrep != "quat":
+#                     try:
+#                         euler = mocap_data[:, 3:]
+#                         q = Quaternion(
+#                             euler[0][0], euler[0][1], euler[0][2], euler[0][3]
+#                         )
+#                         eu = q.to_euler(degrees=True)
+#                         mocap_data[:, 3:6] = eu
+#                         mocap_data = mocap_data[:, :-1]
+#                     except ValueError as e:
+#                         print("Invalid Euler angle sequence:", e)
+
+#                 yield mocap_data
+#                 break
+
+#             else:
+#                 print("ERROR: Invalid ID(s).")
+
+#         except socket.timeout:
+#             print("Timeout count:", attempt + 1)
+#             time.sleep(0.1)
+            
+
+
+#     yield None
+
 
 
 def robotat_3pi_connect(tcp_obj, agent_id):
