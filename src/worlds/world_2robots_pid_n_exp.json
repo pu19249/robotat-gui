@@ -35,8 +35,8 @@
       "IP": "192.168.50.108",
       "state": [-100, -100, 0],
       "controller": "exponential_pid",
-      "goal_x": 0.30,
-      "goal_y": 0.80
+      "goal_x": 1.50,
+      "goal_y": 1.50
     }
   ],
   "obstacle": {

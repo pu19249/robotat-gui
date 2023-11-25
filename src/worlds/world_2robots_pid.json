@@ -20,7 +20,7 @@
       "state": [-10, -50, 0],
       "controller": "pid_controller",
       "goal_x": -1.50,
-      "goal_y": 2.0
+      "goal_y": -2.0
     },
     {
       "img": "pictures/pololu_img_x.png",
@@ -35,8 +35,8 @@
       "IP": "192.168.50.108",
       "state": [10, 30, 0],
       "controller": "pid_controller",
-      "goal_x": -0.90,
-      "goal_y": 1.50
+      "goal_x": 1.50,
+      "goal_y": 2.0
     }
   ],
   "obstacle": {
