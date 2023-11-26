@@ -18,7 +18,7 @@
       "TAG": 7,
       "IP": "192.168.50.107",
       "state": [100, 100, 0],
-      "controller": "exponential_pid",
+      "controller": "pid_controller",
       "goal_x": 0.00,
       "goal_y": 0.00
     },
