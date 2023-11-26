@@ -1,6 +1,7 @@
 # Robotat GUI - Alpha
 
-![Robotat Logo](https://github.com/pu19249/robotat-gui/edit/json_approach/src/pictures/icono_gui.png)
+![Robotat Logo](https://raw.githubusercontent.com/pu19249/robotat-gui/json_approach/src/pictures/icono_gui.png)
+
 
 This project aims to establish the foundation for developing a full desktop application to simulate robots on the robotics experimentation platform of Universidad del Valle de Guatemala, Robotat. The first version establishes a structure to simulate Pololu 3Pi+ mobile robots, program the ESP32 controlling various functions of the Pololu (including establishing a connection with 'Robotat's' server), and monitoring the Pololu's pose on the test table of the Robotat. The goal is to create a complete experimentation flow with the Pololu 3Pi+.
 
