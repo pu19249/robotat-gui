@@ -16,12 +16,15 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 import random
 from PyQt5.QtWidgets import *
 from ota.ota_main import *
-from PyQt5.QtCore import QThread, pyqtSignal, QObject, QThreadPool, QRunnable
+from PyQt5.QtCore import QThread, pyqtSignal, QObject, QThreadPool, QRunnable, Qt
 from PyQt5 import QtGui
 import subprocess
 from pathlib import Path
 import chardet
-
+from LedIndicatorWidget import *
+from ota.wifi_connect import NetworkManager
+from ota.codegen_gui.exp_pid_codegen import *
+from ota.codegen_gui.pid_codegen import *
 # define Worlds directory
 # Get the directory path of the current script, abspath because of the tree structure that everything is on different folders
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -92,7 +95,7 @@ class simulator_tab(QWidget):
         self.v = None
         self.w = None
         # Load uic file
-        uic.loadUi("simulator_tab.ui ", self)
+        uic.loadUi("ui_files/simulator_tab.ui ", self)
 
         # Define our widgets
         self.console_label = self.findChild(QLabel, "message_sim")
@@ -228,6 +231,9 @@ class simulator_tab(QWidget):
                 controller_sim.append(robots[i].get('controller'))
                 goal_x.append(robots[i].get('goal_x'))
                 goal_y.append(robots[i].get('goal_y'))
+            self.console_label.setText(
+                "Se guardaron los parámetros de forma correcta para cargar en los ESP32."
+            )
         except:
             error_code = 4  # You can determine the error code based on the exception
             error_message = error_dict.get(error_code, "Unknown error")
@@ -272,7 +278,7 @@ class ota_tab(QWidget):
     def __init__(self):
         super(ota_tab, self).__init__()
         # Load uic file
-        uic.loadUi("ota_tab.ui ", self)
+        uic.loadUi("ui_files/ota_tab.ui ", self)
         self.fname = None
         # self.thread1 = prepare_esp_for_update()
         # self.thread2 = load_sketch(self.fname)
@@ -282,6 +288,26 @@ class ota_tab(QWidget):
         self.from_simulator = self.findChild(QRadioButton, "from_simulator")
         self.from_new_sketch = self.findChild(QRadioButton, "from_new_sketch")
         self.code_preview = self.findChild(QTextBrowser, "code_preview")
+        self.led = LedIndicator(self)
+        self.led.move(100, 540)
+        self.led.setDisabled(True)  # Make the led non clickable
+        self.WIFI = NetworkManager()
+        self.Robotat_SSID = "Robotat"
+        self.Robotat_Password = "iemtbmcit116"
+        self.WIFI.define_network_parameters(self.Robotat_SSID, self.Robotat_Password)
+        if not self.WIFI.is_connected_to_network():
+            # Make the led red
+            self.led.on_color_1 = QColor(255, 0, 0)
+            self.led.on_color_2 = QColor(176, 0, 0)
+            self.led.off_color_1 = QColor(28, 0, 0)
+            self.led.off_color_2 = QColor(156, 0, 0)
+        else:
+            # Green
+            self.on_color_1 = QColor(0, 255, 0)
+            self.on_color_2 = QColor(0, 192, 0)
+            self.off_color_1 = QColor(0, 28, 0)
+            self.off_color_2 = QColor(0, 128, 0)
+        
         # SIMULATOR GROUP
         self.simulator_group = self.findChild(QGroupBox, "simulator_group")
         self.data_from_sim = self.findChild(QPushButton, "data_from_sim")
@@ -305,6 +331,8 @@ class ota_tab(QWidget):
         self.from_simulator.toggled.connect(lambda: self.btnstate(self.from_simulator))
         self.search_new_sketch.clicked.connect(self.sketch_browser)
         self.prepare_esp32.clicked.connect(self.prepare_esp32_funct)
+        self.prepare_esp_sim.clicked.connect(self.prepare_esp32_funct)
+        self.update_from_sim.clicked.connect(self.upload_esp32_funct_from_sim)
         self.load_new_sketch.clicked.connect(self.upload_esp32_funct)
         self.data_from_sim.clicked.connect(self.data_from_sim_params)
 
@@ -360,13 +388,13 @@ class ota_tab(QWidget):
         self.thread = QThread()
         self.worker = Worker_prepare_esp_for_update()
         self.worker.moveToThread(self.thread)
-        # Step 5: Connect signals and slots
+        # Connect signals and slots
         self.thread.started.connect(self.worker.run)
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
         self.thread.finished.connect(self.thread.deleteLater)
         self.worker.progress.connect(self.updateLabel)
-        # Step 6: Start the thread
+        # Start the thread
         self.thread.start()
 
         # Final resets
@@ -385,16 +413,43 @@ class ota_tab(QWidget):
         self.code_preview.append(output)
 
     def upload_esp32_funct(self):
+        # Green
+        self.on_color_1 = QColor(0, 255, 0)
+        self.on_color_2 = QColor(0, 192, 0)
+        self.off_color_1 = QColor(0, 28, 0)
+        self.off_color_2 = QColor(0, 128, 0)
         self.thread = QThread()
         self.worker = Worker_load_sketch(self.fname)
         self.worker.moveToThread(self.thread)
-        # Step 5: Connect signals and slots
+        # Connect signals and slots
         self.thread.started.connect(self.worker.run)
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
         self.thread.finished.connect(self.thread.deleteLater)
         self.worker.progress.connect(self.updateLabel)
-        # Step 6: Start the thread
+        # Start the thread
+        self.thread.start()
+
+        # Final resets
+        self.load_new_sketch.setEnabled(False)
+        self.thread.finished.connect(
+            lambda: self.load_new_sketch.setEnabled(True)
+        )
+        self.thread.finished.connect(
+            lambda: self.status_label.setText("Ejecutando proceso de carga OTA.")
+        )
+
+    def upload_esp32_funct_from_sim(self):
+        self.thread = QThread()
+        self.worker = Worker_load_sketch("esp32ota_sim")
+        self.worker.moveToThread(self.thread)
+        # Connect signals and slots
+        self.thread.started.connect(self.worker.run)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.thread.finished.connect(self.thread.deleteLater)
+        self.worker.progress.connect(self.updateLabel)
+        # Start the thread
         self.thread.start()
 
         # Final resets
@@ -407,15 +462,18 @@ class ota_tab(QWidget):
         )
 
     def data_from_sim_params(self):
-
-        self.selected_robot_sim = (
-        self.number_robot.currentIndex()
-    )  # Get the selected index
-        print(self.selected_robot_sim)
-        print(TAG_sim[self.selected_robot_sim])
-        # Now based on the current index that value from the lists will be gotten to update the .c files
-        self.modify_ota_update_file()
-    
+        try:
+            self.selected_robot_sim = (
+            self.number_robot.currentIndex()
+        )  # Get the selected index
+            print(self.selected_robot_sim)
+            print(TAG_sim[self.selected_robot_sim])
+            # Now based on the current index that value from the lists will be gotten to update the .c files
+            self.modify_ota_update_file()
+        except:
+            self.status_label.setText(
+                "No se han guardado datos de una simulación previamente."
+            )
     def modify_ota_update_file(self):
         with open("ota/esp32ota_sim/src/main.cpp", 'rb') as file:
             result1 = chardet.detect(file.read())
@@ -431,6 +489,7 @@ class ota_tab(QWidget):
                 lines[i] = f" float goal_x = {goal_x[self.selected_robot_sim]};\n"
             elif "float goal_y = " in line:
                 lines[i] = f" float goal_y = {goal_y[self.selected_robot_sim]};\n"
+
         with open("ota/esp32ota_sim/src/main.cpp", 'w', encoding=file_encoding) as file:
             file.writelines(lines)
 
@@ -450,11 +509,21 @@ class ota_tab(QWidget):
         with open("ota/esp32ota_sim/platformio.ini", 'w', encoding=file_encoding) as file:
             file.writelines(lines)
 
+        print(controller_sim[self.selected_robot_sim])
+        # MODIFY CONTROLLER BASED ON SIMULATION DATA
+        if (controller_sim[self.selected_robot_sim] == 'pid_controller'):
+            print('SE va modificar un archivo')
+            control_file_pid()
+        elif (controller_sim[self.selected_robot_sim] == 'exponential_pid'):
+           print('Se va a modificar otro archivo')
+           control_file_pid_exp()
+        # if controller_sim ==
+
 class monitoring_tab(QWidget):
     def __init__(self):
         super(monitoring_tab, self).__init__()
         # Load uic file
-        uic.loadUi("monitoring_tab.ui ", self)
+        uic.loadUi("ui_files/monitoring_tab.ui ", self)
 
 
 # Initialize the App

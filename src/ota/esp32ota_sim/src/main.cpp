@@ -55,8 +55,8 @@ double temp[2];
 double q[4];
 
 volatile float x, y, z, n, ex, ey, ez, roll, pitch, yaw, v, w;
- float goal_x = -1.5;
- float goal_y = 2.0;
+ float goal_x = 0.0;
+ float goal_y = 0.0;
 
 void encode_send_wheel_speeds_task(void *p_params)
 {
