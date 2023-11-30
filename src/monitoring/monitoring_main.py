@@ -46,6 +46,7 @@ characters = [(os.path.join(pictures_dir, "pololu_img_x.png"), 0, 0, 0), (os.pat
 
 
 # Prepare data as the animation window expects it (list of lists for each x, y, theta for each robot) according to how its received from the server (list of x, y, orientation)
+# Get and process data for more than one marker (in development)
 def get_and_process_data(robotat, marker, representation):
     x_data = []
     y_data = []
@@ -66,6 +67,7 @@ def get_and_process_data(robotat, marker, representation):
 
     return x_data, y_data, theta_data
 
+# Get and process data for one marker only
 # def get_and_process_data(marker):
 #     try:
 #         for pose_data in get_pose_continuous(robotat, [marker], "eulxyz", max_attempts=5):
@@ -147,13 +149,8 @@ animation_window.initialize()
 
 
 
-
 def animation_function():
     while True:
         
         animation_window.start_animation()
         
-
-
-if __name__ == "__main__":
-    animation_function()
