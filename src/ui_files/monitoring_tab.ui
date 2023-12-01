@@ -53,7 +53,7 @@
     <string>Consola de mensajes</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="lineEdit">
+  <widget class="QLineEdit" name="csv_name">
    <property name="geometry">
     <rect>
      <x>140</x>

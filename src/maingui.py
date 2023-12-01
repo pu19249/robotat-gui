@@ -16,6 +16,7 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 import random
 from PyQt5.QtWidgets import *
 from ota.ota_main import *
+from monitoring.monitoring_main import *
 from PyQt5.QtCore import QThread, pyqtSignal, QObject, QThreadPool, QRunnable, Qt
 from PyQt5 import QtGui
 import subprocess
@@ -524,6 +525,28 @@ class monitoring_tab(QWidget):
         super(monitoring_tab, self).__init__()
         # Load uic file
         uic.loadUi("ui_files/monitoring_tab.ui ", self)
+        
+        self.csv_name = self.findChild(QLineEdit, "csv_name")
+        self.csv_location = self.findChild(QToolButton, "csv_location")
+        self.start_monitoring = self.findChild(QPushButton, "start_monitoring")
+        self.clean_previous_data = self.findChild(QPushButton, "clean_previous_data")
+        self.message_sim_monitoring = self.findChild(QPushButton, "message_sim_monitoring")
+
+        if self.csv_name is not None:
+            self.csv_name.setPlaceholderText("Ingresar nombre para el csv")
+        
+        self.csv_location.clicked.connect(self.choose_csv_location)
+
+    def choose_csv_location(self):
+        initial_filename = self.csv_name.text()
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        name, _ = QFileDialog.getSaveFileName(self, 'Save File', initial_filename, 'CSV Files (*.csv);;All Files (*)', options=options)
+
+        if name:
+            py_game_monitoring
+            # with open(name, 'w') as file:
+            #     file.write(initial_filename)
 
 
 # Initialize the App

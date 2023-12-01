@@ -378,7 +378,7 @@ class py_game_monitoring(py_game_animation):
     The data is obtained by an external system (OptiTrack).
     #"""
 
-    def __init__(self, width, height, data_src_funct):
+    def __init__(self, width, height, data_src_funct, filename):
         super().__init__(width, height)
         self.data_src_funct = data_src_funct
 
@@ -419,7 +419,7 @@ class py_game_monitoring(py_game_animation):
             # Print the pairs
             # for pair in pairs_x:
             #     print(pair)
-            with open("cuadrante3" + ".csv", "a", newline="") as file:
+            with open(filename, "a", newline="") as file:
                 writer = csv.writer(file)
                 field = [
                     "x position",
