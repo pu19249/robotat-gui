@@ -332,7 +332,8 @@ class ota_tab(QWidget):
 
         # Define clicking actions for each of the buttons
         self.new_sketch_group.setVisible(False)
-        self.from_simulator.setChecked(True)
+        self.from_simulator.setChecked(False)
+        self.from_new_sketch.setChecked(True)
         self.from_simulator.toggled.connect(lambda: self.btnstate(self.from_simulator))
         self.search_new_sketch.clicked.connect(self.sketch_browser)
         self.prepare_esp32.clicked.connect(self.prepare_esp32_funct)
@@ -534,7 +535,7 @@ class monitoring_tab(QWidget):
         self.csv_location = self.findChild(QToolButton, "csv_location")
         self.start_monitoring = self.findChild(QPushButton, "start_monitoring")
         self.clean_previous_data = self.findChild(QPushButton, "clean_previous_data")
-        self.message_sim_monitoring = self.findChild(QPushButton, "message_sim_monitoring")
+        self.message_sim_monitoring = self.findChild(QLabel, "message_sim_monitoring")
         
         if self.csv_name is not None:
             self.csv_name.setPlaceholderText("Ingresar nombre para el csv")
@@ -556,14 +557,19 @@ class monitoring_tab(QWidget):
 
     def start_monitoring_func(self):
         self.start_flag = True
-        self.robot_animation = RobotAnimation()
-        print(no_robots)
-        if no_robots[0] == 1:
-            print(TAG_sim)
-            self.robot_animation.setup_animation_window(self.initial_filename, TAG_sim[0])
-        elif no_robots[0] > 1:
-            self.robot_animation.setup_animation_window_multiple(self.initial_filename, TAG_sim[0], TAG_sim[1])
-        self.robot_animation.animation_function(self.start_flag)
+        try:
+            self.robot_animation = RobotAnimation()
+            print(no_robots)
+            if no_robots[0] == 1:
+                print(TAG_sim)
+                self.robot_animation.setup_animation_window(self.initial_filename, TAG_sim[0])
+            elif no_robots[0] > 1:
+                self.robot_animation.setup_animation_window_multiple(self.initial_filename, TAG_sim[0], TAG_sim[1])
+            self.robot_animation.animation_function(self.start_flag)
+        except:
+            self.message_sim_monitoring.setText(
+                "Colocar el nombre para el archivo CSV."
+            )
         
     def clean_func(self):
         IP_sim = [] 
@@ -572,6 +578,7 @@ class monitoring_tab(QWidget):
         goal_x = []
         goal_y = []
         no_robots = []
+        
 
 # Initialize the App
 app = QApplication(sys.argv)

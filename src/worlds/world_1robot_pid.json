@@ -15,7 +15,7 @@
         "vel_right_max": 100
       },
       "ID_robot": 1,
-      "TAG": 14,
+      "TAG": 2,
       "IP": "192.168.50.107",
       "state": [0, 0, 0],
       "controller": "pid_controller",

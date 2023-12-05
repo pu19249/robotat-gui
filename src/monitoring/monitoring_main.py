@@ -258,11 +258,33 @@ class RobotAnimation:
     def get_and_process_data(self, marker):
         try:
             for pose_data in get_pose_continuous(self.robotat, [marker], "eulxyz", max_attempts=5):
-
+                
                 x_vals_real_time = [pose_data[0][0]]
                 y_vals_real_time = [pose_data[0][1]]
                 theta_vals_real_time = [pose_data[0][5]]
-
+                print(marker)
+                if marker == 1:
+                    theta_vals_real_time = [pose_data[0][5]]
+                elif marker == 2:
+                    theta_vals_real_time = [pose_data[0][5]-40]
+                elif marker == 3:
+                    theta_vals_real_time = [pose_data[0][5]+40]
+                elif marker == 4:
+                    theta_vals_real_time = [pose_data[0][5]+40]
+                elif marker == 5:
+                    theta_vals_real_time = [pose_data[0][5]+40]
+                elif marker == 6:
+                    theta_vals_real_time = [pose_data[0][5]+40]
+                elif marker == 7:
+                    theta_vals_real_time = [pose_data[0][5]+40]
+                elif marker == 8:
+                    theta_vals_real_time = [pose_data[0][5]+40]
+                elif marker == 9:
+                    theta_vals_real_time = [pose_data[0][5]+40]
+                elif marker == 13:
+                    theta_vals_real_time = [pose_data[0][5]+40]
+                elif marker == 14:
+                    theta_vals_real_time = [pose_data[0][5]+20]
                 self.x_data.append(x_vals_real_time)
                 self.y_data.append(y_vals_real_time)
                 self.theta_data.append(theta_vals_real_time)
