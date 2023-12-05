@@ -16,6 +16,7 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 import random
 from PyQt5.QtWidgets import *
 from ota.ota_main import *
+# from monitoring.robotat_3pi_Python import *
 from monitoring.monitoring_main import *
 from PyQt5.QtCore import QThread, pyqtSignal, QObject, QThreadPool, QRunnable, Qt
 from PyQt5 import QtGui
@@ -26,6 +27,7 @@ from LedIndicatorWidget import *
 from ota.wifi_connect import NetworkManager
 from ota.codegen_gui.exp_pid_codegen import *
 from ota.codegen_gui.pid_codegen import *
+# from monitoring.robotat_3pi_Python import *
 # define Worlds directory
 # Get the directory path of the current script, abspath because of the tree structure that everything is on different folders
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -39,7 +41,7 @@ controller_sim = []
 TAG_sim = []
 goal_x = []
 goal_y = []
-
+no_robots = []
 
 # Define a dictionary to map controller names to controller functions
 controller_map = {
@@ -232,6 +234,8 @@ class simulator_tab(QWidget):
                 controller_sim.append(robots[i].get('controller'))
                 goal_x.append(robots[i].get('goal_x'))
                 goal_y.append(robots[i].get('goal_y'))
+                no_robots.append(self.world["no_robots"])
+                print(no_robots)
             self.console_label.setText(
                 "Se guardaron los parámetros de forma correcta para cargar en los ESP32."
             )
@@ -525,29 +529,49 @@ class monitoring_tab(QWidget):
         super(monitoring_tab, self).__init__()
         # Load uic file
         uic.loadUi("ui_files/monitoring_tab.ui ", self)
-        
+
         self.csv_name = self.findChild(QLineEdit, "csv_name")
         self.csv_location = self.findChild(QToolButton, "csv_location")
         self.start_monitoring = self.findChild(QPushButton, "start_monitoring")
         self.clean_previous_data = self.findChild(QPushButton, "clean_previous_data")
         self.message_sim_monitoring = self.findChild(QPushButton, "message_sim_monitoring")
-
+        
         if self.csv_name is not None:
             self.csv_name.setPlaceholderText("Ingresar nombre para el csv")
         
         self.csv_location.clicked.connect(self.choose_csv_location)
+        self.start_monitoring.clicked.connect(self.start_monitoring_func)
+        self.clean_previous_data.clicked.connect(self.clean_func)
 
     def choose_csv_location(self):
-        initial_filename = self.csv_name.text()
+        self.initial_filename = self.csv_name.text()
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        name, _ = QFileDialog.getSaveFileName(self, 'Save File', initial_filename, 'CSV Files (*.csv);;All Files (*)', options=options)
+        name, _ = QFileDialog.getSaveFileName(self, 'Save File', self.initial_filename, 'CSV Files (*.csv);;All Files (*)', options=options)
 
-        if name:
-            py_game_monitoring
+        # if name:
+        #     py_game_monitoring
             # with open(name, 'w') as file:
             #     file.write(initial_filename)
 
+    def start_monitoring_func(self):
+        self.start_flag = True
+        self.robot_animation = RobotAnimation()
+        print(no_robots)
+        if no_robots[0] == 1:
+            print(TAG_sim)
+            self.robot_animation.setup_animation_window(self.initial_filename, TAG_sim[0])
+        elif no_robots[0] > 1:
+            self.robot_animation.setup_animation_window_multiple(self.initial_filename, TAG_sim[0], TAG_sim[1])
+        self.robot_animation.animation_function(self.start_flag)
+        
+    def clean_func(self):
+        IP_sim = [] 
+        controller_sim = []
+        TAG_sim = []
+        goal_x = []
+        goal_y = []
+        no_robots = []
 
 # Initialize the App
 app = QApplication(sys.argv)

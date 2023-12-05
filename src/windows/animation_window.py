@@ -381,6 +381,7 @@ class py_game_monitoring(py_game_animation):
     def __init__(self, width, height, data_src_funct, filename):
         super().__init__(width, height)
         self.data_src_funct = data_src_funct
+        self.filename = filename
 
     def start_animation(self):
         """
@@ -392,7 +393,123 @@ class py_game_monitoring(py_game_animation):
         previous one until it reaches the final data.
 
         """
+        pygame.init()
+        index = (
+            0  # Initialize the index for accessing x_values, y_values and theta_values
+        )
+        animation_running = True
 
+        pygame.time.delay(10)
+
+        while self.run:
+            self.clock.tick(60)
+            self.play.draw()  # Update the play button
+            x_values, y_values, theta_values, x_raw, y_raw, theta_raw = self.data_src_funct()
+            with open(self.filename + ".csv", "a", newline="") as file:
+                writer = csv.writer(file)
+                field = [
+                    "x position",
+                    "y position",
+                    "orientation",
+                ]  # titles of the columns
+                #writer.writerow(i for i in field)
+                # Write the field names only once, not in every iteration
+                # writer.writerow(field)
+                writer.writerow([x_raw[0], y_raw[0], theta_raw[0]])
+            # print(x_raw, y_raw, theta_raw)
+            # print(x_values, y_values, theta_values)
+            for x, y, theta in zip(x_values, y_values, theta_values):
+                for robot in self.robot_characters:
+                    robot.degree = float(theta[0]) + 180
+                    robot.x = int(x[0])
+                    robot.y = int(y[0])
+                    # Flip the character over the x-axis
+            
+
+                    # print(robot.theta)
+
+            # Flag to terminate window correctly without crashing all Python execution
+            for e in pygame.event.get():
+                if e.type == pygame.QUIT:
+                    self.run = False
+
+            self.screen.fill(self.background_color)
+            self.screen.blit(self.grid, (0, 0))
+            self.display_initial_positions()  # this keeps the robots at their final position even when the time has finished :D
+
+            if self.play.action and not animation_running:
+                print("START")
+                animation_running = True  # Start the animation
+                index = 0  # Reset the index
+
+            for i in range(len(self.robot_characters)):
+                for j in range(i + 1, len(self.robot_characters)):
+                    if robot_character.check_collision(
+                        self.robot_characters[i], self.robot_characters[j]
+                    ):
+                        # Handle collision here (e.g., change color, stop movement, etc.)
+                        print("collision")
+                        animation_running = False  # Stop the animation
+                        pygame.time.delay(1000)  # Wait until pygame window closes
+                        self.run = False
+
+            for robot in self.robot_characters:
+                if not self.bounding_box.collidepoint(robot.x, robot.y):
+                    # Handle collision with bounding box (e.g., stop movement, change direction, etc.)
+                    print("collision")
+                    animation_running = False  # Stop the animation
+                    pygame.time.delay(1000)
+                    self.run = False
+
+            if animation_running:  # and index < len(x_values):
+                for i in range(len(self.robot_characters)):
+                    x_robot = x_values[index][i]
+                    y_robot = y_values[index][i]
+                    theta_robot = theta_values[index][i]
+                    robot = self.robot_characters[i]
+                    # Update character attributes and animations
+                    robot.update(theta_robot, x_robot, y_robot)
+                    robot.rotate_move()
+
+                    pygame.display.flip()
+                    pygame.time.delay(10)
+
+                pygame.display.flip()
+                pygame.time.delay(10)
+                index += 1
+
+            pygame.display.flip()
+            # pygame.transform.flip(self.screen, True, False)
+
+            if animation_running and index >= len(x_values):
+                animation_running = False  # Stop the animation
+
+        # pygame.quit()  # Quit Pygame after the loop finishes
+
+class py_game_monitoring_multiple(py_game_animation):
+    """
+    Child class of the pygame animation window for simulated (pre-calculated) data.
+    What changes here is the start_animation method, instead of iteration over data, it receives
+    constantly new data as it's intended for real time display of the motion of the robots.
+    The data is obtained by an external system (OptiTrack).
+    #"""
+
+    def __init__(self, width, height, data_src_funct, filename):
+        super().__init__(width, height)
+        self.data_src_funct = data_src_funct
+        self.filename = filename
+
+    def start_animation(self):
+        """
+        It takes the arrays to animate the robots based on simulation data,
+        it also handles the pygame events to start and stop the animation. The basic flow of this is
+        that it iterates over the robot_characters added previously, and for each index it looks for the
+        corresponding data on the numpy arrays, to assign the corresponding x, y, theta data for each robot.
+        Then with the robot_character methods, it updates the picture position and orientation, deleting the
+        previous one until it reaches the final data.
+
+        """
+        pygame.init()
         index = (
             0  # Initialize the index for accessing x_values, y_values and theta_values
         )
@@ -419,7 +536,7 @@ class py_game_monitoring(py_game_animation):
             # Print the pairs
             # for pair in pairs_x:
             #     print(pair)
-            with open(filename, "a", newline="") as file:
+            with open(self.filename + ".csv", "a", newline="") as file:
                 writer = csv.writer(file)
                 field = [
                     "x position",
@@ -429,11 +546,11 @@ class py_game_monitoring(py_game_animation):
                 #writer.writerow(i for i in field)
                 # Write the field names only once, not in every iteration
                 # writer.writerow(field)
-                writer.writerow([x_raw[0], y_raw[0], theta_raw[0]])
+                writer.writerow([x_raw[0], y_raw[0], theta_raw[0], x_raw[1], y_raw[1], theta_raw[1]])
             # print(x_raw, y_raw, theta_raw)
                 
             for x, y, theta in zip(pairs_x, pairs_y, pairs_theta):
-                print(x, y, theta)
+                # print(x, y, theta)
                 for i, robot in enumerate(self.robot_characters):
                     # Use the index 'i' to get the corresponding values for the current robot
                     robot.degree = float(theta[i][0]) + 180
@@ -499,4 +616,4 @@ class py_game_monitoring(py_game_animation):
             if animation_running and index >= len(x_values):
                 animation_running = False  # Stop the animation
 
-        pygame.quit()  # Quit Pygame after the loop finishes
+        # pygame.quit()  # Quit Pygame after the loop finishes
