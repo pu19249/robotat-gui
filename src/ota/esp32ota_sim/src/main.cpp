@@ -36,7 +36,7 @@ volatile float phi_r = 0;                        // en rpm
 double WHEEL_RADIUS = (0.32/ 2);         // radio de las ruedas (en m)
 double DISTANCE_FROM_CENTER = (0.96 / 2); // distancia a ruedas (en m)
 // WiFi+Robotat
- const unsigned robot_id = 7;
+ const unsigned robot_id = 1;
 const char *ssid = "Robotat";
 const char *password = "iemtbmcit116";
 const char *host = "192.168.50.200";
@@ -55,8 +55,8 @@ double temp[2];
 double q[4];
 
 volatile float x, y, z, n, ex, ey, ez, roll, pitch, yaw, v, w;
- float goal_x = 1.0;
- float goal_y = -2.0;
+ float goal_x = 1.5;
+ float goal_y = -1.5;
 
 void encode_send_wheel_speeds_task(void *p_params)
 {
@@ -155,7 +155,15 @@ void control_algorithm_task(void *p_params)
     
     // to degrees
     // yaw *= (180.0 / PI);
-    yaw = yaw;// - 2.39; // desfase del marker
+    if (robot_id == 8){
+    yaw = yaw + 3.05;
+    }// - 2.39; // desfase del marker
+    if (robot_id == 7){
+      yaw = yaw - 1.5708;
+    }
+    if (robot_id == 1){
+      yaw = yaw;
+    }
     // yaw *= (180.0 / PI);
     // pitch *= 180.0 / PI;
     // roll *= 180.0 / PI;

@@ -15,8 +15,8 @@
         "vel_right_max": 100
       },
       "ID_robot": 1,
-      "TAG": 14,
-      "IP": "192.168.50.107",
+      "TAG": 8,
+      "IP": "192.168.50.108",
       "state": [100, 100, 0],
       "controller": "pid_controller",
       "goal_x": 0.00,
@@ -31,12 +31,12 @@
         "vel_right_max": 100
       },
       "ID_robot": 2,
-      "TAG": 13,
-      "IP": "192.168.50.108",
+      "TAG": 1,
+      "IP": "192.168.50.109",
       "state": [-100, -100, 0],
       "controller": "exponential_pid",
       "goal_x": 1.50,
-      "goal_y": 1.50
+      "goal_y": -1.50
     }
   ],
   "obstacle": {
@@ -49,11 +49,11 @@
   "landmarks": [
     {
     "id": 1,
-    "pos": [0, 0]
+    "pos": [0.0, 0.0]
   },
   {
     "id": 2,
-    "pos": [0.30, 0.80]
+    "pos": [1.50, -1.50]
   }
 ]
 }

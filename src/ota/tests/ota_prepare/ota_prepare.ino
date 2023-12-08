@@ -3,8 +3,8 @@
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
 
-const char* ssid = "HUAWEI Y8s";//"TIGO-F4CD";
-const char* password = "003831e381aa";//"4NJ667300826";
+const char* ssid = "Robotat";//"HUAWEI Y8s";//"TIGO-F4CD";
+const char* password = "iemtbmcit116";//"003831e381aa";//"4NJ667300826";
 
 void setup() {
 

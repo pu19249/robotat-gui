@@ -264,27 +264,27 @@ class RobotAnimation:
                 theta_vals_real_time = [pose_data[0][5]]
                 print(marker)
                 if marker == 1:
-                    theta_vals_real_time = [pose_data[0][5]]
+                    theta_vals_real_time = [pose_data[0][5]] # done
                 elif marker == 2:
-                    theta_vals_real_time = [pose_data[0][5]-40]
+                    theta_vals_real_time = [pose_data[0][5]-40] # done
                 elif marker == 3:
-                    theta_vals_real_time = [pose_data[0][5]+40]
+                    theta_vals_real_time = [pose_data[0][5]-90]
                 elif marker == 4:
-                    theta_vals_real_time = [pose_data[0][5]+40]
+                    theta_vals_real_time = [pose_data[0][5]-140]
                 elif marker == 5:
-                    theta_vals_real_time = [pose_data[0][5]+40]
+                    theta_vals_real_time = [pose_data[0][5]+175]
                 elif marker == 6:
-                    theta_vals_real_time = [pose_data[0][5]+40]
+                    theta_vals_real_time = [pose_data[0][5]-145]
                 elif marker == 7:
-                    theta_vals_real_time = [pose_data[0][5]+40]
+                    theta_vals_real_time = [pose_data[0][5]+90] # done
                 elif marker == 8:
-                    theta_vals_real_time = [pose_data[0][5]+40]
+                    theta_vals_real_time = [pose_data[0][5]-10] # done
                 elif marker == 9:
-                    theta_vals_real_time = [pose_data[0][5]+40]
+                    theta_vals_real_time = [pose_data[0][5]-80] # done
                 elif marker == 13:
-                    theta_vals_real_time = [pose_data[0][5]+40]
+                    theta_vals_real_time = [pose_data[0][5]+40] # done
                 elif marker == 14:
-                    theta_vals_real_time = [pose_data[0][5]+20]
+                    theta_vals_real_time = [pose_data[0][5]+20] # done
                 self.x_data.append(x_vals_real_time)
                 self.y_data.append(y_vals_real_time)
                 self.theta_data.append(theta_vals_real_time)

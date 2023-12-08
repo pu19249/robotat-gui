@@ -17,7 +17,7 @@
 
 BasicOTA OTA;
 //variables for blinking an LED with Millis
-const int led = 33; // ESP32 Pin to which onboard LED is connected
+const int led = 2; // ESP32 Pin to which onboard LED is connected
 unsigned long previousMillis = 0;  // will store last time LED was updated
 const long interval = 1000;  // interval at which to blink (milliseconds)
 int ledState = LOW;  // ledState used to set the LED
